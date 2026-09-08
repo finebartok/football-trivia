@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Personalized football trivia — build your Scope, play your way">
+  <title>Football Trivia — Personalized Scopes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <nav class="nav-bar">
+    <a href="#" class="nav-logo" id="nav-logo">⚽ Football Trivia</a>
+    <div class="nav-links">
+      <a href="#" class="nav-link active" id="nav-home">Home</a>
+    </div>
+  </nav>
+
+  <div class="app-container">
+    <!-- Home View -->
+    <div id="home-view" class="view active">
+      <section class="hero flex-col flex-center text-center mb-4">
+        <h1 class="text-primary mt-4 mb-2">Your Football Trivia, Your Rules</h1>
+        <p class="text-secondary mb-4">Build custom Scopes or play quick games from top leagues.</p>
+        <div class="flex gap-3">
+          <button id="btn-quick-play" class="btn btn-primary">Quick Play</button>
+          <button id="btn-create-scope" class="btn btn-secondary">Create Scope</button>
+        </div>
+      </section>
+      
+      <section class="saved-scopes mt-4">
+        <h2 class="text-primary mb-3">Your Scopes</h2>
+        <div id="saved-scopes-list" class="grid-3">
+          <!-- Dynamically populated scope cards -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Scope Builder Modal -->
+    <div id="scope-builder" class="scope-builder">
+      <div class="scope-builder-content">
+        <h2 class="text-primary mb-3">Build Your Scope</h2>
+        
+        <h3 class="text-secondary mb-2">Leagues</h3>
+        <div class="league-toggles">
+          <button class="league-badge" data-league="premier-league">Premier League</button>
+          <button class="league-badge" data-league="la-liga">La Liga</button>
+          <button class="league-badge" data-league="bundesliga">Bundesliga</button>
+          <button class="league-badge" data-league="serie-a">Serie A</button>
+          <button class="league-badge" data-league="ligue-1">Ligue 1</button>
+        </div>
+
+        <h3 class="text-secondary mb-2">Era</h3>
+        <div class="era-slider">
+          <input type="range" class="range-slider" id="era-start" min="2020" max="2025" value="2020">
+          <input type="range" class="range-slider" id="era-end" min="2020" max="2025" value="2025">
+          <div class="flex-between text-muted mt-2">
+            <span id="era-start-label">2020</span>
+            <span id="era-end-label">2025</span>
+          </div>
+        </div>
+
+        <h3 class="text-secondary mb-2">Teams (Optional)</h3>
+        <div class="team-picker">
+          <div class="autocomplete-wrapper">
+            <input type="text" id="team-search" class="input" placeholder="Search teams...">
+            <div id="team-dropdown" class="autocomplete-list"></div>
+          </div>
+        </div>
+
+        <h3 class="text-secondary mb-2">Nationalities (Optional)</h3>
+        <div class="nationality-picker">
+          <div class="autocomplete-wrapper">
+            <input type="text" id="nationality-search" class="input" placeholder="Search nationalities...">
+            <div id="nationality-dropdown" class="autocomplete-list"></div>
+          </div>
+        </div>
+
+        <div class="pool-preview">
+          <span class="text-accent">Pool Size:</span> <span id="pool-count"></span> players
+          <p class="text-muted mt-1 text-sm" id="pool-sample"></p>
+        </div>
+
+        <div class="mb-4">
+          <input type="text" id="scope-name" class="input" placeholder="Name this Scope (e.g., 2010s Legends)">
+        </div>
+
+        <div class="flex gap-2">
+          <button id="btn-save-scope" class="btn btn-primary flex-1">Save Scope</button>
+          <button id="btn-cancel-scope" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Format Picker -->
+    <div id="format-picker-view" class="view">
+      <div class="flex-between mb-4">
+        <h2 class="text-primary">Select Game Format</h2>
+        <button id="btn-back-formats" class="btn btn-icon">← Back</button>
+      </div>
+      <div class="grid-2">
+        <div class="card game-card" id="format-guess-player">
+          <div class="icon">🎭</div>
+          <h3>Guess the Player</h3>
+          <p class="text-secondary mt-2">Identify the player from 6 clues revealed one by one.</p>
+        </div>
+        <div class="card game-card" id="format-criteria-grid">
+          <div class="icon">⊞</div>
+          <h3>Criteria Grid</h3>
+          <p class="text-secondary mt-2">Fill the 3x3 grid with players matching intersecting criteria.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guess the Player Game -->
+    <div id="guess-player-view" class="view">
+      <div class="guess-container">
+        <div class="flex-between mb-3">
+          <div class="round-counter" id="guess-round-counter">Round 1/10</div>
+          <div class="score-display" id="guess-score-display">Score: 0</div>
+        </div>
+        
+        <div class="clue-cards" id="guess-clue-cards">
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">🌍</span><span class="text">Nationality</span></div></div>
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">👟</span><span class="text">Position</span></div></div>
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">📅</span><span class="text">Age Range</span></div></div>
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">🏟️</span><span class="text">League</span></div></div>
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">🛡️</span><span class="text">Team</span></div></div>
+          <div class="clue-card"><div class="clue-front"><span>?</span></div><div class="clue-back"><span class="icon">🔤</span><span class="text">Name Initial</span></div></div>
+        </div>
+
+        <div class="guess-mcq-area">
+          <div id="guess-mcq-options" class="mcq-options-grid"></div>
+        </div>
+
+        <div class="flex-center gap-3">
+          <button id="btn-reveal-clue" class="btn btn-secondary">Reveal Next Clue</button>
+          <button id="btn-skip-guess" class="btn btn-secondary">Skip</button>
+          <button id="btn-next-guess" class="btn btn-primary hidden">Next Round</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Criteria Grid Game -->
+    <div id="criteria-grid-view" class="view">
+      <div class="grid-container">
+        <div class="flex-between mb-3">
+          <div class="text-secondary" id="grid-timer">Time: 00:00</div>
+          <div class="score-display" id="grid-score-display">Score: 0/9</div>
+        </div>
+
+        <div class="criteria-grid" id="criteria-grid-board">
+          <div class="grid-header"></div>
+          <div class="grid-header">Criterion 1</div>
+          <div class="grid-header">Criterion 2</div>
+          <div class="grid-header">Criterion 3</div>
+          <div class="grid-header">Criterion A</div>
+          <div class="grid-cell" data-row="0" data-col="0"></div>
+          <div class="grid-cell" data-row="0" data-col="1"></div>
+          <div class="grid-cell" data-row="0" data-col="2"></div>
+          <div class="grid-header">Criterion B</div>
+          <div class="grid-cell" data-row="1" data-col="0"></div>
+          <div class="grid-cell" data-row="1" data-col="1"></div>
+          <div class="grid-cell" data-row="1" data-col="2"></div>
+          <div class="grid-header">Criterion C</div>
+          <div class="grid-cell" data-row="2" data-col="0"></div>
+          <div class="grid-cell" data-row="2" data-col="1"></div>
+          <div class="grid-cell" data-row="2" data-col="2"></div>
+        </div>
+
+        <div class="guess-input-area hidden" id="grid-input-area">
+          <div class="autocomplete-wrapper">
+            <input type="text" id="grid-player-input" class="autocomplete-input" placeholder="Enter player name...">
+            <div id="grid-autocomplete-list" class="autocomplete-list"></div>
+          </div>
+        </div>
+
+        <div class="flex-center gap-3 mt-4">
+          <button id="btn-new-grid" class="btn btn-primary">New Grid</button>
+          <button id="btn-back-grid" class="btn btn-secondary">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-view" class="view">
+      <div class="results-screen">
+        <h2 id="results-title" class="text-primary mb-2">Game Over!</h2>
+        <div class="score-big" id="final-score">0</div>
+        
+        <div class="score-breakdown">
+          <h3 class="text-secondary mb-3">Performance</h3>
+          <div class="progress-bar mb-3">
+            <div class="progress-bar-fill" id="results-progress" style="width: 0%;"></div>
+          </div>
+          <p id="results-summary" class="text-muted">You correctly answered 0 out of 10 rounds.</p>
+        </div>
+
+        <div class="flex-center gap-3">
+          <button id="btn-play-again" class="btn btn-primary">Play Again</button>
+          <button id="btn-results-home" class="btn btn-secondary">Home</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

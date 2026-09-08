@@ -1,0 +1,3610 @@
+[
+  {
+    "name": "Mohamed Salah",
+    "nationality": "Egypt",
+    "position": "Forward",
+    "dateOfBirth": "1992-06-15",
+    "teams": [
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 1
+  },
+  {
+    "name": "Kevin De Bruyne",
+    "nationality": "Belgium",
+    "position": "Midfielder",
+    "dateOfBirth": "1991-06-28",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 2
+  },
+  {
+    "name": "Erling Haaland",
+    "nationality": "Norway",
+    "position": "Forward",
+    "dateOfBirth": "2000-07-21",
+    "teams": [
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 3
+  },
+  {
+    "name": "Bukayo Saka",
+    "nationality": "England",
+    "position": "Forward",
+    "dateOfBirth": "2001-09-05",
+    "teams": [
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 4
+  },
+  {
+    "name": "Declan Rice",
+    "nationality": "England",
+    "position": "Midfielder",
+    "dateOfBirth": "1999-01-14",
+    "teams": [
+      {
+        "team": "West Ham United",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 5
+  },
+  {
+    "name": "Son Heung-min",
+    "nationality": "South Korea",
+    "position": "Forward",
+    "dateOfBirth": "1992-07-08",
+    "teams": [
+      {
+        "team": "Tottenham Hotspur",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 6
+  },
+  {
+    "name": "Harry Kane",
+    "nationality": "England",
+    "position": "Forward",
+    "dateOfBirth": "1993-07-28",
+    "teams": [
+      {
+        "team": "Tottenham Hotspur",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 7
+  },
+  {
+    "name": "Bruno Fernandes",
+    "nationality": "Portugal",
+    "position": "Midfielder",
+    "dateOfBirth": "1994-09-08",
+    "teams": [
+      {
+        "team": "Manchester United",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 8
+  },
+  {
+    "name": "Virgil van Dijk",
+    "nationality": "Netherlands",
+    "position": "Defender",
+    "dateOfBirth": "1991-07-08",
+    "teams": [
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 9
+  },
+  {
+    "name": "Alisson Becker",
+    "nationality": "Brazil",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1992-10-02",
+    "teams": [
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 10
+  },
+  {
+    "name": "Ederson",
+    "nationality": "Brazil",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1993-08-17",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 11
+  },
+  {
+    "name": "Rodri",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1996-06-22",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 12
+  },
+  {
+    "name": "Ruben Dias",
+    "nationality": "Portugal",
+    "position": "Defender",
+    "dateOfBirth": "1997-05-14",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 13
+  },
+  {
+    "name": "Martin Odegaard",
+    "nationality": "Norway",
+    "position": "Midfielder",
+    "dateOfBirth": "1998-12-17",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 14
+  },
+  {
+    "name": "William Saliba",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "2001-03-24",
+    "teams": [
+      {
+        "team": "Nice",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 15
+  },
+  {
+    "name": "Gabriel Magalhaes",
+    "nationality": "Brazil",
+    "position": "Defender",
+    "dateOfBirth": "1997-12-19",
+    "teams": [
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020
+        ]
+      },
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 16
+  },
+  {
+    "name": "Bernardo Silva",
+    "nationality": "Portugal",
+    "position": "Midfielder",
+    "dateOfBirth": "1994-08-10",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 17
+  },
+  {
+    "name": "Phil Foden",
+    "nationality": "England",
+    "position": "Midfielder",
+    "dateOfBirth": "2000-05-28",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 18
+  },
+  {
+    "name": "Marcus Rashford",
+    "nationality": "England",
+    "position": "Forward",
+    "dateOfBirth": "1997-10-31",
+    "teams": [
+      {
+        "team": "Manchester United",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 19
+  },
+  {
+    "name": "Luke Shaw",
+    "nationality": "England",
+    "position": "Defender",
+    "dateOfBirth": "1995-07-12",
+    "teams": [
+      {
+        "team": "Manchester United",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 20
+  },
+  {
+    "name": "Trent Alexander-Arnold",
+    "nationality": "England",
+    "position": "Defender",
+    "dateOfBirth": "1998-10-07",
+    "teams": [
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 21
+  },
+  {
+    "name": "Andrew Robertson",
+    "nationality": "Scotland",
+    "position": "Defender",
+    "dateOfBirth": "1994-03-11",
+    "teams": [
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 22
+  },
+  {
+    "name": "Emiliano Martinez",
+    "nationality": "Argentina",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1992-09-02",
+    "teams": [
+      {
+        "team": "Aston Villa",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 23
+  },
+  {
+    "name": "Ollie Watkins",
+    "nationality": "England",
+    "position": "Forward",
+    "dateOfBirth": "1995-12-30",
+    "teams": [
+      {
+        "team": "Aston Villa",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 24
+  },
+  {
+    "name": "Bruno Guimaraes",
+    "nationality": "Brazil",
+    "position": "Midfielder",
+    "dateOfBirth": "1997-11-16",
+    "teams": [
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Newcastle United",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 25
+  },
+  {
+    "name": "Alexander Isak",
+    "nationality": "Sweden",
+    "position": "Forward",
+    "dateOfBirth": "1999-09-21",
+    "teams": [
+      {
+        "team": "Real Sociedad",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Newcastle United",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 26
+  },
+  {
+    "name": "Reece James",
+    "nationality": "England",
+    "position": "Defender",
+    "dateOfBirth": "1999-12-08",
+    "teams": [
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 27
+  },
+  {
+    "name": "Enzo Fernandez",
+    "nationality": "Argentina",
+    "position": "Midfielder",
+    "dateOfBirth": "2001-01-17",
+    "teams": [
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 28
+  },
+  {
+    "name": "Cole Palmer",
+    "nationality": "England",
+    "position": "Midfielder",
+    "dateOfBirth": "2002-05-06",
+    "teams": [
+      {
+        "team": "Manchester City",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 29
+  },
+  {
+    "name": "Guglielmo Vicario",
+    "nationality": "Italy",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1996-10-07",
+    "teams": [
+      {
+        "team": "Cagliari",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Empoli",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Tottenham Hotspur",
+        "league": "Premier League",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 30
+  },
+  {
+    "name": "Vinicius Junior",
+    "nationality": "Brazil",
+    "position": "Forward",
+    "dateOfBirth": "2000-07-12",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 31
+  },
+  {
+    "name": "Jude Bellingham",
+    "nationality": "England",
+    "position": "Midfielder",
+    "dateOfBirth": "2003-06-29",
+    "teams": [
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 32
+  },
+  {
+    "name": "Pedri",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "2002-11-25",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 33
+  },
+  {
+    "name": "Gavi",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "2004-08-05",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 34
+  },
+  {
+    "name": "Robert Lewandowski",
+    "nationality": "Poland",
+    "position": "Forward",
+    "dateOfBirth": "1988-08-21",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 35
+  },
+  {
+    "name": "Marc-Andre ter Stegen",
+    "nationality": "Germany",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1992-04-30",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 36
+  },
+  {
+    "name": "Luka Modric",
+    "nationality": "Croatia",
+    "position": "Midfielder",
+    "dateOfBirth": "1985-09-09",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 37
+  },
+  {
+    "name": "Toni Kroos",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1990-01-04",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 38
+  },
+  {
+    "name": "Karim Benzema",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1987-12-19",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      }
+    ],
+    "id": 39
+  },
+  {
+    "name": "Thibaut Courtois",
+    "nationality": "Belgium",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1992-05-11",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 40
+  },
+  {
+    "name": "Federico Valverde",
+    "nationality": "Uruguay",
+    "position": "Midfielder",
+    "dateOfBirth": "1998-07-22",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 41
+  },
+  {
+    "name": "Aurelien Tchouameni",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2000-01-27",
+    "teams": [
+      {
+        "team": "Monaco",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 42
+  },
+  {
+    "name": "Eduardo Camavinga",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2002-11-10",
+    "teams": [
+      {
+        "team": "Rennes",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 43
+  },
+  {
+    "name": "Antonio Rudiger",
+    "nationality": "Germany",
+    "position": "Defender",
+    "dateOfBirth": "1993-03-03",
+    "teams": [
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 44
+  },
+  {
+    "name": "Eder Militao",
+    "nationality": "Brazil",
+    "position": "Defender",
+    "dateOfBirth": "1998-01-18",
+    "teams": [
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 45
+  },
+  {
+    "name": "Ronald Araujo",
+    "nationality": "Uruguay",
+    "position": "Defender",
+    "dateOfBirth": "1999-03-07",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 46
+  },
+  {
+    "name": "Frenkie de Jong",
+    "nationality": "Netherlands",
+    "position": "Midfielder",
+    "dateOfBirth": "1997-05-12",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 47
+  },
+  {
+    "name": "Jules Kounde",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "1998-11-12",
+    "teams": [
+      {
+        "team": "Sevilla",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 48
+  },
+  {
+    "name": "Lamine Yamal",
+    "nationality": "Spain",
+    "position": "Forward",
+    "dateOfBirth": "2007-07-13",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 49
+  },
+  {
+    "name": "Antoine Griezmann",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1991-03-21",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Atletico Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 50
+  },
+  {
+    "name": "Jan Oblak",
+    "nationality": "Slovenia",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1993-01-07",
+    "teams": [
+      {
+        "team": "Atletico Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 51
+  },
+  {
+    "name": "Koke",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1992-01-08",
+    "teams": [
+      {
+        "team": "Atletico Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 52
+  },
+  {
+    "name": "Marcos Llorente",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1995-01-30",
+    "teams": [
+      {
+        "team": "Atletico Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 53
+  },
+  {
+    "name": "Mikel Oyarzabal",
+    "nationality": "Spain",
+    "position": "Forward",
+    "dateOfBirth": "1997-04-21",
+    "teams": [
+      {
+        "team": "Real Sociedad",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 54
+  },
+  {
+    "name": "Martin Zubimendi",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1999-02-02",
+    "teams": [
+      {
+        "team": "Real Sociedad",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 55
+  },
+  {
+    "name": "Iago Aspas",
+    "nationality": "Spain",
+    "position": "Forward",
+    "dateOfBirth": "1987-08-01",
+    "teams": [
+      {
+        "team": "Celta Vigo",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 56
+  },
+  {
+    "name": "Inaki Williams",
+    "nationality": "Ghana",
+    "position": "Forward",
+    "dateOfBirth": "1994-06-15",
+    "teams": [
+      {
+        "team": "Athletic Club",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 57
+  },
+  {
+    "name": "Nico Williams",
+    "nationality": "Spain",
+    "position": "Forward",
+    "dateOfBirth": "2002-07-12",
+    "teams": [
+      {
+        "team": "Athletic Club",
+        "league": "La Liga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 58
+  },
+  {
+    "name": "Unai Simon",
+    "nationality": "Spain",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1997-06-11",
+    "teams": [
+      {
+        "team": "Athletic Club",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 59
+  },
+  {
+    "name": "Gerard Moreno",
+    "nationality": "Spain",
+    "position": "Forward",
+    "dateOfBirth": "1992-04-07",
+    "teams": [
+      {
+        "team": "Villarreal",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 60
+  },
+  {
+    "name": "Jamal Musiala",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "2003-02-26",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 61
+  },
+  {
+    "name": "Florian Wirtz",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "2003-05-03",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 62
+  },
+  {
+    "name": "Leroy Sane",
+    "nationality": "Germany",
+    "position": "Forward",
+    "dateOfBirth": "1996-01-11",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 63
+  },
+  {
+    "name": "Thomas Muller",
+    "nationality": "Germany",
+    "position": "Forward",
+    "dateOfBirth": "1989-09-13",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 64
+  },
+  {
+    "name": "Manuel Neuer",
+    "nationality": "Germany",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1986-03-27",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 65
+  },
+  {
+    "name": "Joshua Kimmich",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1995-02-08",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 66
+  },
+  {
+    "name": "Leon Goretzka",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1995-02-06",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 67
+  },
+  {
+    "name": "Alphonso Davies",
+    "nationality": "Canada",
+    "position": "Defender",
+    "dateOfBirth": "2000-11-02",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 68
+  },
+  {
+    "name": "Dayot Upamecano",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "1998-10-27",
+    "teams": [
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 69
+  },
+  {
+    "name": "Matthijs de Ligt",
+    "nationality": "Netherlands",
+    "position": "Defender",
+    "dateOfBirth": "1999-08-12",
+    "teams": [
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Manchester United",
+        "league": "Premier League",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 70
+  },
+  {
+    "name": "Kingsley Coman",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1996-06-13",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 71
+  },
+  {
+    "name": "Granit Xhaka",
+    "nationality": "Switzerland",
+    "position": "Midfielder",
+    "dateOfBirth": "1992-09-27",
+    "teams": [
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 72
+  },
+  {
+    "name": "Jeremie Frimpong",
+    "nationality": "Netherlands",
+    "position": "Defender",
+    "dateOfBirth": "2000-12-10",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 73
+  },
+  {
+    "name": "Alex Grimaldo",
+    "nationality": "Spain",
+    "position": "Defender",
+    "dateOfBirth": "1995-09-20",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 74
+  },
+  {
+    "name": "Victor Boniface",
+    "nationality": "Nigeria",
+    "position": "Forward",
+    "dateOfBirth": "2000-12-23",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 75
+  },
+  {
+    "name": "Jonathan Tah",
+    "nationality": "Germany",
+    "position": "Defender",
+    "dateOfBirth": "1996-02-11",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 76
+  },
+  {
+    "name": "Lukas Hradecky",
+    "nationality": "Finland",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1989-11-24",
+    "teams": [
+      {
+        "team": "Bayer Leverkusen",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 77
+  },
+  {
+    "name": "Julian Brandt",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1996-05-02",
+    "teams": [
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 78
+  },
+  {
+    "name": "Marco Reus",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1989-05-31",
+    "teams": [
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 79
+  },
+  {
+    "name": "Gregor Kobel",
+    "nationality": "Switzerland",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1997-12-06",
+    "teams": [
+      {
+        "team": "VfB Stuttgart",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 80
+  },
+  {
+    "name": "Nico Schlotterbeck",
+    "nationality": "Germany",
+    "position": "Defender",
+    "dateOfBirth": "1999-12-01",
+    "teams": [
+      {
+        "team": "SC Freiburg",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 81
+  },
+  {
+    "name": "Serhou Guirassy",
+    "nationality": "Guinea",
+    "position": "Forward",
+    "dateOfBirth": "1996-03-12",
+    "teams": [
+      {
+        "team": "Rennes",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "VfB Stuttgart",
+        "league": "Bundesliga",
+        "seasons": [
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Borussia Dortmund",
+        "league": "Bundesliga",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 82
+  },
+  {
+    "name": "Xavi Simons",
+    "nationality": "Netherlands",
+    "position": "Midfielder",
+    "dateOfBirth": "2003-04-21",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 83
+  },
+  {
+    "name": "Lois Openda",
+    "nationality": "Belgium",
+    "position": "Forward",
+    "dateOfBirth": "2000-02-16",
+    "teams": [
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 84
+  },
+  {
+    "name": "Dani Olmo",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1998-05-07",
+    "teams": [
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 85
+  },
+  {
+    "name": "Willi Orban",
+    "nationality": "Hungary",
+    "position": "Defender",
+    "dateOfBirth": "1992-11-03",
+    "teams": [
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 86
+  },
+  {
+    "name": "Benjamin Sesko",
+    "nationality": "Slovenia",
+    "position": "Forward",
+    "dateOfBirth": "2003-05-31",
+    "teams": [
+      {
+        "team": "RB Leipzig",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 87
+  },
+  {
+    "name": "Chris Fuhrich",
+    "nationality": "Germany",
+    "position": "Midfielder",
+    "dateOfBirth": "1998-01-09",
+    "teams": [
+      {
+        "team": "VfB Stuttgart",
+        "league": "Bundesliga",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 88
+  },
+  {
+    "name": "Kevin Trapp",
+    "nationality": "Germany",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1990-07-08",
+    "teams": [
+      {
+        "team": "Eintracht Frankfurt",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 89
+  },
+  {
+    "name": "Omar Marmoush",
+    "nationality": "Egypt",
+    "position": "Forward",
+    "dateOfBirth": "1999-02-07",
+    "teams": [
+      {
+        "team": "VfL Wolfsburg",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "VfB Stuttgart",
+        "league": "Bundesliga",
+        "seasons": [
+          2021
+        ]
+      },
+      {
+        "team": "Eintracht Frankfurt",
+        "league": "Bundesliga",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 90
+  },
+  {
+    "name": "Victor Osimhen",
+    "nationality": "Nigeria",
+    "position": "Forward",
+    "dateOfBirth": "1998-12-29",
+    "teams": [
+      {
+        "team": "Napoli",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 91
+  },
+  {
+    "name": "Lautaro Martinez",
+    "nationality": "Argentina",
+    "position": "Forward",
+    "dateOfBirth": "1997-08-22",
+    "teams": [
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 92
+  },
+  {
+    "name": "Nicolo Barella",
+    "nationality": "Italy",
+    "position": "Midfielder",
+    "dateOfBirth": "1997-02-07",
+    "teams": [
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 93
+  },
+  {
+    "name": "Mike Maignan",
+    "nationality": "France",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1995-07-03",
+    "teams": [
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 94
+  },
+  {
+    "name": "Theo Hernandez",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "1997-10-06",
+    "teams": [
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 95
+  },
+  {
+    "name": "Rafael Leao",
+    "nationality": "Portugal",
+    "position": "Forward",
+    "dateOfBirth": "1999-06-10",
+    "teams": [
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 96
+  },
+  {
+    "name": "Dusan Vlahovic",
+    "nationality": "Serbia",
+    "position": "Forward",
+    "dateOfBirth": "2000-01-28",
+    "teams": [
+      {
+        "team": "Fiorentina",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 97
+  },
+  {
+    "name": "Federico Chiesa",
+    "nationality": "Italy",
+    "position": "Forward",
+    "dateOfBirth": "1997-10-25",
+    "teams": [
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Liverpool",
+        "league": "Premier League",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 98
+  },
+  {
+    "name": "Khvicha Kvaratskhelia",
+    "nationality": "Georgia",
+    "position": "Forward",
+    "dateOfBirth": "2001-02-12",
+    "teams": [
+      {
+        "team": "Napoli",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 99
+  },
+  {
+    "name": "Hakan Calhanoglu",
+    "nationality": "Turkey",
+    "position": "Midfielder",
+    "dateOfBirth": "1994-02-08",
+    "teams": [
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 100
+  },
+  {
+    "name": "Alessandro Bastoni",
+    "nationality": "Italy",
+    "position": "Defender",
+    "dateOfBirth": "1999-04-13",
+    "teams": [
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 101
+  },
+  {
+    "name": "Federico Dimarco",
+    "nationality": "Italy",
+    "position": "Defender",
+    "dateOfBirth": "1997-11-10",
+    "teams": [
+      {
+        "team": "Hellas Verona",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 102
+  },
+  {
+    "name": "Romelu Lukaku",
+    "nationality": "Belgium",
+    "position": "Forward",
+    "dateOfBirth": "1993-05-13",
+    "teams": [
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Roma",
+        "league": "Serie A",
+        "seasons": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Napoli",
+        "league": "Serie A",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 103
+  },
+  {
+    "name": "Fikayo Tomori",
+    "nationality": "England",
+    "position": "Defender",
+    "dateOfBirth": "1997-12-19",
+    "teams": [
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 104
+  },
+  {
+    "name": "Olivier Giroud",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1986-09-30",
+    "teams": [
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 105
+  },
+  {
+    "name": "Paulo Dybala",
+    "nationality": "Argentina",
+    "position": "Forward",
+    "dateOfBirth": "1993-11-15",
+    "teams": [
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Roma",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 106
+  },
+  {
+    "name": "Lorenzo Pellegrini",
+    "nationality": "Italy",
+    "position": "Midfielder",
+    "dateOfBirth": "1996-06-19",
+    "teams": [
+      {
+        "team": "Roma",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 107
+  },
+  {
+    "name": "Gianluca Mancini",
+    "nationality": "Italy",
+    "position": "Defender",
+    "dateOfBirth": "1996-04-17",
+    "teams": [
+      {
+        "team": "Roma",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 108
+  },
+  {
+    "name": "Ciro Immobile",
+    "nationality": "Italy",
+    "position": "Forward",
+    "dateOfBirth": "1990-02-20",
+    "teams": [
+      {
+        "team": "Lazio",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 109
+  },
+  {
+    "name": "Luis Alberto",
+    "nationality": "Spain",
+    "position": "Midfielder",
+    "dateOfBirth": "1992-09-28",
+    "teams": [
+      {
+        "team": "Lazio",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 110
+  },
+  {
+    "name": "Gleison Bremer",
+    "nationality": "Brazil",
+    "position": "Defender",
+    "dateOfBirth": "1997-03-18",
+    "teams": [
+      {
+        "team": "Torino",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 111
+  },
+  {
+    "name": "Adrien Rabiot",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "1995-04-03",
+    "teams": [
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 112
+  },
+  {
+    "name": "Wojciech Szczesny",
+    "nationality": "Poland",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1990-04-18",
+    "teams": [
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 113
+  },
+  {
+    "name": "Teun Koopmeiners",
+    "nationality": "Netherlands",
+    "position": "Midfielder",
+    "dateOfBirth": "1998-02-28",
+    "teams": [
+      {
+        "team": "Atalanta",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 114
+  },
+  {
+    "name": "Gianluca Scamacca",
+    "nationality": "Italy",
+    "position": "Forward",
+    "dateOfBirth": "1999-01-01",
+    "teams": [
+      {
+        "team": "Genoa",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Sassuolo",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "West Ham United",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Atalanta",
+        "league": "Serie A",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 115
+  },
+  {
+    "name": "Ederson",
+    "nationality": "Brazil",
+    "position": "Midfielder",
+    "dateOfBirth": "1999-07-07",
+    "teams": [
+      {
+        "team": "Salernitana",
+        "league": "Serie A",
+        "seasons": [
+          2022
+        ]
+      },
+      {
+        "team": "Atalanta",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 116
+  },
+  {
+    "name": "Giorgio Scalvini",
+    "nationality": "Italy",
+    "position": "Defender",
+    "dateOfBirth": "2003-12-11",
+    "teams": [
+      {
+        "team": "Atalanta",
+        "league": "Serie A",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 117
+  },
+  {
+    "name": "Domenico Berardi",
+    "nationality": "Italy",
+    "position": "Forward",
+    "dateOfBirth": "1994-08-01",
+    "teams": [
+      {
+        "team": "Sassuolo",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 118
+  },
+  {
+    "name": "Marco Carnesecchi",
+    "nationality": "Italy",
+    "position": "Goalkeeper",
+    "dateOfBirth": "2000-07-01",
+    "teams": [
+      {
+        "team": "Cremonese",
+        "league": "Serie A",
+        "seasons": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Atalanta",
+        "league": "Serie A",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 119
+  },
+  {
+    "name": "Riccardo Calafiori",
+    "nationality": "Italy",
+    "position": "Defender",
+    "dateOfBirth": "2002-05-19",
+    "teams": [
+      {
+        "team": "Roma",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Bologna",
+        "league": "Serie A",
+        "seasons": [
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 120
+  },
+  {
+    "name": "Kylian Mbappe",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1998-12-20",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Real Madrid",
+        "league": "La Liga",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 121
+  },
+  {
+    "name": "Ousmane Dembele",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1997-05-15",
+    "teams": [
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 122
+  },
+  {
+    "name": "Marquinhos",
+    "nationality": "Brazil",
+    "position": "Defender",
+    "dateOfBirth": "1994-05-14",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 123
+  },
+  {
+    "name": "Achraf Hakimi",
+    "nationality": "Morocco",
+    "position": "Defender",
+    "dateOfBirth": "1998-11-04",
+    "teams": [
+      {
+        "team": "Inter Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 124
+  },
+  {
+    "name": "Bradley Barcola",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "2002-09-02",
+    "teams": [
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 125
+  },
+  {
+    "name": "Gianluigi Donnarumma",
+    "nationality": "Italy",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1999-02-25",
+    "teams": [
+      {
+        "team": "AC Milan",
+        "league": "Serie A",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 126
+  },
+  {
+    "name": "Warren Zaire-Emery",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2006-03-08",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 127
+  },
+  {
+    "name": "Vitinha",
+    "nationality": "Portugal",
+    "position": "Midfielder",
+    "dateOfBirth": "2000-02-13",
+    "teams": [
+      {
+        "team": "Wolverhampton Wanderers",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 128
+  },
+  {
+    "name": "Lucas Hernandez",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "1996-02-14",
+    "teams": [
+      {
+        "team": "Bayern Munich",
+        "league": "Bundesliga",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 129
+  },
+  {
+    "name": "Nuno Mendes",
+    "nationality": "Portugal",
+    "position": "Defender",
+    "dateOfBirth": "2002-06-19",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 130
+  },
+  {
+    "name": "Randal Kolo Muani",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1998-12-05",
+    "teams": [
+      {
+        "team": "Nantes",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Eintracht Frankfurt",
+        "league": "Bundesliga",
+        "seasons": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 131
+  },
+  {
+    "name": "Goncalo Ramos",
+    "nationality": "Portugal",
+    "position": "Forward",
+    "dateOfBirth": "2001-06-20",
+    "teams": [
+      {
+        "team": "Paris Saint-Germain",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 132
+  },
+  {
+    "name": "Jonathan David",
+    "nationality": "Canada",
+    "position": "Forward",
+    "dateOfBirth": "2000-01-14",
+    "teams": [
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 133
+  },
+  {
+    "name": "Lucas Chevalier",
+    "nationality": "France",
+    "position": "Goalkeeper",
+    "dateOfBirth": "2001-11-06",
+    "teams": [
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 134
+  },
+  {
+    "name": "Benjamin Andre",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "1990-08-03",
+    "teams": [
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 135
+  },
+  {
+    "name": "Bafode Diakite",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "2001-01-06",
+    "teams": [
+      {
+        "team": "Toulouse",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Lille",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 136
+  },
+  {
+    "name": "Alexandre Lacazette",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1991-05-28",
+    "teams": [
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 137
+  },
+  {
+    "name": "Rayan Cherki",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2003-08-17",
+    "teams": [
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 138
+  },
+  {
+    "name": "Maxence Caqueret",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2000-02-15",
+    "teams": [
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 139
+  },
+  {
+    "name": "Anthony Lopes",
+    "nationality": "Portugal",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1990-10-01",
+    "teams": [
+      {
+        "team": "Lyon",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 140
+  },
+  {
+    "name": "Pierre-Emerick Aubameyang",
+    "nationality": "Gabon",
+    "position": "Forward",
+    "dateOfBirth": "1989-06-18",
+    "teams": [
+      {
+        "team": "Arsenal",
+        "league": "Premier League",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "FC Barcelona",
+        "league": "La Liga",
+        "seasons": [
+          2022
+        ]
+      },
+      {
+        "team": "Chelsea",
+        "league": "Premier League",
+        "seasons": [
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024
+        ]
+      }
+    ],
+    "id": 141
+  },
+  {
+    "name": "Valentin Rongier",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "1994-12-07",
+    "teams": [
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 142
+  },
+  {
+    "name": "Leonardo Balerdi",
+    "nationality": "Argentina",
+    "position": "Defender",
+    "dateOfBirth": "1999-01-26",
+    "teams": [
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 143
+  },
+  {
+    "name": "Jonathan Clauss",
+    "nationality": "France",
+    "position": "Defender",
+    "dateOfBirth": "1992-09-25",
+    "teams": [
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Marseille",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Nice",
+        "league": "Ligue 1",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 144
+  },
+  {
+    "name": "Brice Samba",
+    "nationality": "France",
+    "position": "Goalkeeper",
+    "dateOfBirth": "1994-04-25",
+    "teams": [
+      {
+        "team": "Nottingham Forest",
+        "league": "Premier League",
+        "seasons": [
+          2021,
+          2022
+        ]
+      },
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 145
+  },
+  {
+    "name": "Kevin Danso",
+    "nationality": "Austria",
+    "position": "Defender",
+    "dateOfBirth": "1998-09-19",
+    "teams": [
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 146
+  },
+  {
+    "name": "Florian Sotoca",
+    "nationality": "France",
+    "position": "Forward",
+    "dateOfBirth": "1990-10-25",
+    "teams": [
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 147
+  },
+  {
+    "name": "Facundo Medina",
+    "nationality": "Argentina",
+    "position": "Defender",
+    "dateOfBirth": "1999-05-28",
+    "teams": [
+      {
+        "team": "Lens",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 148
+  },
+  {
+    "name": "Terem Moffi",
+    "nationality": "Nigeria",
+    "position": "Forward",
+    "dateOfBirth": "1999-05-25",
+    "teams": [
+      {
+        "team": "Lorient",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023
+        ]
+      },
+      {
+        "team": "Nice",
+        "league": "Ligue 1",
+        "seasons": [
+          2023,
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 149
+  },
+  {
+    "name": "Khepren Thuram",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "2001-03-26",
+    "teams": [
+      {
+        "team": "Nice",
+        "league": "Ligue 1",
+        "seasons": [
+          2020,
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "team": "Juventus",
+        "league": "Serie A",
+        "seasons": [
+          2024,
+          2025
+        ]
+      }
+    ],
+    "id": 150
+  }
+]
