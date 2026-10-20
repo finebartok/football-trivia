@@ -68,15 +68,31 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
 
   const spoken = recipe.speak({ subject, window, value, pool, registry });
 
-  // Never let the hint ladder reveal the answer. A hint whose value contains
-  // the answer's number gives the stat away: a club_goals hint "60 goals
-  // (since 2012)" shares the same windows[id].goals as a tournament_goals=60
-  // round under a different metric id, so we match by the answer's number,
-  // not by metric id.
-  const answerToken = new RegExp(`\\b${String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
-  const hints = hintOrder(buildHints(subject, window, registry))
-    .filter(h => !answerToken.test(String(h.value ?? '')));
-  const clues = hints.slice(0, Math.max(1, stages));
+  // Extract every number rendered in a hint's value so we compare numerically
+  // rather than with a word-boundary regex. A word boundary fails against
+  // adjacent word characters: "€80M" does not match \b80\b even though 80 is
+  // the answer, while "204 caps" must not be treated as an 80-caps answer.
+  function numbersIn(text) {
+    return (String(text ?? '').match(/\d+/g) ?? []).map(Number);
+  }
+  function hintRevealsAnswer(hint, answer) {
+    if (answer === undefined || answer === null) return false;
+    const answerNumber = Number(answer);
+    if (!Number.isFinite(answerNumber)) return false; // name-based answer: no numeric leak
+    return numbersIn(hint.value).some(n => n === answerNumber);
+  }
+
+  // Never let the hint ladder reveal the answer: drop any hint whose rendered
+  // value carries the answer's number under any metric id (a club_goals hint
+  // "60 goals (since 2012)" shares windows[id].goals with a tournament_goals=60
+  // round; a "€80M" market-value hint leaks an 80-caps answer).
+  const allHints = hintOrder(buildHints(subject, window, registry));
+  const safeHints = allHints.filter(h => !hintRevealsAnswer(h, value));
+  // Degrade safely: if every hint would reveal the answer (essentially
+  // impossible with real biographical hints, but possible with synthetic
+  // data), keep the round usable and non-crashing instead of emitting zero
+  // clues and an empty revealSchedule.
+  const clues = (safeHints.length ? safeHints : allHints).slice(0, Math.max(1, stages));
 
   const isNumeric = recipe.template === 'stat_value';
   const distractors = isNumeric

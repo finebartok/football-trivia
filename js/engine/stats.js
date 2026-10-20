@@ -85,7 +85,10 @@ export function metricsFor(player, window) {
       value = player.windows[window.id].goals;
     } else if (window?.id && m.id === 'club_appearances' && player.windows?.[window.id]?.appearances !== undefined) {
       value = player.windows[window.id].appearances;
-    } else if (player.stats?.[m.id] !== undefined) {
+    } else if (!window && player.stats?.[m.id] !== undefined) {
+      // A career total is only a valid answer when no window is in play. With
+      // a window, the window IS the scope of the claim - a career figure
+      // dressed as a windowed one is the "199 goals since 2012" mistake again.
       value = player.stats[m.id];
     }
     if (value === undefined || value === null) continue;
