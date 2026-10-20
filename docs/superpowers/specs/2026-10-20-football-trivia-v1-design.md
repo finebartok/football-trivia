@@ -12,9 +12,11 @@ A realtime multiplayer football trivia game for a friend group playing on their 
 
 **The whole product is two things.**
 
-**Pillar 1 — the user picks the lens.** Not a quiz from a catalogue: a season, a tournament, an era, a competition, a club, a nationality, a vibe. *"Our kind of football."* The Scope is that choice, and it is reusable, shareable and forkable.
+**Pillar 1 — the user crafts the vibe.** Not a quiz from a catalogue: a season, a tournament, an era, a competition, a club, a nationality, a vibe. *"Our kind of football."* The Scope is that choice, and it is reusable, shareable and forkable.
 
-**Pillar 2 — the engine generates the quiz.** This is the product. The engine does not filter a database and dress the rows up. Given a lens, it *composes* a ten-round quiz: it decides which players are worth asking about, which facts about them are interesting and discriminable, how to word each question, which distractors would be genuinely tempting, and in what order the rounds should run. Two people playing the same Scope get different quizzes, and the quiz is different again next week.
+**Pillar 2 — the engine generates the quiz.** This is the product. The engine does not filter a database and dress the rows up. Given a vibe, it *composes* a ten-round quiz: it decides which players are worth asking about, which facts about them are interesting and discriminable, how to word each question, which distractors would be genuinely tempting, and in what order the rounds should run. Two people playing the same vibe get different quizzes, and the quiz is different again next week.
+
+**The engine is under the hood.** The player crafts a vibe and then plays. They never see a query, a plan, a metric list, or a summary of what the quiz contains. What the engine decided is discovered by playing it.
 
 Pillar 1 without pillar 2 is a database with a filter. Pillar 2 without pillar 1 is the same generated quiz for everyone. The product is the intersection.
 
@@ -42,7 +44,7 @@ Each arrow is a separate, testable component. The user touches only the first an
 | D3 | **Supabase** (Postgres + Realtime + Auth) | Managed, free at friend-group scale, and doubles as the data store. No socket server to operate. |
 | D4 | **Guess the Player only** in v1 | Two of three current formats are broken; Higher/Lower is literally a game over invented numbers. One format, done excellently. |
 | D5 | **Scope = union of clauses** | A scope is a disjunction of clauses; each clause is a conjunction of predicates. Makes "La Liga 2010s **OR** current PL" and "Spain **AND** Barça **AND** 2010s" both expressible. The current code intersects teams/nationalities on top of the union — the exact failure the pitch says it avoids. |
-| D6 | **Presets + fork-a-preset in v1**; free-form composer is v2 | The pitch names setup friction as the #1 product risk. A blank composer is a form. Forking a preset is a draft. |
+| D6 | **Vibes + "make this ours" in v1**; free-form composer is v2 | The pitch names setup friction as the #1 product risk. A blank composer is a form. Forking a vibe is a draft. |
 | D7 | **Retro Collectible theme (D) by default**, Premium Editorial (C) optional | Approved visually. Both ship as token swaps over identical markup. |
 | D8 | **Server-timed clue reveals, player-chosen answer lock** | The only way to guarantee every phone shows the same clue at the same time without spoilers, while preserving the risk/reward gamble. |
 | D9 | **Photos from Wikimedia Commons via Wikidata P18** | Only source that is free, legally clean, and unlimited enough (50 entities per HTTP call). |
@@ -54,6 +56,7 @@ Each arrow is a separate, testable component. The user touches only the first an
 | D15 | **A Scope defines a pool *and* a window context** | A Scope is not a filter over a table — it is a pool plus the lens the questions are asked through. "La Liga 2010s" is a pool of players *and* the 2010–19 season window. "World Cup 2022" is a pool *and* a tournament window. The scope's clauses decide **who**; the window decides **from when**. |
 | D16 | **Questions are composed, never raw rows** | Every question is generated from a (metric, window, subject) triple by a phrasing registry. The player is a subject, not a record dump: "How many goals did he score for Real Madrid in 2014-15?", never "goals_rma_2014_15: 61". |
 | D17 | **Windowed stats are exact where the source is exact** | `game_events` yields true all-competition club-season totals — derived Ronaldo 61, Messi 60, Suárez 59, Lewandowski 55, all matching the real records. Windowed does not have to mean approximate; it means *scoped*. |
+| D18 | **The engine is under the hood** | The player's verb is **"craft the vibe"**. They never see a query, a plan, a metric list, or a summary of what the quiz contains. What the engine decided is discovered by playing it — a preview gives the quiz away, and the surprise is what makes a group ask for round 4. |
 
 ---
 
@@ -619,6 +622,30 @@ SELECT DISTINCT ?player WHERE {
 
 Each resolved player is matched to a `player_pool` row by normalised name + DOB; unmatched names go to `overrides.json` for adjudication. A tournament that resolves to fewer than 20 pool players is not offered as a preset.
 
+### 5.7 The vibe crafter — the front door
+
+The customization surface is the first thing a user touches, and it must feel like **curating a mood**, not composing a query. This is where the setup-friction risk the pitch names is won or lost.
+
+**User-facing language.** The player-facing noun is a **vibe**, and the verb is **craft**. Internally it is still a `scope` — the code keeps the precise term, the interface uses the warm one.
+
+| Everywhere | Instead of |
+|---|---|
+| "Craft a vibe" | "Create Scope" / "Build a filter" |
+| "Make this ours" | "Fork" / "Duplicate" |
+| "A fresh quiz is generated every time you play" | "New quiz each session" |
+| "Vibes" (saved list) | "Your Scopes" |
+
+**Principles:**
+
+1. **Start from a vibe, never from a blank form.** The first screen is a grid of vibe cards — *La Liga 2010s*, *World Cup 2022*, *Late Bloomers*, *Derby Night*, *Ever-Capped*. Each shows its pool size and a one-line description. A blank composer is a form; a preset is a starting point.
+2. **Adjust by swapping, not by configuring.** Opening a vibe offers named moves — **different era**, **different competition**, **add a club**, **only these nations**, **a narrower stat** — not a wall of checkboxes and sliders. Every move re-runs the pool and shows the new count.
+3. **The pool count is the feedback loop.** Every move shows the before and after: *"1,854 players → 312 players"*, instantly, on-device. If the count drops below the floor, the move is marked and the reason is stated — *"only 49 players have La Liga data for 2005–09"*.
+4. **Never reject a number the user typed.** A stat threshold that yields 3 players is not an error to be refused; it is shown with the count and a suggestion — *"only 3 players hit 200+ goals aged 30+ — try 50+"* — and the smaller threshold is one tap away.
+5. **Fork, don't start over.** The primary action on a vibe card is **"Make this ours"**, which copies it into the group's saved list.
+6. **Share the vibe, not the query.** The share link carries the vibe's definition and opens as a ready-to-play card for the recipient.
+
+**The composer stays behind the vibes.** A free-form query console is v2 and only unlocks if vibes get used *and* forked. If people keep forking presets but never build from scratch, the composer is not a missing feature — it is unnecessary.
+
 ---
 
 ## 6. Game engine
@@ -875,14 +902,13 @@ export function planQuiz(scope, pool, { rounds = 10, seed, difficulty }) {
 4. **A difficulty curve.** Early rounds use shallow hints and generous multipliers; later rounds dig into window-level facts. Round 1 is a warm-up; round 10 is the one people argue about.
 5. **No dead rounds.** Every generated round must have a discriminable answer and at least one hint that is not already implied by an earlier round's answer.
 
-**The plan is server-side and identical for everyone.** It is generated once when the room starts, written to the `rounds` table, and every phone renders the same ten rounds. Determinism comes from a seed (`rooms` stores it), so a plan can be regenerated and verified — and so a bug report can be reproduced exactly.
+**The plan is server-side and identical for everyone.** It is generated once when the room starts, written to the `quiz_plans` table, and every phone renders the same ten rounds. Determinism comes from a seed (`rooms.quiz_seed`), so a plan can be regenerated and verified — and so a bug report can be reproduced exactly.
 
-**The lobby shows the plan's shape.** This is the moment the user sees that a quiz was *made*, not fetched:
+**The plan is never shown to the players.** The engine is under the hood: a player sees a round, plays it, and finds out what the quiz had in store by playing it. Showing the plan's shape beforehand would give the quiz away — the stat types, the scarcity questions and the curve are the surprise, and a surprise is the thing that makes a group ask for round 4.
 
-> **TONIGHT'S QUIZ**
-> 10 rounds · La Liga 2010–19 · 5 different stat types · 1 club-season question · difficulty curve: gentle → deep
+What the lobby *does* show is the Scope (the pool, the era, the difficulty) and one honest line: **a fresh quiz is generated every time you play.** That tells the group the quiz is not a fixed artefact without describing it.
 
-That summary is itself generated from the plan, and it is what makes the group want to press Start — the quiz already has a *shape* before the first round.
+The one place the plan's shape does surface is **after** the game, on the results screen, where it becomes part of the shared artefact rather than a preview of it.
 
 **Why this is the difference between a filter and a generator.** A filter returns a set and lets the player consume it in whatever order it happens to be in. A generator returns a *designed* set: it has a beginning and an end, it varies, it builds, and it reserves its best material for when it will land hardest. If the group plays the same Scope every week, the plan being fresh each time is the retention mechanic — the Scope is stable, the quiz is not.
 
@@ -904,7 +930,6 @@ create table rooms (
   current_round int not null default 0,
   total_rounds int not null default 10,
   quiz_seed bigint,                         -- seed the quiz plan was generated with
-  plan_summary jsonb,                      -- human-readable plan shape, shown in the lobby
   round_started_at timestamptz,
   deadline_at timestamptz,
   finished_at timestamptz,
@@ -936,17 +961,35 @@ create table game_scopes (
   created_at timestamptz not null default now()
 );
 
+-- The plan is generated server-side at game start and is NEVER exposed to clients.
+create table quiz_plans (
+  room_id uuid primary key references rooms(id) on delete cascade,
+  seed bigint not null,
+  plan jsonb not null,           -- the composed ten rounds, in order
+  summary jsonb,                 -- machine-readable shape, for the post-game recap
+  generated_at timestamptz not null default now()
+);
+-- RLS: SELECT denied to all clients. service_role only.
+
+-- A round's client-visible data. Deliberately contains NO answer.
 create table rounds (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references rooms(id) on delete cascade,
   round_number int not null,
-  target_player_id bigint not null references players(id),   -- THE ANSWER, never sent to clients
   clue_order jsonb not null,             -- [{id,label,value,iconKey}] in reveal order
   reveal_schedule jsonb not null,        -- [{stage, reveal_at}] absolute timestamptz
   status text not null default 'pending' check (status in ('pending','active','closed')),
   started_at timestamptz, closed_at timestamptz,
   unique (room_id, round_number)
 );
+
+-- The answer key. Separate table because RLS is row-level and cannot hide a column.
+create table round_secrets (
+  round_id uuid primary key references rounds(id) on delete cascade,
+  target_player_id bigint not null references players(id),
+  source_id text references sources(id)
+);
+-- RLS: no client SELECT, no client INSERT/UPDATE. service_role only.
 
 create table answers (
   id uuid primary key default gen_random_uuid(),
@@ -966,8 +1009,17 @@ create table answers (
 **RLS intent:**
 - `rooms` — SELECT: creator or member. INSERT: authenticated. UPDATE: only via a `SECURITY DEFINER` RPC (the state machine must not be forgeable by clients). DELETE: creator.
 - `room_memberships` — SELECT: same-room members. INSERT: `auth.uid() = user_id` and room is in `lobby` and not full. UPDATE: own row only. DELETE: own row or creator.
-- `rounds` — SELECT: room members. INSERT/UPDATE: **server only** (service_role). Clients can never write the answer key.
+- `quiz_plans` — **no client access at all.** The plan and the answer keys are server-only.
+- `rounds` — SELECT: room members, **and only for rounds that have started**. A client may see the current round's clues and schedule; it may not read a future round. INSERT/UPDATE: server only.
+- `round_secrets` — **no client SELECT, ever.** This is the answer key.
 - `answers` — SELECT: room members. INSERT: `auth.uid() = user_id`, guarded by an `is_round_open` RPC. No UPDATE ever.
+
+**Two rules that make "the engine is under the hood" true:**
+
+1. **A client never receives the plan.** The ten-round plan exists only in `quiz_plans`, readable by the service role. Clients receive *the current round's* clues, schedule and options, and nothing about the rounds after it.
+2. **Future rounds are not materialised.** The plan is computed once at game start, but `rounds` rows are inserted one at a time, as each round begins. Even if a client queried the table directly, there is no future row to find — and the one row that exists has no answer in it.
+
+A player who opens devtools sees their own round's clues and options (which they can see on screen anyway) and nothing else.
 
 ### 7.2 State machine
 
@@ -1010,13 +1062,17 @@ The server is the clock and the authority. Per round it generates the target fro
 
 | Screen | Purpose |
 |---|---|
-| Home | Play a preset, resume a saved scope, create a room |
-| Lobby | Room code, scope card, roster, **the generated quiz's shape**, start |
+| Home | Craft a vibe, resume a saved vibe, create a room |
+| **Vibe crafter** | Vibe cards, named moves, live pool count (§5.7) |
+| Lobby | Room code, vibe card, roster, **"a fresh quiz is generated every time you play"**, start |
 | Round | Window banner, clue ladder, clue cards, live avatar strip, 4 options, timer, rank |
 | Reveal | Collectible card with photo and window fact, your points, resolved leaderboard |
-| Results | Final standings, "make your own Scope" CTA, share |
-| Scope builder | Preset + fork, era slider with coverage warning, live pool count |
+| Results | Final standings, **post-game quiz recap**, "craft your own vibe" CTA, share |
 | Credits | Photo attributions (CC BY-SA compliance) |
+
+**The lobby shows nothing about the quiz.** No plan summary, no stat types, no curve. The engine's decisions are discovered by playing. The lobby shows only what the group chose — the vibe, its pool size, the era, the difficulty — and one honest line about the quiz being generated fresh. The plan's shape surfaces **after** the game, on the results screen, where it is part of the shared artefact rather than a preview of it.
+
+**The results screen's quiz recap** is a small, honest line: *"This quiz: 10 rounds · 5 different kinds of question · hardest round: 6"*. It is the discovery mechanic — the group finds out what the engine did with their vibe, and that is what they talk about afterwards.
 
 **The lobby's plan card** is where the user sees pillar 2 working. It is generated from the plan, not written by hand:
 
@@ -1070,6 +1126,7 @@ Optional theme (Premium Editorial): `--bg #FAF8F3`, `--ink #17130F`, `--accent #
 | R4 | Setup friction — most groups pick "play everything" | Ship presets + fork. Measure: if presets get used but nobody forks, the composer is unnecessary. |
 | R5 | Empty-room cold start — nobody joins, so a session yields no signal | The cheapest falsification test (§10) runs before multiplayer work, not after. |
 | R6 | Photo coverage gaps and CC BY-SA attribution burden | Jersey tile is a first-class card state, not an error. One credits screen satisfies attribution. |
+| R7 | **Answer leakage** — a player reads the answer key from the database | The answer lives in `round_secrets`, which has no client SELECT. Future rounds are never materialised, so there is no future answer to find. A devtools check is part of the end-to-end test: a client cannot read any round's target before it resolves. |
 
 ---
 
@@ -1112,7 +1169,7 @@ Unit-tested, no DOM. Same code runs in the browser and in server-side validation
 Mobile-first PWA, Retro Collectible theme + Premium Editorial theme, four screens wired to the engine with fake data, accessibility pass (contrast, focus, reduced-motion).
 
 ### Phase 4 — Multiplayer room
-Supabase schema + RLS + RPCs, room lifecycle, Realtime channels, sync, leaderboard, failure-mode handling.
+Supabase schema + RLS + RPCs, room lifecycle, Realtime channels, sync, leaderboard, failure-mode handling. `quiz_plans` and `round_secrets` are service-role only; `rounds` rows are materialised one at a time as each round begins.
 
 ### Phase 5 — Scope builder
 Presets + fork + era slider with coverage warning + **stat threshold control with live count and nearest-valid suggestion** + tournament picker + live pool preview + share links.
