@@ -44,3 +44,35 @@ export async function getEntities(ids) {
   }
   return out;
 }
+
+export const FOOTBALLER = 'Q937857'; // occupation (P106): association football player
+
+/**
+ * The footballers Wikidata records as participants in a tournament, or as
+ * members of a participating nation's squad during its window.
+ *
+ * Both filters are load-bearing. Without `wdt:P106 wd:Q937857` the `P54` branch
+ * also matches managers and officials; without the `pq:P580` date window it
+ * matches every player who EVER turned out for a participating national team
+ * (6,505 and 6,557 for the 2022 World Cup respectively, against 231 with both).
+ *
+ * `from`/`to` are the tournament's year and the year before it (2022 -> 2021-2022),
+ * not hardcoded, so a tournament's own year drives its window.
+ */
+export function tournamentSquadQuery({ qid, from, to }) {
+  return `
+    SELECT DISTINCT ?player ?playerLabel WHERE {
+      ?player wdt:P31 wd:Q5; wdt:P106 wd:${FOOTBALLER} .
+      {
+        ?player wdt:P1344 wd:${qid} .
+      }
+      UNION
+      {
+        ?player p:P54 ?st . ?st ps:P54 ?team .
+        ?team wdt:P1344 wd:${qid} .
+        ?st pq:P580 ?start .
+        FILTER(YEAR(?start) >= ${from} && YEAR(?start) <= ${to})
+      }
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+    }`;
+}

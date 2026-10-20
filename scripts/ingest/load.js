@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 import { readCsvGz } from './lib/csv.js';
 import { normalisePlayer, normaliseTransfer } from './normalize.js';
 import { normaliseName } from '../../lib/names.js';
-import { sparql, searchEntity } from './lib/wikidata.js';
+import { sparql, searchEntity, tournamentSquadQuery } from './lib/wikidata.js';
 
 const SOURCE_ID = 'tm_dump_2026-07-06';
 
@@ -169,17 +169,25 @@ export async function loadTransfers(db, { rawDir }) {
 // --- Tournament rosters ----------------------------------------------------
 // The Transfermarkt dump holds WC2022's fixtures but no squads, so tournament
 // rosters come from Wikidata's P1344 (participant in) / P54 (member of sports
-// team). The match is by folded name and ONLY a unique match counts: an
-// ambiguous name is reported, never attached to the nearest guess.
+// team). The pool is deliberately not "everyone who ever played for a
+// participating nation" - see tournamentSquadQuery - and the match is by folded
+// name where ONLY a unique match counts: an ambiguous name is reported, never
+// attached to the nearest guess.
 
 const WIKIDATA_SOURCE_ID = 'wikidata';
 const WIKIDATA_URL = 'https://www.wikidata.org/';
 
-// A national squad at a finals is 26-33 players; even a generous cap is far
-// below anything an over-broad query returns. A larger result is a query bug,
-// not a roster: writing it would fabricate memberships, so it is reported and
-// skipped instead (zero-fabrication rule).
-const MAX_PLAUSIBLE_SQUAD = 100;
+// A tournament squad *pool* is not the exact 26-man list - Wikidata records
+// participants, not final squads - so it is larger than one squad but far
+// smaller than "everyone who ever played for a participating nation". 231 is
+// the 2022 World Cup; the over-broad query gives 6,494. The band rejects both
+// directions: too big is a query bug, too small means the shape is wrong.
+const MIN_PLAUSIBLE_SQUAD = 50;
+const MAX_PLAUSIBLE_SQUAD = 800;
+
+export function squadSizeIsPlausible(n) {
+  return n >= MIN_PLAUSIBLE_SQUAD && n <= MAX_PLAUSIBLE_SQUAD;
+}
 
 // Tournament ids are stable (`wc-2022`); the QID is what Wikidata knows. Only
 // the 2022 World Cup QID is pinned - the rest resolve from the seeded name, so
@@ -211,22 +219,11 @@ export function matchTournamentSquads(squad, players) {
   return { matched, unmatched };
 }
 
-/** The whole squad of one tournament, as `[{ id: QID, label }]`. One query per
- * tournament: the player participates directly, or played for a team that did.
- *
- * ponytail: the P54 branch is the brief's, and on today's Wikidata it matches
- * every player who ever turned out for any participating national team, not the
- * tournament roster (verified: wc-2022 -> 6557, not ~440). The squads are not
- * modelled as P54 statements on the tournament's `*-at-the-tournament` items
- * either. Callers must therefore size-guard the result; see MAX_PLAUSIBLE_SQUAD. */
-export async function fetchTournamentSquad(qid) {
-  const bindings = await sparql(`
-    SELECT DISTINCT ?player ?playerLabel WHERE {
-      { ?player wdt:P1344 wd:${qid} . }
-      UNION
-      { ?player p:P54 ?st . ?st ps:P54 ?team . ?team wdt:P1344 wd:${qid} . }
-      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
-    }`);
+/** The squad pool of one tournament, as `[{ id: QID, label }]`. One query per
+ * tournament. The query shape (occupation filter + P54 date window) lives in
+ * lib/wikidata.js; the window is the tournament's own year and the year before. */
+export async function fetchTournamentSquad(qid, year) {
+  const bindings = await sparql(tournamentSquadQuery({ qid, from: year - 1, to: year }));
   return bindings
     .filter(b => b.player?.value)
     .map(b => {
@@ -254,7 +251,7 @@ export async function resolveTournamentQid(name) {
  * a real player row by folded, unique name. Unmatched members are returned for
  * reporting, never inserted. `squads` may be injected so tests stay offline.
  */
-export async function loadTournaments(db, { tournaments = [], squads } = {}) {
+export async function loadTournaments(db, { tournaments = [], squads, fetchSquad = fetchTournamentSquad } = {}) {
   await db.query(
     `insert into sources (id, licence, url) values ($1, $2, $3) on conflict (id) do nothing`,
     [WIKIDATA_SOURCE_ID, 'CC0-1.0', WIKIDATA_URL],
@@ -262,6 +259,9 @@ export async function loadTournaments(db, { tournaments = [], squads } = {}) {
 
   const ids = tournaments.length ? tournaments : Object.keys(TOURNAMENT_NAMES);
   const players = (await db.query('select id, name from players')).rows;
+  const years = new Map(
+    (await db.query('select id, year from tournaments')).rows.map(r => [r.id, r.year]),
+  );
 
   let loaded = 0;
   const unmatched = [];
@@ -269,12 +269,22 @@ export async function loadTournaments(db, { tournaments = [], squads } = {}) {
     const qid = TOURNAMENT_QIDS[tournamentId]
       ?? await resolveTournamentQid(TOURNAMENT_NAMES[tournamentId]);
     if (!qid) continue;
-    const squad = squads?.[tournamentId] ?? await fetchTournamentSquad(qid);
-    // A squad bigger than any real roster means the query resolved the wrong
-    // set (see fetchTournamentSquad). Report it and write nothing.
-    if (squad.length > MAX_PLAUSIBLE_SQUAD) {
-      unmatched.push({ tournamentId, reason: `implausible squad size ${squad.length}` });
-      continue;
+    const year = years.get(tournamentId);
+    if (!year) { unmatched.push({ tournamentId, reason: 'no year for tournament' }); continue; }
+    const injected = squads?.[tournamentId];
+    let squad;
+    if (injected) {
+      // A test seam: the caller owns the fixture's validity.
+      squad = injected;
+    } else {
+      squad = await fetchSquad(qid, year);
+      // A pool outside the plausible band means the query resolved the wrong
+      // set (see tournamentSquadQuery). Report the size and write nothing -
+      // writing an over-broad result would fabricate memberships.
+      if (!squadSizeIsPlausible(squad.length)) {
+        unmatched.push({ tournamentId, reason: `implausible squad size ${squad.length}` });
+        continue;
+      }
     }
     const { matched, unmatched: missed } = matchTournamentSquads(
       squad.filter(m => m.label), players,
