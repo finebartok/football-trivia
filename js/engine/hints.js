@@ -5,11 +5,12 @@ const ICONS = {
   value: 'value', age: 'age', league: 'league', team: 'team', name: 'name',
 };
 
-export function buildHints(subject, window, registry, { limit = 8 } = {}) {
+export function buildHints(subject, window, registry, { limit } = {}) {
   const hints = [];
 
-  if (subject.nationality) {
-    hints.push({ id: 'nationality', label: 'Nationality', value: subject.nationality, iconKey: ICONS.nat, family: 'career', surface: true });
+  const nationality = subject.nationality ?? subject.citizenship?.[0];
+  if (nationality) {
+    hints.push({ id: 'nationality', label: 'Nationality', value: nationality, iconKey: ICONS.nat, family: 'career', surface: true });
   }
   if (subject.position) {
     const foot = subject.foot ? ` (${subject.foot.toLowerCase()}-footed)` : '';
@@ -42,7 +43,7 @@ export function buildHints(subject, window, registry, { limit = 8 } = {}) {
     });
   }
 
-  return hints.slice(0, limit);
+  return hintOrder(hints).slice(0, limit);
 }
 
 const RANK = { window: 0, roster: 1, path: 2, surface: 3 };
