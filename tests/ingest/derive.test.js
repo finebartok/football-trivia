@@ -221,3 +221,54 @@ test('an appearance adds to the same club-season window as a goal', () => {
   const goals = windowStats.find(s => s.windowId === '5-2014' && s.metric === 'goals');
   assert.equal(goals.value, 1);
 });
+
+test('the age band sums goals scored after the player turned 30', () => {
+  const { windows, windowStats } = deriveWindows({
+    appearances: [
+      // born 1990, so 29 in 2019 and 30 in 2020
+      { playerSourceKey: '1', clubId: 5, season: 2019, year: 2019, goals: 7 },
+      { playerSourceKey: '1', clubId: 5, season: 2020, year: 2020, goals: 5 },
+    ],
+    clubsById: { 5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' } },
+    competitionsById: {},
+    dobById: { 1: '1990-03-15' },
+  });
+
+  const w = windows.find(x => x.kind === 'age_band');
+  assert.ok(w, 'an age-band window must exist');
+  assert.equal(w.id, 'age-30');
+  assert.equal(w.label, 'aged 30+');
+  assert.equal(w.ageFrom, 30);
+  assert.equal(w.ageTo, null);
+
+  const stat = windowStats.find(s => s.windowId === 'age-30' && s.metric === 'goals_after_age_30');
+  assert.equal(stat.value, 5, 'only the 2020 goals are aged 30+');
+});
+
+test('the age band is windowed, not career-true', () => {
+  const { windowStats } = deriveWindows({
+    appearances: [{ playerSourceKey: '1', clubId: 5, season: 2020, year: 2020, goals: 5 }],
+    clubsById: { 5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' } },
+    competitionsById: {},
+    dobById: { 1: '1990-03-15' },
+  });
+  const stat = windowStats.find(s => s.metric === 'goals_after_age_30');
+  assert.equal(stat.exact, false, 'a windowed metric is never career-true');
+});
+
+test('the age band only counts the 2012+ window, and only players with a DOB', () => {
+  const { windowStats } = deriveWindows({
+    appearances: [
+      { playerSourceKey: '1', clubId: 5, season: 2010, year: 2010, goals: 9 },
+      { playerSourceKey: '1', clubId: 5, season: 2013, year: 2013, goals: 4 },
+      { playerSourceKey: '2', clubId: 5, season: 2013, year: 2013, goals: 6 },
+    ],
+    clubsById: { 5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' } },
+    competitionsById: {},
+    dobById: { 1: '1980-01-01' }, // player 2 has no DOB and is skipped
+  });
+  const stats = windowStats.filter(s => s.metric === 'goals_after_age_30');
+  assert.equal(stats.length, 1, 'no DOB means no age band, never a fabricated 0');
+  assert.equal(stats[0].playerSourceKey, '1');
+  assert.equal(stats[0].value, 4, 'the 2010 goal is outside the 2012+ window');
+});
