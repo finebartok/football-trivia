@@ -155,3 +155,71 @@ test('loadTransfers stages every usable transfer with a start-year season', asyn
   assert.equal(row.market_value_eur, 700000);
   await db.close();
 });
+
+test('two footballers who share a name and date of birth both survive, with distinct slugs', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'load-dup-'));
+  await gz(dir, 'players.csv.gz',
+    'player_id,name,date_of_birth,country_of_citizenship,position,foot,height_in_cm,international_caps,international_goals,market_value_in_eur,highest_market_value_in_eur',
+    [
+      '101,Rafael Silva,1993-05-05,Brazil,Attack,Right,175,3,1,2000000,5000000',
+      '202,Rafael Silva,1993-05-05,Portugal,Defender,Left,183,7,0,900000,2500000',
+    ]);
+
+  const db = await freshDb();
+  const res = await loadPlayers(db, { rawDir: dir });
+  assert.equal(res.players, 2, 'no usable source row is silently dropped');
+
+  const rows = (await db.query('select id, slug, name, international_caps from players order by id')).rows;
+  assert.equal(rows.length, 2, 'two different players, not one overwritten row');
+  assert.notEqual(rows[0].slug, rows[1].slug, 'the slug identifies a player, not a name');
+  assert.equal(new Set(rows.map(r => r.slug)).size, 2);
+  assert.deepEqual(rows.map(r => r.international_caps).sort(), [3, 7], 'each keeps its own stats');
+
+  const sources = (await db.query('select player_id, source_key from player_sources order by source_key')).rows;
+  assert.equal(sources.length, 2, 'each player maps to its own source key');
+  assert.equal(new Set(sources.map(s => s.source_key)).size, 2);
+  assert.equal(new Set(sources.map(s => s.player_id)).size, 2, 'the source keys resolve to two different players');
+  await db.close();
+});
+
+test('re-running with duplicate names keeps the same slugs and creates no duplicates', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'load-dup2-'));
+  await gz(dir, 'players.csv.gz',
+    'player_id,name,date_of_birth,country_of_citizenship,position,foot,height_in_cm,international_caps,international_goals,market_value_in_eur,highest_market_value_in_eur',
+    [
+      '101,Rafael Silva,1993-05-05,Brazil,Attack,Right,175,3,1,2000000,5000000',
+      '202,Rafael Silva,1993-05-05,Portugal,Defender,Left,183,7,0,900000,2500000',
+    ]);
+
+  const db = await freshDb();
+  const a = await loadPlayers(db, { rawDir: dir });
+  const slugsAfterFirst = (await db.query('select slug from players order by slug')).rows.map(r => r.slug);
+  const b = await loadPlayers(db, { rawDir: dir });
+  const slugsAfterSecond = (await db.query('select slug from players order by slug')).rows.map(r => r.slug);
+
+  assert.equal(a.players, 2);
+  assert.equal(b.players, 2, 'the second run updates the same two players');
+  const count = (await db.query('select count(*)::int c from players')).rows[0].c;
+  assert.equal(count, 2, 're-running creates no duplicate rows');
+  assert.deepEqual(slugsAfterSecond, slugsAfterFirst, 'slugs are stable across runs');
+  await db.close();
+});
+
+test('the same source id is one player even when two rows are otherwise identical', async () => {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'load-same-'));
+  await gz(dir, 'players.csv.gz',
+    'player_id,name,date_of_birth,country_of_citizenship,position,foot,height_in_cm,international_caps,international_goals,market_value_in_eur,highest_market_value_in_eur',
+    [
+      '300,Sam Identical,1990-01-01,England,Midfield,Right,180,1,0,100000,200000',
+      '300,Sam Identical,1990-01-01,England,Midfield,Right,180,2,0,150000,250000',
+    ]);
+
+  const db = await freshDb();
+  const res = await loadPlayers(db, { rawDir: dir });
+  assert.equal(res.players, 2, 'both source rows are processed');
+
+  const rows = (await db.query('select slug, international_caps from players')).rows;
+  assert.equal(rows.length, 1, 'one source id is one player, updated not duplicated');
+  assert.equal(rows[0].international_caps, 2, 'the later row updates the same player');
+  await db.close();
+});

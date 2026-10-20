@@ -3,6 +3,7 @@
 // idempotent: re-running produces the same rows, never duplicates. A missing
 // source value stays NULL - this file never invents one.
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { readCsvGz } from './lib/csv.js';
 import { normalisePlayer, normaliseTransfer } from './normalize.js';
 
@@ -66,6 +67,14 @@ export async function loadReferenceData(db, { rawDir }) {
   return { leagues, clubs };
 }
 
+// The slug is derived from the player's name, so two real footballers can share
+// one ("Rafael Silva", born 1993-05-05). A slug must identify a player, not a
+// name, so a collision is disambiguated by a suffix derived from the source key:
+// deterministic, stable across runs, and never overwriting a real player.
+function suffixFor(sourceKey) {
+  return crypto.createHash('sha1').update(String(sourceKey)).digest('hex').slice(0, 4);
+}
+
 export async function loadPlayers(db, { rawDir }) {
   await ensureSource(db);
   let loaded = 0, skipped = 0;
@@ -73,32 +82,61 @@ export async function loadPlayers(db, { rawDir }) {
   for await (const raw of readCsvGz(path.join(rawDir, 'players.csv.gz'))) {
     const p = normalisePlayer(raw);
     if (!p) { skipped++; continue; }
-    const { rows } = await db.query(
-      `insert into players (slug, name, date_of_birth, citizenship, position, sub_position,
-                            preferred_foot, height_cm, international_caps, international_goals,
-                            market_value_eur, highest_market_value_eur)
-       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-       on conflict (slug) do update set
-         name = excluded.name, date_of_birth = excluded.date_of_birth,
-         citizenship = excluded.citizenship, position = excluded.position,
-         sub_position = excluded.sub_position, preferred_foot = excluded.preferred_foot,
-         height_cm = excluded.height_cm, international_caps = excluded.international_caps,
-         international_goals = excluded.international_goals,
-         market_value_eur = excluded.market_value_eur,
-         highest_market_value_eur = excluded.highest_market_value_eur
-       returning id`,
-      [p.slug, p.name, p.dateOfBirth, p.citizenship, p.position, p.subPosition,
-       p.preferredFoot, p.heightCm, p.internationalCaps, p.internationalGoals,
-       p.marketValueEur, p.highestMarketValueEur],
-    );
+
+    // The source key is the player's identity: a row we have already loaded is
+    // the same player and must be updated, not inserted a second time.
+    const known = (await db.query(
+      `select p.id from player_sources s join players p on p.id = s.player_id
+       where s.source_id = $1 and s.source_key = $2`,
+      [SOURCE_ID, p.sourceKey],
+    )).rows[0];
+
+    let playerId = known?.id;
+    if (playerId === undefined) {
+      const slug = await freeSlug(db, p.slug, p.sourceKey);
+      const { rows } = await db.query(
+        `insert into players (slug, name, date_of_birth, citizenship, position, sub_position,
+                              preferred_foot, height_cm, international_caps, international_goals,
+                              market_value_eur, highest_market_value_eur)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+         returning id`,
+        [slug, p.name, p.dateOfBirth, p.citizenship, p.position, p.subPosition,
+         p.preferredFoot, p.heightCm, p.internationalCaps, p.internationalGoals,
+         p.marketValueEur, p.highestMarketValueEur],
+      );
+      playerId = rows[0].id;
+    } else {
+      await db.query(
+        `update players set
+           name = $2, date_of_birth = $3, citizenship = $4, position = $5, sub_position = $6,
+           preferred_foot = $7, height_cm = $8, international_caps = $9, international_goals = $10,
+           market_value_eur = $11, highest_market_value_eur = $12
+         where id = $1`,
+        [playerId, p.name, p.dateOfBirth, p.citizenship, p.position, p.subPosition,
+         p.preferredFoot, p.heightCm, p.internationalCaps, p.internationalGoals,
+         p.marketValueEur, p.highestMarketValueEur],
+      );
+    }
+
     await db.query(
       `insert into player_sources (player_id, source_id, source_key) values ($1,$2,$3)
        on conflict (player_id, source_id) do update set source_key = excluded.source_key`,
-      [rows[0].id, SOURCE_ID, p.sourceKey],
+      [playerId, SOURCE_ID, p.sourceKey],
     );
     loaded++;
   }
   return { players: loaded, skipped };
+}
+
+// The bare slug is used when it is free; otherwise a source-key suffix keeps
+// both players. The loop only advances if that suffix is itself taken, which
+// needs three players with one name - it is deterministic either way.
+async function freeSlug(db, base, sourceKey) {
+  const taken = async (slug) => (await db.query('select 1 from players where slug = $1', [slug])).rows.length > 0;
+  if (!(await taken(base))) return base;
+  let candidate = `${base}-${suffixFor(sourceKey)}`;
+  for (let n = 2; await taken(candidate); n++) candidate = `${base}-${suffixFor(sourceKey)}-${n}`;
+  return candidate;
 }
 
 export async function loadTransfers(db, { rawDir }) {
