@@ -1238,7 +1238,7 @@ git commit -m "feat(data): idempotent loaders for reference data and players"
 
 **Interfaces:**
 - Consumes: `lib/seasons.js` (`parseSeason`, `overlapsSeason`)
-- Produces: `deriveStints({ transfers, appearances })` → `{ stints: Stint[], seasons: Season[] }` where `Stint = { playerSourceKey, clubId, seasonStart, seasonEnd, evidence }` and `Season = { playerSourceKey, season, clubId, leagueId }`. Pure: takes arrays, returns arrays.
+- Produces: `deriveStints({ transfers, appearances, clubsById })` → `{ stints: Stint[], seasons: Season[] }` where `Stint = { playerSourceKey, clubId, seasonStart, seasonEnd, evidence }` and `Season = { playerSourceKey, season, clubId, leagueId }`. Pure: takes arrays, returns arrays.
 - Produces: `deriveStints` merges two evidence sources: a transfer says a player joined a club in a season; an appearance says a player was registered for a club in a season. Where both exist for the same (player, club, season), `evidence` is `'appearance'` (the stronger claim).
 - Evidence precedence: `appearance` > `transfer` > `wikidata` > `override`.
 
@@ -1311,9 +1311,7 @@ Expected: FAIL with `ERR_MODULE_NOT_FOUND`.
 Create `scripts/ingest/derive.js`:
 
 ```js
-import { seasonLabel } from '../../lib/seasons.js';
-
-const EVIDENCE_RANK = { appearance: 3, transfer: 2, wikidata: 1, override: 4 };
+const EVIDENCE_RANK = { appearance: 4, transfer: 3, wikidata: 2, override: 1 };
 
 export function deriveStints({ transfers = [], appearances = [], clubsById = {} }) {
   /** @type {Map<string, {playerSourceKey,clubId,seasons:Set<number>,evidence:string}>} */
@@ -1490,7 +1488,7 @@ Expected: FAIL with `deriveWindows is not a function`.
 
 - [ ] **Step 3: Write the implementation**
 
-Append to `scripts/ingest/derive.js`:
+Append to `scripts/ingest/derive.js`. **Task 6 deliberately did not import `seasonLabel` (it did not need it), so this task MUST add `import { seasonLabel } from '../../lib/seasons.js';` at the top of the file** — `deriveWindows` uses it to label club-season windows. Add that import once, at the top, not inside the appended block.
 
 ```js
 export function deriveWindows({ goals = [], appearances = [], games = [], clubsById = {}, competitionsById = {} }) {
@@ -1609,7 +1607,7 @@ git commit -m "feat(data): derive windows and window stats - club-season totals 
 **Interfaces:**
 - Consumes: `scripts/ingest/lib/db.js` (`openDb`, `applyMigrations`)
 - Produces: `applyQualityGate(db)` → `{ passed: number, failed: number, reasons: Map<string, string[]> }`. Sets `players.quality = {status, reasons[]}` and `players.active = true` for passers, `false` for failures. Never deletes a player.
-- Produces: `buildReport(db)` → `{ errors: string[], warnings: string[], stats: object }`.
+- Produces: `buildReport(db)` → `{ errors: string[], warnings: string[], stats: object }`. **Task 8 implements three of the seven ERROR conditions**: a pool below `MIN_POOL`, a published numeric with no `source_id`, and a player-season claiming two clubs. The other four — a pool member failing the gate, an unresolved ambiguous/conflict name, a league-alias collision, and a >10% pool drop — are deferred: two of them need the alias loader and a previous-run snapshot that no task builds yet, and the ambiguous/conflict checks need the name-matching step that Task 5's load performs. They are listed here so the contract is not silently overstated, and the final whole-branch review triages them.
 - Produces: `isPublishable(db)` → boolean — `true` when there are no ERRORs. ERRORs include: any player in `player_pool` failing the gate, an unresolved ambiguous/conflict name, an overlapping stint without an override, a league-alias collision, any numeric without a `source_id`, any pool with fewer than 20 players for an advertised preset, or a pool drop of more than 10% against the previous run.
 - Produces: `MIN_POOL = 20` — the floor below which a scope or threshold is refused.
 
@@ -1826,16 +1824,26 @@ git commit -m "feat(data): quality gate - excluded players stay visible with rea
 - Consumes: `scripts/ingest/lib/db.js`, `lib/names.js` (`normaliseName`)
 - Produces (from `scripts/ingest/lib/wikidata.js`): `sparql(query): Promise<Array<Record<string,string>>>` — POSTs to `https://query.wikidata.org/sparql` with a `User-Agent` header and returns the bindings array. `searchEntity(term, limit): Promise<Array<{id,label,description}>>` — `wbsearchentities`. `getEntities(ids): Promise<Record<string,object>>` — `wbgetentities`, 50 ids per call.
 - Produces (from `scripts/ingest/load.js`): `loadTournaments(db, { rawDir })` → loads `tournaments` and `player_tournaments` from Wikidata squad membership. Returns `{ tournaments: number, players: number, unmatched: number }`.
-- The SPARQL for a tournament's squad:
+- The SPARQL for a tournament's squad. **Both the occupation filter and the P54 date qualifiers are load-bearing** — without them the query returns every player who *ever* represented a participating nation (6,494 for the 2022 World Cup, including 1986 Argentina) rather than the tournament's players.
 
 ```sparql
 SELECT DISTINCT ?player ?playerLabel WHERE {
-  { ?player wdt:P1344 wd:Q284163 . }
+  ?player wdt:P31 wd:Q5; wdt:P106 wd:Q937857 .
+  {
+    ?player wdt:P1344 wd:Q284163 .
+  }
   UNION
-  { ?player p:P54 ?st . ?st ps:P54 ?team . ?team wdt:P1344 wd:Q284163 . }
+  {
+    ?player p:P54 ?st . ?st ps:P54 ?team .
+    ?team wdt:P1344 wd:Q284163 .
+    ?st pq:P580 ?start .
+    FILTER(YEAR(?start) >= 2021 && YEAR(?start) <= 2022)
+  }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
 }
 ```
+
+Measured 2026-10-21 for the 2022 World Cup: 131 direct participants + 105 qualified squad members = **231 players**. The size guard must reject the over-broad form (6,494) and accept the real one (231): a tournament squad pool cannot exceed ~800 players, and a result below ~50 means the query shape is wrong.
 
 - [ ] **Step 1: Write the failing test**
 

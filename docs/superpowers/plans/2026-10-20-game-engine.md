@@ -789,7 +789,10 @@ export function metricsFor(player, window) {
       value = player.windows[window.id].goals;
     } else if (window?.id && m.id === 'club_appearances' && player.windows?.[window.id]?.appearances !== undefined) {
       value = player.windows[window.id].appearances;
-    } else if (player.stats?.[m.id] !== undefined) {
+    } else if (!window && player.stats?.[m.id] !== undefined) {
+      // A career total is only a valid answer when no window is in play. With
+      // a window, the window IS the scope of the claim - a career figure
+      // dressed as a windowed one is the "199 goals since 2012" mistake again.
       value = player.stats[m.id];
     }
     if (value === undefined || value === null) continue;
@@ -822,7 +825,7 @@ git commit -m "feat(engine): metric registry - windowed values always state thei
 
 **Interfaces:**
 - Consumes: `js/engine/stats.js` (`formatMetric`, `metricDescriptor`)
-- Produces: `buildHints(subject, window, registry, { limit = 4 })` → `Hint[]` where `Hint = { id, label, value, iconKey, metric, window }`.
+- Produces: `buildHints(subject, window, registry, { limit })` → `Hint[]` — `limit` is an OPTIONAL caller cap with no default. Ranking happens before slicing, and round assembly does the ×4 selection. where `Hint = { id, label, value, iconKey, metric, window }`.
 - Produces: `hintOrder(hints)` → the hints sorted hardest-first: window-level facts before career surface facts. A hint is "surface" when its metric family is `career` **and** the metric is one of `position`, `nationality`, `age`.
 
 - [ ] **Step 1: Write the failing test**
@@ -882,11 +885,14 @@ const ICONS = {
   value: 'value', age: 'age', league: 'league', team: 'team', name: 'name',
 };
 
-export function buildHints(subject, window, registry, { limit = 8 } = {}) {
+export function buildHints(subject, window, registry, { limit } = {}) {
   const hints = [];
 
-  if (subject.nationality) {
-    hints.push({ id: 'nationality', label: 'Nationality', value: subject.nationality, iconKey: ICONS.nat, family: 'career', surface: true });
+  // The engine's player contract is citizenship[] - 0 of 82 fixture players
+  // carry a `nationality` field - so the hint must read whichever is present.
+  const nationality = subject.nationality ?? subject.citizenship?.[0];
+  if (nationality) {
+    hints.push({ id: 'nationality', label: 'Nationality', value: nationality, iconKey: ICONS.nat, family: 'career', surface: true });
   }
   if (subject.position) {
     const foot = subject.foot ? ` (${subject.foot.toLowerCase()}-footed)` : '';
@@ -920,7 +926,10 @@ export function buildHints(subject, window, registry, { limit = 8 } = {}) {
     });
   }
 
-  return hints.slice(0, limit);
+  // Rank BEFORE slicing. Slicing first drops the window and roster facts -
+  // the opposite of the stated "window facts before career surface facts"
+  // intent - because the metric hints come last in build order.
+  return hintOrder(hints).slice(0, limit);
 }
 
 const RANK = { window: 0, roster: 1, path: 2, surface: 3 };
@@ -964,7 +973,7 @@ git commit -m "feat(engine): hint catalogue - window facts before career surface
 - Consumes: nothing
 - Produces: `RECIPES` — a frozen array of question recipes. Each is `{ id, template, metric, windowKinds, speak, answerValue }`.
   - `speak({ subject, window, value, pool, registry })` → `{ prompt, answer, unit, context }`.
-  - `answerValue(subject, window, metric)` → the number or string the question asks for.
+  - The value a recipe asks for is computed by the composer through `metricValue` in `js/engine/questions.js`; recipes do not compute it themselves.
 - Produces: `recipesFor({ template, window, pool })` → the recipes whose metric and window kind are available for the given pool.
 
 **Recipes shipped:**
@@ -1216,9 +1225,9 @@ git commit -m "feat(engine): scoring - stage multiplier x time factor"
 
 **Interfaces:**
 - Consumes: `js/engine/rng.js` (`shuffle`)
-- Produces: `numericDistractors({ value, pool, subject, metric, rng, count = 3 })` → `number[]` — real values from comparable players, never equal to the truth, all distinct.
+- Produces: `numericDistractors({ value, pool, subject, metric, window, rng, count = 3 })` → `number[]` — real values from comparable players **measured in the same window as the truth**, never equal to the truth, all distinct.
 - Produces: `nameDistractors({ pool, subject, scope, rng, count = 3 })` → `Player[]` — players in the pool who are not the subject.
-- Produces: `buildOptions({ answer, distractors, rng })` → `Array<{ id, label, correct }>` — four options, shuffled, exactly one correct.
+- Produces: `buildOptions({ answer, distractors, rng })` → `Array<{ id, label, correct }>` — always exactly `OPTION_COUNT` (4) options, shuffled, exactly one correct.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1279,27 +1288,44 @@ Create `js/engine/distractors.js`:
 ```js
 import { shuffle } from './rng.js';
 
-export function numericDistractors({ value, pool, subject, metric, rng, count = 3 }) {
+// A distractor is only useful if it is the same KIND of number as the truth.
+// Reading the truth per-window (e.g. 61 goals in 2014-15) while the distractors
+// summed every window in a player's career (300+) would be meaningless.
+function metricValueFor(p, metric, window) {
+  switch (metric) {
+    case 'international_caps': return p.internationalCaps;
+    case 'international_goals': return p.internationalGoals;
+    case 'highest_market_value_eur': return p.highestMarketValueEur;
+    case 'scarcity_peers': return p.stats?.scarcity_peers;
+    case 'tournament_goals':
+    case 'club_goals': {
+      const wid = window?.id;
+      if (!wid) return undefined;
+      return p.windows?.[wid]?.goals;
+    }
+    default: return undefined;
+  }
+}
+
+export function numericDistractors({ value, pool, subject, metric, window, rng, count = 3 }) {
   const values = new Set();
   for (const p of pool ?? []) {
     if (subject && p.id === subject.id) continue;
-    let v;
-    if (metric === 'international_caps') v = p.internationalCaps;
-    else if (metric === 'tournament_goals') v = Object.values(p.windows ?? {}).reduce((s, w) => s + (w.goals ?? 0), 0);
-    else if (metric === 'club_goals') v = Object.values(p.windows ?? {}).reduce((s, w) => s + (w.goals ?? 0), 0);
-    else v = p.internationalCaps;
+    const v = metricValueFor(p, metric, window);
     if (v === undefined || v === null || v === 0) continue;
     if (v === value) continue;
     values.add(v);
     if (values.size >= count * 4) break;
   }
-  const pool2 = shuffle(rng, [...values]).slice(0, count);
-  while (pool2.length < count) {
-    const bump = value + (pool2.length + 1) * 2;
-    if (!pool2.includes(bump) && bump !== value) pool2.push(bump);
-    else break;
+  const picked = shuffle(rng, [...values]).slice(0, count);
+  let bump = 1;
+  while (picked.length < count) {
+    const candidate = value + bump * 2;
+    if (candidate !== value && !picked.includes(candidate)) picked.push(candidate);
+    bump++;
+    if (bump > 100) break;
   }
-  return pool2;
+  return picked;
 }
 
 export function nameDistractors({ pool, subject, scope, rng, count = 3 }) {
@@ -1307,16 +1333,30 @@ export function nameDistractors({ pool, subject, scope, rng, count = 3 }) {
   return shuffle(rng, candidates).slice(0, count);
 }
 
+export const OPTION_COUNT = 4;
+
 export function buildOptions({ answer, distractors, rng }) {
+  const wrong = (distractors ?? [])
+    .map(d => (typeof d === 'object' && d !== null ? d.name : String(d)))
+    .filter(label => label !== String(answer));
+  const uniqueWrong = [...new Set(wrong)].slice(0, OPTION_COUNT - 1);
+
+  // A round always has four options. If the pool could not supply enough
+  // distinct wrong answers, pad with clearly-wrong derived values rather
+  // than showing the player a three-option round.
+  let bump = 1;
+  while (uniqueWrong.length < OPTION_COUNT - 1) {
+    const candidate = `${String(answer)} (${bump})`;
+    if (!uniqueWrong.includes(candidate)) uniqueWrong.push(candidate);
+    bump++;
+    if (bump > 50) break;
+  }
+
   const all = [
     { id: 'opt-0', label: String(answer), correct: true },
-    ...(distractors ?? []).map((d, i) => ({
-      id: `opt-${i + 1}`,
-      label: typeof d === 'object' && d !== null ? d.name : String(d),
-      correct: false,
-    })),
+    ...uniqueWrong.map((label, i) => ({ id: `opt-${i + 1}`, label, correct: false })),
   ];
-  return shuffle(rng, all);
+  return shuffle(rng, all).slice(0, OPTION_COUNT);
 }
 ```
 
@@ -1430,9 +1470,11 @@ import { numericDistractors, nameDistractors, buildOptions } from './distractors
 
 export function informativeness(value, values) {
   if (value === undefined || value === null) return 0;
-  const distinct = new Set(values.filter(v => v !== undefined && v !== null));
-  if (distinct.size <= 1) return 0;
-  return 1 - (1 / distinct.size);
+  const present = values.filter(v => v !== undefined && v !== null);
+  if (present.length === 0) return 0;
+  // The share of the pool whose value DIFFERS from this one. A value
+  // everybody shares scores 0; a value only this player has scores ~1.
+  return present.filter(v => v !== value).length / present.length;
 }
 
 function metricValue(subject, metric, window) {
@@ -1445,8 +1487,11 @@ function metricValue(subject, metric, window) {
     return window?.id ? (subject.windows?.[window.id]?.goals) : undefined;
   }
   if (metric === 'club_goals') {
-    if (window?.id && subject.windows?.[window.id]?.goals !== undefined) return subject.windows[window.id].goals;
-    return subject.stats?.club_goals;
+    // A windowed metric never falls back to a career total: "61 goals in
+    // 2014-15" and "300 career goals" are different facts, and mixing them
+    // would put an incomparable number in the options.
+    if (window?.id) return subject.windows?.[window.id]?.goals;
+    return undefined;
   }
   if (metric === 'goals_after_age_30') return subject.stats?.goals_after_age_30;
   return undefined;
@@ -1476,18 +1521,34 @@ export function candidateSubjects({ scope, pool, registry, window, metric }) {
 
 export function composeRound({ subject, metric, window, scope, registry, pool, rng, difficulty = 'medium', roundMs = 20000, stages = 4 }) {
   const descriptor = metricDescriptor(metric);
-  const recipe = RECIPES.find(r => r.metric === metric && r.windowKinds.includes(window?.kind ?? 'career'))
-    ?? RECIPES.find(r => r.metric === 'identity');
+  const recipe = RECIPES.find(r => r.metric === metric && r.windowKinds.includes(window?.kind ?? 'career'));
+  if (!recipe) {
+    // No recipe for this metric in this window kind is a programming error,
+    // not a licence to ask a different question. Silently falling back to
+    // "Who is this?" would report the wrong metric and unit.
+    throw new Error(`no recipe for metric "${metric}" in window kind "${window?.kind ?? 'career'}"`);
+  }
 
   const value = metricValue(subject, metric, window);
+  if (value === undefined || value === null) {
+    throw new Error(`no value for metric "${metric}" for player "${subject.name}"`);
+  }
   const spoken = recipe.speak({ subject, window, value, pool, registry });
 
-  const hints = hintOrder(buildHints(subject, window, registry));
+  // The clue ladder must never contain the answer. Stage 1 is the x5 scoring
+  // stage, so leaking the answer there makes every stat round a free 7500
+  // points. Hints are matched by the VALUE they carry, not by metric id,
+  // because two metric ids can share one underlying number.
+  const answerValues = new Set(
+    metricsFor(subject, window).filter(m => m.value === value).map(m => String(m.value)),
+  );
+  const hints = hintOrder(buildHints(subject, window, registry))
+    .filter(h => !answerValues.has(String(h.value).replace(/\s*\(since \d+\)$/, '')));
   const clues = hints.slice(0, Math.max(1, stages));
 
   const isNumeric = recipe.template === 'stat_value';
   const distractors = isNumeric
-    ? numericDistractors({ value, pool, subject, metric, rng, count: 3 }).map(String)
+    ? numericDistractors({ value, pool, subject, metric, window, rng, count: 3 }).map(String)
     : nameDistractors({ pool, subject, scope, rng, count: 3 });
 
   const options = buildOptions({ answer: spoken.answer, distractors, rng });
@@ -1501,14 +1562,14 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
 
   return {
     template: recipe.template,
-    metric,
+    metric: recipe.metric,
     family: recipe.family ?? descriptor?.family ?? 'career',
     prompt: spoken.prompt,
     context: spoken.context ?? null,
     subjectId: subject.id,
     subjectName: subject.name,
     answer: spoken.answer,
-    unit: spoken.unit ?? descriptor?.unit ?? null,
+    unit: spoken.unit ?? (recipe.metric === 'identity' ? null : descriptor?.unit ?? null),
     options,
     clues: clues.map(c => ({ id: c.id, label: c.label, value: c.value, iconKey: c.iconKey })),
     revealSchedule,

@@ -89,7 +89,7 @@ Each arrow is a separate, testable component. The user touches only the first an
 | Source | Provides | Limits | Licence |
 |---|---|---|---|
 | `dcaribou/transfermarkt-datasets` | **Spine.** 50,149 players, 175,165 transfers, 1,894,350 appearances, **1,274,468 game events (247,803 goals, 381,752 cards, 631,339 substitutions)**, 650k+ market valuations, 88,958 games, 790 clubs, 65 competitions | Snapshot frozen at 2026-07-06; no 2026/27 squads | CC0-1.0 |
-| Wikidata (`wbsearchentities`, `wbgetentities`, `wbgetclaims`, SPARQL) | Player QIDs, DOB/nationality/position corroboration, club stints for pre-1993 players (263k footballers), **tournament rosters** (WC2022 ≈ 440 players via `P54`+`P1344`) | Quality uneven; dates often year-precision; WDQS rate-limits to ~1 req/min during outages — batch aggressively | CC0-1.0 |
+| Wikidata (`wbsearchentities`, `wbgetentities`, `wbgetclaims`, SPARQL) | Player QIDs, DOB/nationality/position corroboration, club stints for pre-1993 players (263k footballers), **tournament rosters** (WC2022 ≈ 231 players via `P1344` + date-qualified `P54`) | Quality uneven; dates often year-precision; WDQS rate-limits to ~1 req/min during outages — batch aggressively | CC0-1.0 |
 | Wikimedia Commons | Player photos + per-file licence/author | Coverage ~35% of our target pool; living-player photos often absent | CC0 / CC BY-SA 4.0 / PD — attribution required for CC BY-SA |
 | openfootball (GitHub repos) | Club → league mapping for 1993–2012 | Static files, per-country | Free open repos |
 
@@ -579,7 +579,7 @@ Receiver sees a read-only card: scope name, pool size, sample player names, and 
 | El Clásico Derby Night | `{leagues:["ES1"], seasonStart:2008, seasonEnd:2018, teams:[<id:FC Barcelona>, <id:Real Madrid>]}` | computed at ingest |
 | South Americans in Europe | `{nationalities:["Argentina","Brazil","Uruguay","Colombia"], leagues:["GB1","ES1","IT1","FR1","L1"], seasonStart:2015, seasonEnd:2025}` | computed at ingest |
 | New-Money Leagues | `{leagues:["SA1","MLS1"], seasonStart:2023, seasonEnd:2025}` | computed at ingest |
-| **World Cup 2022** | `{tournaments:["wc-2022"]}` | ~440 (Wikidata) |
+| **World Cup 2022** | `{tournaments:["wc-2022"]}` | ~231 (Wikidata) |
 | **World Cup 2026** | `{tournaments:["wc-2026"]}` | ~1,247 (TM dump) |
 | **Late Bloomers** | `{stats:[{metric:"goals_after_age_30",op:">=",value:50}]}` | ~111 |
 | **Ever-Capped** | `{stats:[{metric:"international_caps",op:">=",value:50}]}` | ~1,023 |
@@ -601,7 +601,7 @@ Tournament membership is a **separate source**, because the Transfermarkt dump's
 
 | Tournament | Squad source | Players |
 |---|---|---|
-| **World Cup 2022** | Wikidata `P54` (member of sports team) + `P1344` (participant in) | ~440 |
+| **World Cup 2022** | Wikidata `P1344` (participant in) ∪ date-qualified `P54` (member of sports team), ∩ occupation footballer | ~231 |
 | World Cup 2026 | TM `game_lineups` (group stage only — the dump froze 2026-07-06) | ~1,247 |
 | Copa América 2024 | TM `game_lineups` | ~412 |
 | AFC Asian Cup 2024 | TM `game_lineups` | ~611 |
@@ -613,14 +613,19 @@ Ingest for a Wikidata tournament:
 
 ```sparql
 SELECT DISTINCT ?player WHERE {
+  ?player wdt:P31 wd:Q5; wdt:P106 wd:Q937857 .         # occupation: association football player
   { ?player wdt:P1344 wd:Q284163 . }                    # participant directly
   UNION
   { ?player p:P54 ?st . ?st ps:P54 ?team .            # or member of a participating team
-    ?team wdt:P1344 wd:Q284163 . }
+    ?team wdt:P1344 wd:Q284163 .
+    ?st pq:P580 ?start .                               # ...during the tournament window
+    FILTER(YEAR(?start) >= 2021 && YEAR(?start) <= 2022) }
 }
 ```
 
 Each resolved player is matched to a `player_pool` row by normalised name + DOB; unmatched names go to `overrides.json` for adjudication. A tournament that resolves to fewer than 20 pool players is not offered as a preset.
+
+**What the pool actually is:** footballers Wikidata records as participants in, or members of a participating nation's squad during, the tournament. It is **not** the exact 26-man squad list — that is modelled only in Wikipedia's navbox templates, not in Wikidata. The scope card states the pool size so nothing is overstated. The ~231 figure was measured on 2026-10-21; an earlier estimate of ~440 came from an unfiltered query and was wrong.
 
 ### 5.7 The vibe crafter — the front door
 

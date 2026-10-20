@@ -44,6 +44,14 @@ def season_start(v):
     if n >= 1000: return n
     return 2000 + n if n <= 29 else 1900 + n
 
+POSITION_MAP = {
+    "Goalkeeper": "Goalkeeper", "Torwart": "Goalkeeper",
+    "Defender": "Defender", "Abwehr": "Defender",
+    "Midfield": "Midfielder", "Mittelfeld": "Midfielder",
+    "Attack": "Forward", "Sturm": "Forward", "Forward": "Forward",
+}
+
+
 def norm(s):
     s = unicodedata.normalize('NFKD', s or '').encode('ascii', 'ignore').decode().lower()
     return re.sub(r'\s+', ' ', re.sub(r'[^a-z ]', '', s)).strip()
@@ -230,7 +238,11 @@ for p in selected:
         "name": p["name"],
         "dateOfBirth": p["date_of_birth"].split(" ")[0],
         "citizenship": [p["country_of_citizenship"]] if p.get("country_of_citizenship") else [],
-        "position": p.get("position") or "Unknown",
+        # The pipeline normalises TM's coarse positions onto the game's four
+        # (Goalkeeper / Defender / Midfielder / Forward). The fixture is the
+        # engine's input contract and must use the SAME vocabulary, or a
+        # scope clause like positions:['Forward'] matches nobody.
+        "position": POSITION_MAP.get((p.get("position") or "").strip(), "Unknown"),
         "subPosition": p.get("sub_position") or None,
         "foot": p.get("foot") or None,
         "heightCm": to_int(p.get("height_in_cm")) or None,
