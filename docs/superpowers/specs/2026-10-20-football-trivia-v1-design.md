@@ -34,6 +34,9 @@ The differentiator is the Scope. Instead of picking from a fixed quiz catalogue,
 | D12 | **Scopes can filter on statistics and tournament rosters, not just categorical metadata** | "La Liga 2010s" is only half the personalization. "World Cup 2022", "50+ goals after turning 30", "100+ caps" are scopes too, and they are the ones that feel bespoke. |
 | D13 | **Every stat metric declares its window, and the clue states it** | Club goals and appearances are only real from 2012 in any free source. "50+ goals aged 30+ (since 2012)" is true; "50+ goals aged 30+" is a lie. This is the rule that stops the project re-creating the fabricated-stats bug. |
 | D14 | **Three question templates, one round structure** | Variety comes from the template, not from rewriting the engine. T1 identify (names), T2 stat value (numbers), T3 membership (who was in the pool). |
+| D15 | **A Scope defines a pool *and* a window context** | A Scope is not a filter over a table — it is a pool plus the lens the questions are asked through. "La Liga 2010s" is a pool of players *and* the 2010–19 season window. "World Cup 2022" is a pool *and* a tournament window. The scope's clauses decide **who**; the window decides **from when**. |
+| D16 | **Questions are composed, never raw rows** | Every question is generated from a (metric, window, subject) triple by a phrasing registry. The player is a subject, not a record dump: "How many goals did he score for Real Madrid in 2014-15?", never "goals_rma_2014_15: 61". |
+| D17 | **Windowed stats are exact where the source is exact** | `game_events` yields true all-competition club-season totals — derived Ronaldo 61, Messi 60, Suárez 59, Lewandowski 55, all matching the real records. Windowed does not have to mean approximate; it means *scoped*. |
 
 ---
 
@@ -65,7 +68,7 @@ The differentiator is the Scope. Instead of picking from a fixed quiz catalogue,
 
 | Source | Provides | Limits | Licence |
 |---|---|---|---|
-| `dcaribou/transfermarkt-datasets` | **Spine.** 50,149 players, 175,165 transfers, 1,894,350 appearances, 650k+ market valuations, 88,958 games, 790 clubs, 65 competitions | Snapshot frozen at 2026-07-06; no 2026/27 squads | CC0-1.0 |
+| `dcaribou/transfermarkt-datasets` | **Spine.** 50,149 players, 175,165 transfers, 1,894,350 appearances, **1,274,468 game events (247,803 goals, 381,752 cards, 631,339 substitutions)**, 650k+ market valuations, 88,958 games, 790 clubs, 65 competitions | Snapshot frozen at 2026-07-06; no 2026/27 squads | CC0-1.0 |
 | Wikidata (`wbsearchentities`, `wbgetentities`, `wbgetclaims`, SPARQL) | Player QIDs, DOB/nationality/position corroboration, club stints for pre-1993 players (263k footballers), **tournament rosters** (WC2022 ≈ 440 players via `P54`+`P1344`) | Quality uneven; dates often year-precision; WDQS rate-limits to ~1 req/min during outages — batch aggressively | CC0-1.0 |
 | Wikimedia Commons | Player photos + per-file licence/author | Coverage ~35% of our target pool; living-player photos often absent | CC0 / CC BY-SA 4.0 / PD — attribution required for CC BY-SA |
 | openfootball (GitHub repos) | Club → league mapping for 1993–2012 | Static files, per-country | Free open repos |
@@ -313,6 +316,75 @@ A Scope can filter on numbers (D12). That only stays honest if every number know
 
 **Why this matters more than it looks:** the original project shipped a clue reading `"Domestic Title Winner"` for 268 of 346 players who had won no domestic title. Unlabelled numbers are how that happened. The windowing rule is the structural fix, not a copy edit.
 
+### 4.8 Windows — the lens questions are asked through
+
+A **window** is a named, bounded slice of a player's career. It is the difference between "he scored 61 goals" and "he scored **61 goals for Real Madrid in 2014-15**".
+
+```sql
+create table windows (
+  id text primary key,          -- 'wc-2022', 'rma-2014-15', 'la-liga-2010-2019', 'career'
+  kind text not null check (kind in
+    ('career','season','season_range','tournament','club_stint','age_band')),
+  label text not null,          -- '2022 World Cup', 'Real Madrid 2014-15'
+  detail text,                  -- '61 goals', 'the 2021-22 season'
+  season_start smallint, season_end smallint,
+  tournament_id text references tournaments(id),
+  club_id bigint references clubs(id),
+  team_name text,
+  age_from smallint, age_to smallint
+);
+
+create table player_window_stats (
+  player_id bigint references players(id) on delete cascade,
+  window_id text not null references windows(id),
+  metric text not null,         -- 'goals', 'appearances', 'goals_aged_30', 'clean_sheets'
+  value numeric not null,
+  exact boolean not null,
+  source_id text references sources(id),
+  primary key (player_id, window_id, metric)
+);
+```
+
+`player_derived_stats` (§4.7) is the career-window case of this table; the two are unified so a stat is always *some* window, and the window is always named.
+
+**Window kinds and what backs each:**
+
+| Kind | Example window | Backed by | Exactness |
+|---|---|---|---|
+| `career` | his whole career | `players` + `player_valuations` | exact |
+| `season` | Real Madrid 2014-15 | `game_events` × `games` | **exact** (all competitions) |
+| `season_range` | La Liga 2010-19 | `game_events` + `appearances` | exact within the window |
+| `tournament` | 2022 World Cup | `game_events` × `games` | exact |
+| `club_stint` | Sevilla 2014-16 | transfers + events | exact within the stint |
+| `age_band` | goals aged 30+ | events + DOB | exact within the window |
+
+**Verified against the real record** (derived from `game_events`, all competitions):
+
+| Player | Window | Derived | Actual |
+|---|---|---|---|
+| Cristiano Ronaldo | Real Madrid 2014-15 | 61 | 61 |
+| Lionel Messi | Barcelona 2012-13 | 60 | 60 |
+| Luis Suárez | Barcelona 2015-16 | 59 | 59 |
+| Robert Lewandowski | Bayern 2019-20 | 55 | 55 |
+| Lionel Messi | 2022 World Cup | 7 | 7 |
+| Olivier Giroud | 2022 World Cup | 4 | 4 |
+
+**Windowed does not have to mean approximate.** It means *scoped* — and a scoped number is still true.
+
+**Where the window's start comes from.** A window is never invented: it is derived from the scope's clauses, from a club stint, from a tournament roster, or from an age band. A window with no source is not created. `game_events` covers goal events from 2006 (World Cups) and club seasons from 2012/13; a window outside those bounds is not offered.
+
+**The scope-to-window mapping** — how clauses turn into a lens:
+
+| Scope clause | Window it implies |
+|---|---|
+| `tournaments: ["wc-2022"]` | `tournament:wc-2022` — pool = that squad |
+| `leagues: ["ES1"], seasonStart: 2010, seasonEnd: 2019` | `season_range:ES1:2010-2019` |
+| `teams: [<id>]` | `club_stint:<id>` (or the union over the player's stints at that club) |
+| `stats: [{goals_after_age_30 >= 50}]` | `age_band:30+` |
+| nothing | `career` |
+
+A scope may also carry an explicit `window` override, which is what the composer produces when it wants to ask a question about a specific season inside a broader pool.
+
 ---
 
 ## 5. Scope engine
@@ -372,9 +444,21 @@ Stat and tournament clauses:
 ```json
 {
   "v": 2, "id": "uuid", "name": "World Cup 2022",
-  "clauses": [ { "tournaments": ["wc-2022"] } ]
+  "clauses": [ { "tournaments": ["wc-2022"] } ],
+  "window": "wc-2022",
+  "question": { "template": "identify", "difficulty": "medium" }
 }
 ```
+
+A scope is three things, and the third is what makes it a *game* rather than a filter:
+
+| Field | Decides |
+|---|---|
+| `clauses[]` | **who** is eligible — the pool |
+| `window` | **the lens** questions are asked through (§4.8) |
+| `question` | **what kind** of question, and how deep the hints go |
+
+`window` is normally *derived* from the clauses (§4.8) and only stored when it is overridden. `question.template` defaults per scope type (§6.5) but is overridable, so a group can force "only ever ask me numbers" if they want.
 
 **Scope clauses reference stable ids, never display names.** `leagues` holds competition ids (`ES1`, `GB1`, `IT1`, `FR1`, `L1`, `NL1`, `PO1`, `MLS1`, `SA1`); `teams` holds club ids; `tournaments` holds tournament ids. The client renders names from `leagues.display_name`, `clubs.name` and `tournaments.display_name`. This matters because the source club names are *not* the names people type — the dataset has `Arsenal FC`, `Liverpool FC`, `FC Barcelona`, `Juventus FC`, and the current app's team picker searches for `Arsenal`, so it would never match a single row. `club_aliases` and `league_aliases` map what people type to the canonical ids.
 
@@ -523,14 +607,16 @@ Pure, DOM-free, unit-tested modules under `js/engine/`. The server must be able 
 
 | t | Event |
 |---|---|
-| 0–2s | Setup. Scope name, round number. Answer inputs disabled. |
+| 0–2s | Setup. **Window banner** (e.g. "2022 WORLD CUP"), scope name, round number. Answer inputs disabled. |
 | 2–7s | **Clue 1** revealed. Multiplier ×5. |
 | 7–12s | **Clue 2** revealed. Multiplier ×3. |
 | 12–17s | **Clue 3** revealed. Multiplier ×2. |
 | 17–20s | **Clue 4** revealed. Multiplier ×1. |
 | 20s | **Snap.** All inputs lock. Server reveals the answer and resolves the round. |
 
-Clue set is chosen per target from the capabilities the player actually has (§4.5), ordered **hardest first** — nationality and position last, because they narrow the pool fastest.
+The window banner is always visible for the whole round. It is the answer to "what is this round actually about?" and it is what makes a windowed scope feel different from a flat one.
+
+Clue set is chosen per target from the capabilities the player actually has (§4.5) and the window in play (§6.7), ordered **hardest first** — the window-specific facts outrank the career surface facts.
 
 ### 6.2 Answer input
 
@@ -566,6 +652,7 @@ Every round has the same shape, whatever the template:
 {
   template: 'identify' | 'stat_value' | 'membership',
   prompt:  string,          // what is being asked
+  context: string | null,   // the window label, shown as a banner
   subject: player | null,   // named in the prompt, if any
   answer:  string,          // the correct answer value
   options: string[],        // 4 options, one correct
@@ -617,6 +704,102 @@ Difficulty applies to **clue depth**, not just player obscurity:
 | Hard | all statistical / career-path clues, surface facts withheld | three supporting hints | three elimination hints |
 
 **Why "inclusivity" needs all three:** the casual fan gets T1 with a shallow ladder and a famous player; the football-stat obsessive gets T2 with a precise number and a deep hint chain; the nostalgic fan gets a tournament scope with T3. One template serves one of those three people and leaves the other two bored — which is the same reason a room with one format dies after round 4.
+
+### 6.6 The question generator
+
+Questions are **composed**, not selected from a table. A generator produces the question text, the answer, and the distractors from a (metric, window, subject) triple.
+
+```js
+// recipes/registry.js
+export const RECIPES = [
+  {
+    id: 'goals_in_season',
+    template: 'stat_value',
+    metric: 'goals',
+    windowKinds: ['season'],
+    // subject is chosen by the generator; the recipe only knows how to speak.
+    speak: ({ subject, window, value }) => ({
+      prompt: `How many goals did ${subject.name} score for ${window.clubName} in ${window.seasonLabel}?`,
+      answer: value,
+      unit: 'goals',
+    }),
+  },
+  {
+    id: 'goals_in_tournament',
+    template: 'stat_value',
+    metric: 'goals',
+    windowKinds: ['tournament'],
+    speak: ({ subject, window, value }) => ({
+      prompt: `How many goals did ${subject.name} score at the ${window.label}?`,
+      answer: value,
+      unit: 'goals',
+    }),
+  },
+  {
+    id: 'identify_in_window',
+    template: 'identify',
+    metric: 'identity',
+    windowKinds: ['career', 'season', 'season_range', 'tournament', 'club_stint', 'age_band'],
+    speak: ({ subject, window }) => ({
+      prompt: `Who is this?`,
+      context: window.label,          // rendered as a banner above the clue ladder
+      answer: subject.name,
+    }),
+  },
+  // ... one entry per metric × window kind combination that ships
+];
+```
+
+**Selection.** The generator picks a recipe whose metric and window kind are *available* for the scope's window and whose answer is discriminable:
+
+1. Collect every `(recipe, subject)` pair where the subject has a non-null value for the recipe's metric in a window of a compatible kind.
+2. Reject pairs whose value is degenerate — `0` (nothing to distinguish) or a value the window's population shares with every other candidate.
+3. Rank by **informativeness**: how sharply the true value separates the subject from the other candidates in the pool.
+4. Pick one, then build distractors appropriate to the template.
+
+This is why the questions are **dynamic**: the same scope produces a different question each game, chosen from whatever the data can actually distinguish.
+
+**Distractors per template.** Numeric questions draw from the metric's real distribution among comparable players (same window, same position), rounded to plausible increments, never equal to the truth. Name questions draw from the pool and enforce the non-determinability rule from §6.4.
+
+**Phrasing is content, not code.** Every recipe carries its own sentence, so a human can rewrite "How many goals did he score for Real Madrid in 2014-15?" into "He hit 61 for Real Madrid that season — how many?" without touching logic. The registry is the one place where the game's voice lives.
+
+### 6.7 Hint catalogue
+
+Hints are the ladder's payload. The catalogue below is what "wide and inclusive" means concretely — every one is backed by a real source row, and each declares whether it is exact or windowed.
+
+**Career-level**
+
+| # | Hint | Source | Exact |
+|---|---|---|---|
+| 1 | Nationality | `players.citizenship` | ✓ |
+| 2 | Position + preferred foot | `players.position`, `players.foot` | ✓ |
+| 3 | Age / birth decade | `players.date_of_birth` | ✓ |
+| 4 | Height | `players.height_cm` | ✓ |
+| 5 | International caps | `players.international_caps` | ✓ |
+| 6 | International goals | `players.international_goals` | ✓ |
+| 7 | Peak market value + the year it peaked | `market_value_history` | ✓ |
+| 8 | Club path with years | `club_stints` | ✓ |
+| 9 | Number of clubs / leagues | `club_stints` | ✓ |
+| 10 | Shirt number at a given club-season | `game_lineups.number` | windowed |
+
+**Window-level** — the new layer
+
+| # | Hint | Example | Source | Exact |
+|---|---|---|---|---|
+| 11 | Tournament participation | "played in the 2022 World Cup" | `player_tournaments` | ✓ |
+| 12 | Tournament output | "scored 3 goals at the 2022 World Cup" | `player_window_stats` | ✓ |
+| 13 | Club-season output | "61 goals for Real Madrid in 2014-15" | `player_window_stats` | ✓ |
+| 14 | Club-season appearances | "made 38 league appearances in 2018-19" | `appearances` | windowed |
+| 15 | Age-band output | "50+ goals aged 30+ (since 2012)" | `player_window_stats` | windowed |
+| 16 | Value at a point in time | "valued at €80M in 2018" | `market_value_history` | ✓ |
+| 17 | Scarcity comparison | "one of only 7 players with 100+ Premier League appearances" | derived over the pool | ✓ |
+| 18 | Teammate link | "played alongside Messi at Barcelona" | club-season overlap | ✓ |
+
+**Explicitly unavailable:** trophies, Ballon d'Or, league awards, transfer fees, and captaincy. None of these exist in any free source, and the old project's "Domestic Title Winner" clue was the fabrication that proved the point. A hint type ships only when it has a source.
+
+**Hint ordering.** The ladder serves the hardest, most specific fact first — the one that narrows the pool fastest. For a tournament window, "scored 3 goals at the 2022 World Cup" (12) outranks "played in the 2022 World Cup" (11) outranks "a forward" (2). Career-level surface facts (nationality, position) are held back for the low-multiplier stages, so the ×5 stage is worth waiting for.
+
+**Difficulty = hint depth**, not just player obscurity. Easy ladders surface surface facts early; hard ladders surface window-level facts and withhold the obvious ones.
 
 ---
 
@@ -842,10 +1025,15 @@ Add T2 `stat_value` and T3 `membership` to the template registry. Each is a new 
 | Scope matcher | Pure-function unit tests + a shared fixture run against both the JS and SQL implementations so they cannot drift |
 | Scope stat predicates | Property test: a player with a **missing** metric never matches a numeric predicate; a player with a genuine `0` matches `== 0` and fails `>= 1`. The distinction must hold. |
 | Metric windowing | Property test: every `player_derived_stats` row has a window unless `exact`; every clue text for a windowed metric contains the window string. **Fails if a windowed metric is ever surfaced unlabelled.** |
+| Window derivation | Property test: every window in `windows` traces to a source row — no window exists that no stint, tournament, season range or age band produced. |
+| Window accuracy | Regression fixture asserting the verified totals: Ronaldo 61 (Real Madrid 2014-15), Messi 60 (Barcelona 2012-13), Suárez 59 (2015-16), Lewandowski 55 (Bayern 2019-20), Messi 7 (2022 WC). |
 | Threshold guard | Every preset threshold and every stat filter resolves to ≥ 20 pool players, asserted in `validate.js` |
 | Clue generation | Property tests: every clue value is non-null, comes from a real source row, and no two stages leak the same fact |
+| Question generator | Property test: for every generated round, the answer appears in the options exactly once, the true value is not among the distractors, and the prompt's numbers match the answer. **Every recipe's output is snapshot-tested** so a wording change is a visible diff. |
+| Recipe coverage | Assert every shipped metric has a recipe for every window kind it supports, and that no recipe can be selected without a non-degenerate value. |
+| Hint catalogue | Assert every shipped hint type resolves to a source row; a hint type with no source cannot be enabled. |
 | Distractors | Property test: no distractor matches the full conjunction of revealed clues; the answer is never uniquely determined by the option set |
-| Templates | One test per template asserting the round shape (`prompt`, `answer`, 4 options, 4 clues) and that the answer is present in the options exactly once |
+| Templates | One test per template asserting the round shape (`prompt`, `context`, `answer`, 4 options, 4 clues) and that the answer is present in the options exactly once |
 | Scoring | Table-driven unit tests for stage × time factor, including the boundary at exactly 20s |
 | Room state machine | Exhaustive transition table test — every legal and illegal transition asserted |
 | RLS | Integration test per table per role: anon, non-member, member, host, service_role |

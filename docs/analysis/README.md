@@ -43,3 +43,19 @@ window. The bands that hold are 30+ (285 players), 50+ (111), and
 The Transfermarkt dump has **World Cup 2022 fixtures but no lineups**, and
 no Euro lineups at all, so WC2022 squads (~440 players) come from
 Wikidata `P54` + `P1344` instead.
+
+`measure-window-stats.py` derives per-window stats from `game_events` and
+verifies them against the real record. The derived all-competition
+club-season totals match exactly:
+
+| Player | Window | Derived | Actual |
+|---|---|---|---|
+| Cristiano Ronaldo | Real Madrid 2014-15 | 61 | 61 |
+| Lionel Messi | Barcelona 2012-13 | 60 | 60 |
+| Luis Suárez | Barcelona 2015-16 | 59 | 59 |
+| Robert Lewandowski | Bayern 2019-20 | 55 | 55 |
+| Lionel Messi | 2022 World Cup | 7 | 7 |
+| Olivier Giroud | 2022 World Cup | 4 | 4 |
+
+That is what makes "windowed" mean *scoped* rather than *approximate* —
+and it is the data behind the composed questions in §6.6.
