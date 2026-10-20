@@ -31,20 +31,25 @@ The differentiator is the Scope. Instead of picking from a fixed quiz catalogue,
 | D9 | **Photos from Wikimedia Commons via Wikidata P18** | Only source that is free, legally clean, and unlimited enough (50 entities per HTTP call). |
 | D10 | **Era floor 2010**, surfaced as a coverage warning | Pre-2010 coverage is ~50 players per league — real but too thin. The builder shows it; the scope is refused with a reason, never silently padded. |
 | D11 | **All fabricated stats deleted outright** | Not flagged, not hidden behind a demo flag. Deleted, along with the RNG estimator and the hand-injected players. |
+| D12 | **Scopes can filter on statistics and tournament rosters, not just categorical metadata** | "La Liga 2010s" is only half the personalization. "World Cup 2022", "50+ goals after turning 30", "100+ caps" are scopes too, and they are the ones that feel bespoke. |
+| D13 | **Every stat metric declares its window, and the clue states it** | Club goals and appearances are only real from 2012 in any free source. "50+ goals aged 30+ (since 2012)" is true; "50+ goals aged 30+" is a lie. This is the rule that stops the project re-creating the fabricated-stats bug. |
+| D14 | **Three question templates, one round structure** | Variety comes from the template, not from rewriting the engine. T1 identify (names), T2 stat value (numbers), T3 membership (who was in the pool). |
 
 ---
 
 ## 3. Scope of v1
 
 ### In
-- Scope engine (clauses) + 6–8 presets + fork-a-preset
+- Scope engine (clauses) with **categorical + statistical + tournament predicates** + 8–11 presets + fork-a-preset
 - Realtime room: create, join by code, lobby, 10 synchronized rounds, live leaderboard, final standings
 - Guess the Player with 4 clue stages, MCQ answer, lock-in scoring
-- Real player data with photos
+- **T1 `identify` template** (names)
+- Real player data with photos, real stat metrics with declared windows, real tournament rosters
 - Shareable Scope links; shareable results artifact
 - Retro Collectible theme (default) + Premium Editorial theme (optional)
 
-### Out (v2+)
+### Out (v1.1 / v2+)
+- **T2 `stat_value`** (numeric answers) and **T3 `membership`** — spec'd in §6.5, built after T1 proves out
 - Free-form Scope composer
 - Higher/Lower, Criteria Grid
 - Natural-language scope creation
@@ -61,7 +66,7 @@ The differentiator is the Scope. Instead of picking from a fixed quiz catalogue,
 | Source | Provides | Limits | Licence |
 |---|---|---|---|
 | `dcaribou/transfermarkt-datasets` | **Spine.** 50,149 players, 175,165 transfers, 1,894,350 appearances, 650k+ market valuations, 88,958 games, 790 clubs, 65 competitions | Snapshot frozen at 2026-07-06; no 2026/27 squads | CC0-1.0 |
-| Wikidata (`wbsearchentities`, `wbgetentities`, `wbgetclaims`) | Player QIDs, DOB/nationality/position corroboration, club stints for pre-1993 players (263k footballers) | Quality uneven; dates often year-precision | CC0-1.0 |
+| Wikidata (`wbsearchentities`, `wbgetentities`, `wbgetclaims`, SPARQL) | Player QIDs, DOB/nationality/position corroboration, club stints for pre-1993 players (263k footballers), **tournament rosters** (WC2022 ≈ 440 players via `P54`+`P1344`) | Quality uneven; dates often year-precision; WDQS rate-limits to ~1 req/min during outages — batch aggressively | CC0-1.0 |
 | Wikimedia Commons | Player photos + per-file licence/author | Coverage ~35% of our target pool; living-player photos often absent | CC0 / CC BY-SA 4.0 / PD — attribution required for CC BY-SA |
 | openfootball (GitHub repos) | Club → league mapping for 1993–2012 | Static files, per-country | Free open repos |
 
@@ -181,6 +186,35 @@ create table overrides (            -- human adjudication only, applied LAST
   note text, decided_by text, decided_at timestamptz
 );
 
+-- Statistical predicates a Scope can filter on (see §4.7)
+create table player_derived_stats (
+  player_id bigint references players(id) on delete cascade,
+  metric text not null,             -- 'goals_after_age_30', 'club_goals', 'international_caps', ...
+  value numeric not null,
+  window_start smallint,            -- null = exact career value
+  window_end smallint,
+  exact boolean not null,           -- true = career-true, false = windowed
+  source_id text references sources(id),
+  primary key (player_id, metric)
+);
+create index on player_derived_stats (metric, value);
+
+-- Tournament roster membership (see §5.6)
+create table tournaments (
+  id text primary key,              -- 'wc-2022', 'euro-2024', 'copa-2024', 'wc-2026'
+  name text not null,
+  year smallint not null,
+  display_name text not null
+);
+create table player_tournaments (
+  player_id bigint references players(id) on delete cascade,
+  tournament_id text not null references tournaments(id),
+  team_name text,
+  source_id text references sources(id),
+  primary key (player_id, tournament_id)
+);
+create index on player_tournaments (tournament_id);
+
 create view player_pool as
   select * from players where active and quality->>'status' = 'pass';
 ```
@@ -228,19 +262,56 @@ Round targets are drawn from `scope ∩ player_pool WHERE every required hint is
 scripts/ingest/
   fetch.js       downloads each source to data/raw/{source}/{snapshot}/ and writes
                  manifest.json {url, sha256, bytes, fetched_at}; hash verified on re-runs
-  load.js        raw → staging, one --source flag per run (tm | wikidata | photos)
+  load.js        raw → staging, one --source flag per run
+                 (tm | wikidata | wikidata_tournaments | photos)
   normalize.js   pure: league alias resolution, ISO-3166 citizenship, position enum,
                  season-bound clamping, name normalisation, dedupe, apply overrides.json LAST
+  derive.js      pure: player_seasons from stints, player_derived_stats from
+                 appearances+games, club_path, career span — every metric stamped
+                 with its window and `exact` flag
   validate.js    quality gate + report; --strict exits non-zero on any ERROR
 ```
 
 **Idempotent:** natural keys + `INSERT … ON CONFLICT DO UPDATE`; re-running against the same manifest produces zero diffs, asserted by `validate.js`. Raw files are immutable — corrections live only in `overrides.json`.
+
+`derive.js` is a **pure function of staged data**, which is what makes the windowing rule enforceable: a derived metric cannot exist without a window and an `exact` flag, because there is no code path that produces one without the other.
 
 **Photo resolution chain:** Wikidata `wbsearchentities` (name → QID candidates, disambiguated by DOB + description) → `wbgetentities` with 50 QIDs per call → P18 image URL → Commons `imageinfo` for licence/author (50 titles per call) → download → resize to 512px WebP → Supabase Storage → `photos` row with licence + attribution + source URL. Fallback: deterministic jersey tile (`hsl(hash(player_id) % 36, 55%, 42%)` background, initials, position glyph) rendered by the same component that renders a real photo, so a missing image is a first-class card state rather than an error.
 
 **Validation report blocks the ship** on: any `player_pool` player failing the gate; unresolved ambiguous/conflict names; DOB disagreement vs `gold_standard.json`; overlapping stints; unresolved league-alias collisions; any numeric without a `source_id`; any row traceable to the old RNG path; any advertised scope with pool < 20; pool drop >10% vs the previous run without an allowlist entry. Warns on per-field coverage %, name-match rate, photo coverage %, and prints an era-depth table per league.
 
 **`data/gold_standard.json` stops being data and becomes a regression test** — assert exact DOB, club stints and caps for Messi, Ronaldo, Neymar, Salah, Haaland. Fails CI on silent drift.
+
+### 4.7 Stat metrics and the windowing rule
+
+A Scope can filter on numbers (D12). That only stays honest if every number knows where it came from.
+
+**Metrics are either EXACT or WINDOWED, and the distinction is carried in the data, not in the UI's memory.**
+
+| Metric | Type | Window | Measured coverage |
+|---|---|---|---|
+| `international_caps` | EXACT | career | 16,946 players with caps > 0; 1,023 with ≥ 50 |
+| `international_goals` | EXACT | career | from `players.international_goals` |
+| `highest_market_value_eur` | EXACT | career peak | 97% of gate-passers have a value |
+| `age`, `nationality`, `position` | EXACT | — | required by the gate |
+| `club_goals` | WINDOWED | 2012+ | 7 players ≥ 300; 160 ≥ 100; 712 ≥ 50 |
+| `club_appearances` | WINDOWED | 2012+ | 13,666 players have appearances but 0 goals — the distractor pool |
+| `goals_after_age_30` | WINDOWED | 2012+ | 23 players ≥ 100; 111 ≥ 50; 285 ≥ 30; 1,085 ≥ 10 |
+| `tournament_goals` / `tournament_apps` | WINDOWED | per tournament | 200 goals recorded across 2,251 World Cup appearances |
+
+**The rule:** a WINDOWED metric's clue text always states its window.
+
+> ✓ "50+ goals aged 30+ (since 2012)"
+> ✗ "50+ goals aged 30+"
+
+> ✓ "80+ international caps"
+> ✗ "80+ caps since 2012"  ← caps are exact; adding a window is wrong in the other direction
+
+`player_derived_stats.exact` carries the flag, and the clue generator reads it. A metric may not be surfaced unless its window is known — there is no "unknown window" rendering.
+
+**Threshold sanity:** "200 goals after turning 30" is **not reachable** — only 3 players clear it in the 2012+ window (max 333). Any scope threshold whose pool falls below 20 is refused with a reason (§5.5). The preset family is built around bands that hold: 30+ (285), 50+ (111), 100+ (23 — too thin, so it is not a preset).
+
+**Why this matters more than it looks:** the original project shipped a clue reading `"Domestic Title Winner"` for 268 of 346 players who had won no domestic title. Unlabelled numbers are how that happened. The windowing rule is the structural fix, not a copy edit.
 
 ---
 
@@ -250,9 +321,21 @@ scripts/ingest/
 
 A scope is a **disjunction of clauses**. Each clause is a **conjunction of predicates**. Array predicates match if the player matches *any* element. Missing predicate = wildcard.
 
+**Predicate vocabulary:**
+
+| Predicate | Type | Match |
+|---|---|---|
+| `leagues[]` | categorical | league id in array |
+| `teams[]` | categorical | club id in array |
+| `nationalities[]` | categorical | citizenship in array |
+| `positions[]` | categorical | position in array |
+| `tournaments[]` | roster | player was in the tournament's squad |
+| `stats[]` | statistical | `{metric, op, value}` — see §5.2 |
+| `seasonStart` / `seasonEnd` | range | overlaps a stint's season range |
+
 ```json
 {
-  "v": 1,
+  "v": 2,
   "id": "uuid",
   "name": "La Liga 2010s",
   "clauses": [
@@ -266,7 +349,7 @@ Multi-blend:
 
 ```json
 {
-  "v": 1, "id": "uuid", "name": "Our mix",
+  "v": 2, "id": "uuid", "name": "Our mix",
   "clauses": [
     { "leagues": ["ES1"], "seasonStart": 2010, "seasonEnd": 2019 },
     { "leagues": ["GB1"], "seasonStart": 2024, "seasonEnd": 2025 }
@@ -274,14 +357,44 @@ Multi-blend:
 }
 ```
 
-**Scope clauses reference stable ids, never display names.** `leagues` holds competition ids (`ES1`, `GB1`, `IT1`, `FR1`, `L1`, `NL1`, `PO1`, `MLS1`, `SA1`); `teams` holds club ids. The client renders names from `leagues.display_name` and `clubs.name`. This matters because the source club names are *not* the names people type — the dataset has `Arsenal FC`, `Liverpool FC`, `FC Barcelona`, `Juventus FC`, and the current app's team picker searches for `Arsenal`, so it would never match a single row. `club_aliases` and `league_aliases` map what people type to the canonical ids.
+Stat and tournament clauses:
+
+```json
+{
+  "v": 2, "id": "uuid", "name": "Late Bloomers",
+  "clauses": [
+    { "leagues": ["ES1"], "seasonStart": 2010, "seasonEnd": 2019 },
+    { "stats": [{ "metric": "goals_after_age_30", "op": ">=", "value": 50 }] }
+  ]
+}
+```
+
+```json
+{
+  "v": 2, "id": "uuid", "name": "World Cup 2022",
+  "clauses": [ { "tournaments": ["wc-2022"] } ]
+}
+```
+
+**Scope clauses reference stable ids, never display names.** `leagues` holds competition ids (`ES1`, `GB1`, `IT1`, `FR1`, `L1`, `NL1`, `PO1`, `MLS1`, `SA1`); `teams` holds club ids; `tournaments` holds tournament ids. The client renders names from `leagues.display_name`, `clubs.name` and `tournaments.display_name`. This matters because the source club names are *not* the names people type — the dataset has `Arsenal FC`, `Liverpool FC`, `FC Barcelona`, `Juventus FC`, and the current app's team picker searches for `Arsenal`, so it would never match a single row. `club_aliases` and `league_aliases` map what people type to the canonical ids.
 
 ### 5.2 Matching
 
 ```js
-function seasonsOverlap(entrySeasons, start, end) {
-  const lo = start ?? -Infinity, hi = end ?? Infinity;
-  return (entrySeasons || []).some(s => s >= lo && s <= hi);
+const OPS = {
+  '>=': (v, t) => v >= t,
+  '>':  (v, t) => v >  t,
+  '<=': (v, t) => v <= t,
+  '<':  (v, t) => v <  t,
+  '==': (v, t) => v === t,
+  between: (v, t) => v >= t[0] && v <= t[1],
+};
+
+function statMatches(pred, stats) {
+  const v = stats?.[pred.metric];
+  if (v === undefined || v === null) return false;   // no value → no match, NEVER default to 0
+  const op = OPS[pred.op];
+  return op ? op(v, pred.value) : false;
 }
 
 function clauseMatches(clause, player) {
@@ -289,9 +402,19 @@ function clauseMatches(clause, player) {
   const T = clause.teams?.length ? clause.teams : null;
   const N = clause.nationalities?.length ? clause.nationalities : null;
   const P = clause.positions?.length ? clause.positions : null;
+  const R = clause.tournaments?.length ? clause.tournaments : null;
 
   if (N && !N.includes(player.nationality)) return false;
   if (P && !P.includes(player.position)) return false;
+
+  if (R && !(player.tournaments || []).some(t => R.includes(t))) return false;
+
+  // A stat predicate is satisfied by the player's derived value.
+  // A player with a genuine 0 goals FAILS '>= 50' — but a player with NO
+  // derived value also fails, and is distinguishable in the data.
+  if (clause.stats?.length) {
+    if (!clause.stats.every(p => statMatches(p, player.stats))) return false;
+  }
 
   const needsEntry = L || T || clause.seasonStart != null || clause.seasonEnd != null;
   if (!needsEntry) return true;
@@ -308,6 +431,8 @@ export function playerInScope(player, scope) {
   return scope.clauses.some(c => clauseMatches(c, player));
 }
 ```
+
+The `stats` block is **ANDed within a clause** and the clause is **ORed across clauses**. So `[{leagues:["ES1"], 2010-19}, {stats:[goals_after_age_30>=50]}]` means *La Liga 2010s players* **or** *players with 50+ goals after 30* — the union semantics the pitch asks for, now including numeric predicates.
 
 This runs identically in SQL (as a view/query) and in the browser (for instant preview). One definition, two implementations, kept in step by a shared fixture test.
 
@@ -343,14 +468,48 @@ Receiver sees a read-only card: scope name, pool size, sample player names, and 
 | El Clásico Derby Night | `{leagues:["ES1"], seasonStart:2008, seasonEnd:2018, teams:[<id:FC Barcelona>, <id:Real Madrid>]}` | computed at ingest |
 | South Americans in Europe | `{nationalities:["Argentina","Brazil","Uruguay","Colombia"], leagues:["GB1","ES1","IT1","FR1","L1"], seasonStart:2015, seasonEnd:2025}` | computed at ingest |
 | New-Money Leagues | `{leagues:["SA1","MLS1"], seasonStart:2023, seasonEnd:2025}` | computed at ingest |
+| **World Cup 2022** | `{tournaments:["wc-2022"]}` | ~440 (Wikidata) |
+| **World Cup 2026** | `{tournaments:["wc-2026"]}` | ~1,247 (TM dump) |
+| **Late Bloomers** | `{stats:[{metric:"goals_after_age_30",op:">=",value:50}]}` | ~111 |
+| **Ever-Capped** | `{stats:[{metric:"international_caps",op:">=",value:50}]}` | ~1,023 |
+| **Century Goals** | `{stats:[{metric:"club_goals",op:">=",value:100}]}` | ~160 |
 
-The three uncounted pools are measured by `validate.js` at ingest and their numbers are written into the preset definitions rather than guessed here. Club ids are resolved at ingest by name lookup, so a preset never hardcodes a club name string.
+The uncounted pools are measured by `validate.js` at ingest and their numbers are written into the preset definitions rather than guessed here. Club ids are resolved at ingest by name lookup, so a preset never hardcodes a club name string.
 
 **Note:** the source dataset contains no Atlético Madrid club row, so no preset may reference it. Presets are limited to clubs that exist in the data.
 
 ### 5.5 Era floor handling
 
 The builder's era slider spans the real data range. As the user drags, the live pool count updates and **low-coverage eras are flagged**: any window whose pool falls below 20 players shows a warning — *"only 49 players have La Liga data for 2005–09"*. Saving such a scope is refused with that reason. The slider is **not** hard-clamped — hiding the cliff would misrepresent what the data contains.
+
+The same rule applies to **stat thresholds**: a threshold whose pool falls below 20 is refused with the count, e.g. *"only 3 players scored 200+ goals after turning 30 — try 50+"*. The builder suggests the nearest threshold that holds.
+
+### 5.6 Tournament rosters
+
+Tournament membership is a **separate source**, because the Transfermarkt dump's own tournament coverage is thin:
+
+| Tournament | Squad source | Players |
+|---|---|---|
+| **World Cup 2022** | Wikidata `P54` (member of sports team) + `P1344` (participant in) | ~440 |
+| World Cup 2026 | TM `game_lineups` (group stage only — the dump froze 2026-07-06) | ~1,247 |
+| Copa América 2024 | TM `game_lineups` | ~412 |
+| AFC Asian Cup 2024 | TM `game_lineups` | ~611 |
+| AFCON 2025 / 2026 | TM `game_lineups` | ~650 / ~418 |
+
+The TM dump contains **World Cup 2022 fixtures but no lineups**, and **no Euro lineups at all**, despite carrying Euro fixtures from 2008. So tournament rosters are ingested from Wikidata for WC2022 and other tournaments, and from the dump where lineups exist.
+
+Ingest for a Wikidata tournament:
+
+```sparql
+SELECT DISTINCT ?player WHERE {
+  { ?player wdt:P1344 wd:Q284163 . }                    # participant directly
+  UNION
+  { ?player p:P54 ?st . ?st ps:P54 ?team .            # or member of a participating team
+    ?team wdt:P1344 wd:Q284163 . }
+}
+```
+
+Each resolved player is matched to a `player_pool` row by normalised name + DOB; unmatched names go to `overrides.json` for adjudication. A tournament that resolves to fewer than 20 pool players is not offered as a preset.
 
 ---
 
@@ -398,6 +557,66 @@ Leaderboard order: total points → correct count → lowest total response time
 Candidates are ranked by similarity to the target: shared position (+3), shared nationality (+3), shared club (+4), shared league (+2). The top-ranked pool is sampled with a small randomness budget so the same target does not produce an identical option set every game.
 
 **Constraint:** the answer must never be inferable from the option set itself — i.e. if exactly one option is Turkish *and* a midfielder *and* has a La Liga stint, that option is the answer by elimination. The generator must verify that no distractor shares the *full* conjunction of revealed clues, and regenerate if it does.
+
+### 6.5 Question templates
+
+Every round has the same shape, whatever the template:
+
+```js
+{
+  template: 'identify' | 'stat_value' | 'membership',
+  prompt:  string,          // what is being asked
+  subject: player | null,   // named in the prompt, if any
+  answer:  string,          // the correct answer value
+  options: string[],        // 4 options, one correct
+  answerLabel: string,      // how the correct option is labelled
+  clues:   [{id, label, value, iconKey, window?}],   // revealed across the 4 stages
+}
+```
+
+The engine signature becomes `generateRound(scope, template, difficulty)`. The 4-stage ladder, the lock-in, the scoring formula and the UI are **identical across templates** — only the prompt, the option set and the hint generator change. That is what keeps three templates from becoming three games.
+
+**T1 — `identify`** (v1 default). "Who is this?" The target is drawn from the scope pool; each stage reveals a fact about it. Answer is a player name; options are 4 names.
+
+Because the Scope can carry stat predicates, T1 automatically produces statistical questions: the target comes from a stat-filtered pool and one of the clue cards is the stat itself.
+
+> Scope: *Late Bloomers* (50+ goals aged 30+, since 2012)
+> Clue 3: **"50+ goals aged 30+ (since 2012)"**
+> Options: İlkay Gündoğan · Hakan Çalhanoğlu · Emre Belözoğlu · Okay Yokuşlu
+
+This costs nothing beyond the scope extension — no new UI, no new answer shape.
+
+**T2 — `stat_value`** (v1.1). The answer is a **number**, not a name. The prompt names the player; the player must be chosen so the number is not guessable from the prompt alone.
+
+> "How many international caps did **Mesut Özil** have?"
+> Options: 90 · 92 · 94 · 96
+
+Numeric distractors are generated from the metric's real distribution among comparable players (same position, similar era), rounded to plausible increments, and **never equal to the true value**. A metric with fewer than 20 non-zero values in the pool is not used — there would be nothing to discriminate against.
+
+**T3 — `membership`** (v1.1). The answer is one of four players who *is* in the scope, with three who are not.
+
+> "Who played in the **2022 World Cup**?"
+> Options: Lionel Messi · Kevin De Bruyne · Erling Haaland · Jude Bellingham
+
+The distractor rule reverses: the three wrong options must each violate the scope for a *different, visible* reason, so the answer is findable by elimination rather than by luck.
+
+**Template selection.** The template is part of the Scope's configuration, with a default per scope type:
+
+| Scope contains | Default template |
+|---|---|
+| a `tournaments` predicate | `membership` (it is the natural question) |
+| a `stats` predicate | `identify` (the stat becomes a clue) |
+| neither | `identify` |
+
+Difficulty applies to **clue depth**, not just player obscurity:
+
+| Difficulty | T1 clue ladder | T2 | T3 |
+|---|---|---|---|
+| Easy | nationality → position → club → stat | one supporting hint | one elimination hint |
+| Medium | position → club → era → stat | two supporting hints | two elimination hints |
+| Hard | all statistical / career-path clues, surface facts withheld | three supporting hints | three elimination hints |
+
+**Why "inclusivity" needs all three:** the casual fan gets T1 with a shallow ladder and a famous player; the football-stat obsessive gets T2 with a precise number and a deep hint chain; the nostalgic fan gets a tournament scope with T3. One template serves one of those three people and leaves the other two bored — which is the same reason a room with one format dies after round 4.
 
 ---
 
@@ -594,10 +813,10 @@ If (2) and (4) both fail after two sessions, stop and re-think the product.
 This also independently measures the data gap: if a hand-picked 20-player list is the only thing that works, the data pipeline is the priority.
 
 ### Phase 1 — Data spine
-`scripts/ingest/*` → Postgres. `player_pool` view. Quality gate. Validation report green. `gold_standard.json` as a regression test. Photos ingested via the Commons chain.
+`scripts/ingest/*` → Postgres. `player_pool` view. Quality gate. Validation report green. `gold_standard.json` as a regression test. Photos ingested via the Commons chain. **Derived stats (`derive.js`) with window + `exact` flags.** Tournament rosters from Wikidata and from `game_lineups`.
 
 ### Phase 2 — Game engine
-`js/engine/` — pure modules: scope matcher, clue generator, distractor generator, scoring, round state machine. Unit-tested, no DOM. Same code runs in the browser and in server-side validation.
+`js/engine/` — pure modules: scope matcher (categorical + stat + tournament predicates), clue generator (incl. stat clues with windows), distractor generator, scoring, round state machine, **template registry with T1**. Unit-tested, no DOM. Same code runs in the browser and in server-side validation.
 
 ### Phase 3 — Client shell
 Mobile-first PWA, Retro Collectible theme + Premium Editorial theme, four screens wired to the engine with fake data, accessibility pass (contrast, focus, reduced-motion).
@@ -606,10 +825,13 @@ Mobile-first PWA, Retro Collectible theme + Premium Editorial theme, four screen
 Supabase schema + RLS + RPCs, room lifecycle, Realtime channels, sync, leaderboard, failure-mode handling.
 
 ### Phase 5 — Scope builder
-Presets + fork + era slider with coverage warning + live pool preview + share links.
+Presets + fork + era slider with coverage warning + **stat threshold control with live count and nearest-valid suggestion** + tournament picker + live pool preview + share links.
 
 ### Phase 6 — Polish
 Sound, haptics, motion, credits screen, empty/error states, PWA install.
+
+### Phase 7 — v1.1 templates
+Add T2 `stat_value` and T3 `membership` to the template registry. Each is a new generator + a new option renderer; the ladder, scoring and room are untouched.
 
 ---
 
@@ -618,8 +840,12 @@ Sound, haptics, motion, credits screen, empty/error states, PWA install.
 | Layer | Approach |
 |---|---|
 | Scope matcher | Pure-function unit tests + a shared fixture run against both the JS and SQL implementations so they cannot drift |
+| Scope stat predicates | Property test: a player with a **missing** metric never matches a numeric predicate; a player with a genuine `0` matches `== 0` and fails `>= 1`. The distinction must hold. |
+| Metric windowing | Property test: every `player_derived_stats` row has a window unless `exact`; every clue text for a windowed metric contains the window string. **Fails if a windowed metric is ever surfaced unlabelled.** |
+| Threshold guard | Every preset threshold and every stat filter resolves to ≥ 20 pool players, asserted in `validate.js` |
 | Clue generation | Property tests: every clue value is non-null, comes from a real source row, and no two stages leak the same fact |
 | Distractors | Property test: no distractor matches the full conjunction of revealed clues; the answer is never uniquely determined by the option set |
+| Templates | One test per template asserting the round shape (`prompt`, `answer`, 4 options, 4 clues) and that the answer is present in the options exactly once |
 | Scoring | Table-driven unit tests for stage × time factor, including the boundary at exactly 20s |
 | Room state machine | Exhaustive transition table test — every legal and illegal transition asserted |
 | RLS | Integration test per table per role: anon, non-member, member, host, service_role |

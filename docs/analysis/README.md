@@ -32,3 +32,14 @@ Verified results (2026-10-20):
 | Serie A | 1,933 | 1,520 | 1,031 | 51 | 3 |
 | Ligue 1 | 1,985 | 1,613 | 996 | 52 | 4 |
 | Bundesliga | 1,717 | 1,298 | 836 | 46 | 2 |
+
+`measure-stat-metrics.py` measures the stat metrics a Scope can filter on
+(§4.7) and prints which are reachable. Key result: **"200 goals after
+turning 30" is not reachable** — only 3 players clear it in the 2012+
+window. The bands that hold are 30+ (285 players), 50+ (111), and
+`international_caps >= 50` (1,023, and exact rather than windowed).
+
+`measure-tournament-squads.py` resolves tournament squads from Wikidata.
+The Transfermarkt dump has **World Cup 2022 fixtures but no lineups**, and
+no Euro lineups at all, so WC2022 squads (~440 players) come from
+Wikidata `P54` + `P1344` instead.
