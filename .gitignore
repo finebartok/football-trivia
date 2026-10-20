@@ -1,0 +1,16 @@
+node_modules/
+package-lock.json.bak
+
+# Source snapshots and build artifacts from the ingestion pipeline (large, reproducible)
+data/raw/
+data/football.db
+
+# Brainstorming companion mockups
+.superpowers/
+
+# Local env
+.env
+.env.local
+
+# Stray output from the old ad-hoc test scripts
+console_dump.html
