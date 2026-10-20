@@ -103,8 +103,10 @@ test('a player with no Wikidata match, or no P18 image, is reported unresolved',
 });
 
 test('the licence for a Commons file is read from extmetadata, not guessed from the filename', () => {
-  const fixture = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
-  const got = fixture['Example.jpg'];
+  // Fixture is the real imageinfo response for Commons File:Example.jpg, trimmed.
+  // fetchLicence is exercised against the live API separately; keeping it out of
+  // the suite means the tests never need the network.
+  const got = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'))['Example.jpg'];
   assert.equal(got.licence, 'Public domain');
   assert.ok(got.attribution, 'a licence still records the author for the credits screen');
   assert.ok(got.width > 0 && got.height > 0, 'source dimensions are recorded');
