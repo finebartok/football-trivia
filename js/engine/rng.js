@@ -1,5 +1,6 @@
 export function makeRng(seed) {
-  let a = (Number(seed) >>> 0) || 1;
+  // Coerce to unsigned 32-bit int. Non-numeric/NaN becomes 0.
+  let a = Number(seed) >>> 0;
   return function rng() {
     a |= 0;
     a = (a + 0x6D2B79F5) | 0;
@@ -10,7 +11,7 @@ export function makeRng(seed) {
 }
 
 export function pick(rng, array) {
-  if (!array.length) return null;
+  if (!array || !array.length) return null;
   return array[Math.floor(rng() * array.length)];
 }
 
