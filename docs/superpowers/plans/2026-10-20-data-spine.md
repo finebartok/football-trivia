@@ -104,7 +104,7 @@ Rewrite `package.json`:
   "description": "Personalized football trivia — real data, generated quizzes",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/",
+    "test": "node --test \"tests/**/*.test.js\"",
     "db:apply": "node scripts/ingest/lib/db.js --apply",
     "ingest:all": "node scripts/ingest/fetch.js && node scripts/ingest/load.js && node scripts/ingest/derive.js && node scripts/ingest/validate.js",
     "validate": "node scripts/ingest/validate.js --strict",
@@ -156,9 +156,9 @@ test('migrations apply cleanly and create the expected tables', async () => {
 test('player_pool only exposes rows that passed the quality gate', async () => {
   const db = await openDb();
   await applyMigrations(db);
-  await db.query(`insert into players (slug, name, date_of_birth, citizenship, position, quality)
-    values ('a','A Pass','1990-01-01','{"England"}','Forward','{"status":"pass"}'),
-           ('b','B Fail','1990-01-01','{"England"}','Forward','{"status":"fail"}')`);
+  await db.query(`insert into players (slug, name, date_of_birth, citizenship, position, quality, active)
+    values ('a','A Pass','1990-01-01','{"England"}','Forward','{"status":"pass"}',true),
+           ('b','B Fail','1990-01-01','{"England"}','Forward','{"status":"fail"}',false)`);
   const rows = (await db.query('select slug from player_pool')).rows;
   assert.deepEqual(rows.map(r => r.slug), ['a']);
   await db.close();
@@ -389,7 +389,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_DIR = path.resolve(__dirname, '../../db');
+// scripts/ingest/lib -> scripts/ingest -> scripts -> repo root
+const DB_DIR = path.resolve(__dirname, '../../../db');
 
 export async function openDb({ url } = {}) {
   if (url) {
@@ -397,6 +398,9 @@ export async function openDb({ url } = {}) {
     const pool = new Pool({ connectionString: url });
     return {
       async query(sql, params) { return pool.query(sql, params); },
+      // A migration file holds many statements. node-postgres runs them in one
+      // simple-query round trip; PGlite needs exec() for the same thing.
+      async exec(sql) { return pool.query(sql); },
       async close() { await pool.end(); },
     };
   }
@@ -407,6 +411,10 @@ export async function openDb({ url } = {}) {
       const res = await pg.query(sql, params);
       return { rows: res.rows ?? [], rowCount: res.affectedRows ?? res.rows?.length ?? 0 };
     },
+    async exec(sql) {
+      await pg.exec(sql);
+      return { rows: [], rowCount: 0 };
+    },
     async close() { await pg.close(); },
   };
 }
@@ -414,7 +422,7 @@ export async function openDb({ url } = {}) {
 export async function applyMigrations(db) {
   const files = fs.readdirSync(DB_DIR).filter(f => f.endsWith('.sql')).sort();
   for (const f of files) {
-    await db.query(fs.readFileSync(path.join(DB_DIR, f), 'utf8'));
+    await db.exec(fs.readFileSync(path.join(DB_DIR, f), 'utf8'));
   }
   return files;
 }
@@ -534,6 +542,9 @@ export function normaliseName(s) {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    // An apostrophe inside a name is part of the name, not a word break:
+    // "N'Golo Kante" must fold to "ngolo kante", not "n golo kante".
+    .replace(/['\u2018\u2019\u02bc]/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -875,7 +886,7 @@ import { parseSeason } from '../../lib/seasons.js';
 
 const POSITION_MAP = [
   [/goalkeeper|\bGK\b/i, 'Goalkeeper'],
-  [/defender|\bCB\b|\bLB\b|\bRB\b|\bLWB\b|\bRWB\b|full[- ]?back/i, 'Defender'],
+  [/defender|\bCB\b|\bLB\b|\bRB\b|\bLWB\b|\bRWB\b|back|wing[- ]?back/i, 'Defender'],
   [/midfield|\bCM\b|\bCDM\b|\bCAM\b|\bLM\b|\bRM\b/i, 'Midfielder'],
   [/forward|\bST\b|\bCF\b|\bLW\b|\bRW\b|winger|striker/i, 'Forward'],
 ];
@@ -969,20 +980,30 @@ export function normaliseTransfer(raw) {
 }
 
 export function resolveClubAliases(clubs, aliases) {
-  const byFolded = new Map();
-  for (const c of clubs) {
-    const key = normaliseName(c.name);
-    if (!byFolded.has(key)) byFolded.set(key, []);
-    byFolded.get(key).push(c);
-  }
   const out = new Map();
   for (const alias of aliases) {
     const key = normaliseName(alias);
-    const exact = byFolded.get(key);
-    if (exact && exact.length === 1) { out.set(key, exact[0].id); continue; }
+    if (!key) continue;
+    // Count every club whose name CONTAINS the alias before resolving anything.
+    // "Arsenal" matches both "Arsenal FC" and "Arsenal Tula", and an alias that
+    // could mean either is not resolvable - a wrong club is worse than no club.
     const matches = clubs.filter(c => normaliseName(c.name).includes(key));
-    if (matches.length === 1) out.set(key, matches[0].id);
-    // zero or many matches -> not resolvable, and that is the safe answer
+    if (matches.length === 1) {
+      out.set(key, matches[0].id);
+      continue;
+    }
+    if (matches.length > 1) {
+      // Ambiguous. If the alias is the exact name of exactly one of them AND
+      // that one is in a league the others are not, it is still ambiguous.
+      const exact = matches.filter(c => normaliseName(c.name) === key);
+      if (exact.length === 1 && matches.length === 2) {
+        // Two clubs, one is an exact match - still refuse. "Arsenal" means
+        // "Arsenal FC" to a fan, not the Russian club, and guessing is wrong.
+        continue;
+      }
+      continue;
+    }
+    // zero matches -> not resolvable, and that is the safe answer
   }
   return out;
 }
@@ -1399,11 +1420,11 @@ test('a club-season window carries the exact goals scored in it', () => {
   const { windows, windowStats } = deriveWindows({
     goals: [
       { playerSourceKey: '1', clubId: 5, competitionId: 'ES1', season: 2014, year: 2015 },
-      { playerSourceKey: '1', clubId: 5, competitionId: 'ES1', season: 2014, year: 2014 },
+      { playerSourceKey: '1', clubId: 5, competitionId: 'ES1', season: 2015, year: 2016 },
     ],
     games: [],
     clubsById: { 5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' } },
-    competitionsById: { ES1: { id: 'ES1', name: 'laliga' } },
+    competitionsById: { ES1: { id: 'ES1', name: 'laliga', type: 'domestic_league' } },
   });
 
   const w = windows.find(x => x.kind === 'season' && x.clubId === 5 && x.seasonStart === 2014);
@@ -1413,6 +1434,11 @@ test('a club-season window carries the exact goals scored in it', () => {
   const stat = windowStats.find(s => s.windowId === w.id && s.metric === 'goals');
   assert.equal(stat.value, 1);
   assert.equal(stat.exact, true);
+
+  // the next season is its own window, not more goals in the first one
+  const w2 = windows.find(x => x.kind === 'season' && x.clubId === 5 && x.seasonStart === 2015);
+  const stat2 = windowStats.find(s => s.windowId === w2.id && s.metric === 'goals');
+  assert.equal(stat2.value, 1);
 });
 
 test('a tournament window counts only that competition', () => {
@@ -1423,7 +1449,10 @@ test('a tournament window counts only that competition', () => {
     ],
     games: [],
     clubsById: { 5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' } },
-    competitionsById: { FIWC: { id: 'FIWC', name: 'world-cup' }, ES1: { id: 'ES1', name: 'laliga' } },
+    competitionsById: {
+      FIWC: { id: 'FIWC', name: 'world-cup', type: 'national_team_competition' },
+      ES1: { id: 'ES1', name: 'laliga', type: 'domestic_league' },
+    },
   });
 
   const w = windows.find(x => x.kind === 'tournament' && x.tournamentId === 'wc-2022');
@@ -1443,7 +1472,10 @@ test('window ids are deterministic and collision free across clubs', () => {
       5: { id: 5, name: 'FC Barcelona', leagueId: 'ES1' },
       9: { id: 9, name: 'Arsenal FC', leagueId: 'GB1' },
     },
-    competitionsById: { ES1: { id: 'ES1', name: 'laliga' }, GB1: { id: 'GB1', name: 'premier-league' } },
+    competitionsById: {
+      ES1: { id: 'ES1', name: 'laliga', type: 'domestic_league' },
+      GB1: { id: 'GB1', name: 'premier-league', type: 'domestic_league' },
+    },
   });
   const seasonWindows = windows.filter(w => w.kind === 'season');
   assert.equal(new Set(seasonWindows.map(w => w.id)).size, seasonWindows.length);
@@ -1606,11 +1638,16 @@ async function seed(db, rows) {
 test('the gate passes a complete player and rejects an incomplete one', async () => {
   const db = await openDb();
   await applyMigrations(db);
+  await db.query(`insert into clubs (id, name) values (1, 'Test FC')`);
   await seed(db, [
     { slug: 'good', name: 'Good Player', dob: '1990-01-01', nat: '{England}', pos: 'Forward' },
     { slug: 'tooyoung', name: 'Too Old', dob: '1920-01-01', nat: '{England}', pos: 'Forward' },
     { slug: 'nostint', name: 'No Stint', dob: '1990-01-01', nat: '{England}', pos: 'Forward' },
   ]);
+  // G5 requires a club stint with both season bounds, so the passing player
+  // needs one and the failing ones must not have it.
+  await db.query(`insert into club_stints (player_id, club_id, season_start, season_end, evidence)
+    select id, 1, 2014, 2018, 'appearance' from players where slug in ('good','tooyoung')`);
 
   const res = await applyQualityGate(db);
   assert.equal(res.passed, 1);
@@ -1641,6 +1678,7 @@ test('the report flags a pool below the floor and isPublishable refuses it', asy
 test('a player with no photo still passes - the photo is not required', async () => {
   const db = await openDb();
   await applyMigrations(db);
+  await db.query(`insert into clubs (id, name) values (1, 'Test FC')`);
   await seed(db, [{ slug: 'nophoto', name: 'No Photo', dob: '1990-01-01', nat: '{England}', pos: 'Forward' }]);
   await db.query(`insert into club_stints (player_id, club_id, season_start, season_end, evidence)
     select id, 1, 2014, 2018, 'appearance' from players where slug='nophoto'`);
@@ -2092,10 +2130,13 @@ test('the export matches the committed fixture shape', async () => {
 
   const json = JSON.parse(await fs.readFile(out, 'utf8'));
   assert.ok(json.registry);
-  assert.ok(Array.isArray(json.registry.leagues));
+  // the registry mirrors the committed fixture: leagues and windows are
+  // id-keyed objects, clubs and tournaments are arrays
+  assert.equal(typeof json.registry.leagues, 'object');
+  assert.ok(!Array.isArray(json.registry.leagues));
   assert.ok(Array.isArray(json.registry.clubs));
-  assert.ok(json.registry.windows);
-  assert.ok(json.registry.tournaments);
+  assert.equal(typeof json.registry.windows, 'object');
+  assert.ok(Array.isArray(json.registry.tournaments));
   assert.equal(json.players.length, 1);
   const p = json.players[0];
   for (const k of ['id','slug','name','dateOfBirth','citizenship','position','teams','tournaments','stats','windows']) {
