@@ -6,6 +6,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { readCsvGz } from './lib/csv.js';
 import { normalisePlayer, normaliseTransfer } from './normalize.js';
+import { normaliseName } from '../../lib/names.js';
+import { sparql, searchEntity } from './lib/wikidata.js';
 
 const SOURCE_ID = 'tm_dump_2026-07-06';
 
@@ -162,4 +164,130 @@ export async function loadTransfers(db, { rawDir }) {
     rows++;
   }
   return { rows };
+}
+
+// --- Tournament rosters ----------------------------------------------------
+// The Transfermarkt dump holds WC2022's fixtures but no squads, so tournament
+// rosters come from Wikidata's P1344 (participant in) / P54 (member of sports
+// team). The match is by folded name and ONLY a unique match counts: an
+// ambiguous name is reported, never attached to the nearest guess.
+
+const WIKIDATA_SOURCE_ID = 'wikidata';
+const WIKIDATA_URL = 'https://www.wikidata.org/';
+
+// A national squad at a finals is 26-33 players; even a generous cap is far
+// below anything an over-broad query returns. A larger result is a query bug,
+// not a roster: writing it would fabricate memberships, so it is reported and
+// skipped instead (zero-fabrication rule).
+const MAX_PLAUSIBLE_SQUAD = 100;
+
+// Tournament ids are stable (`wc-2022`); the QID is what Wikidata knows. Only
+// the 2022 World Cup QID is pinned - the rest resolve from the seeded name, so
+// no more QIDs than necessary live in this file.
+const TOURNAMENT_QIDS = { 'wc-2022': 'Q284163' };
+const TOURNAMENT_NAMES = {
+  'wc-2022': '2022 FIFA World Cup',
+  'wc-2026': '2026 FIFA World Cup',
+  'euro-2024': 'UEFA Euro 2024',
+  'copa-2024': '2024 Copa América',
+};
+
+export function matchTournamentSquads(squad, players) {
+  const byFolded = new Map();
+  for (const p of players) {
+    const key = normaliseName(p.name);
+    if (!byFolded.has(key)) byFolded.set(key, []);
+    byFolded.get(key).push(p);
+  }
+  const matched = [], unmatched = [];
+  for (const member of squad) {
+    const candidates = byFolded.get(normaliseName(member.label)) ?? [];
+    if (candidates.length === 1) {
+      matched.push({ playerId: candidates[0].id, playerName: candidates[0].name, wikidataId: member.id });
+    } else {
+      unmatched.push({ wikidataId: member.id, label: member.label, reason: candidates.length === 0 ? 'not found' : 'ambiguous' });
+    }
+  }
+  return { matched, unmatched };
+}
+
+/** The whole squad of one tournament, as `[{ id: QID, label }]`. One query per
+ * tournament: the player participates directly, or played for a team that did.
+ *
+ * ponytail: the P54 branch is the brief's, and on today's Wikidata it matches
+ * every player who ever turned out for any participating national team, not the
+ * tournament roster (verified: wc-2022 -> 6557, not ~440). The squads are not
+ * modelled as P54 statements on the tournament's `*-at-the-tournament` items
+ * either. Callers must therefore size-guard the result; see MAX_PLAUSIBLE_SQUAD. */
+export async function fetchTournamentSquad(qid) {
+  const bindings = await sparql(`
+    SELECT DISTINCT ?player ?playerLabel WHERE {
+      { ?player wdt:P1344 wd:${qid} . }
+      UNION
+      { ?player p:P54 ?st . ?st ps:P54 ?team . ?team wdt:P1344 wd:${qid} . }
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+    }`);
+  return bindings
+    .filter(b => b.player?.value)
+    .map(b => {
+      const id = b.player.value.split('/').pop();
+      const label = b.playerLabel?.value;
+      // An unlabelled entity comes back as its own QID; that is not a name and
+      // must never be matched against, so it is reported as unlabelled.
+      return { id, label: label && label !== id ? label : null };
+    });
+}
+
+/** Resolve a tournament's QID from Wikidata by exact label, so no more QIDs
+ * than necessary are hardcoded. Qualification/group/final/bids pages share the
+ * label prefix and are never the tournament; only an exact-label hit counts. */
+export async function resolveTournamentQid(name) {
+  if (!name) return null;
+  const hits = await searchEntity(name, 10);
+  const exact = hits.find(h => h.label === name
+    && !/qualif|group|final|bid|squad/i.test(h.description ?? ''));
+  return exact?.id ?? null;
+}
+
+/**
+ * Load each tournament's roster from Wikidata and attach the members that match
+ * a real player row by folded, unique name. Unmatched members are returned for
+ * reporting, never inserted. `squads` may be injected so tests stay offline.
+ */
+export async function loadTournaments(db, { tournaments = [], squads } = {}) {
+  await db.query(
+    `insert into sources (id, licence, url) values ($1, $2, $3) on conflict (id) do nothing`,
+    [WIKIDATA_SOURCE_ID, 'CC0-1.0', WIKIDATA_URL],
+  );
+
+  const ids = tournaments.length ? tournaments : Object.keys(TOURNAMENT_NAMES);
+  const players = (await db.query('select id, name from players')).rows;
+
+  let loaded = 0;
+  const unmatched = [];
+  for (const tournamentId of ids) {
+    const qid = TOURNAMENT_QIDS[tournamentId]
+      ?? await resolveTournamentQid(TOURNAMENT_NAMES[tournamentId]);
+    if (!qid) continue;
+    const squad = squads?.[tournamentId] ?? await fetchTournamentSquad(qid);
+    // A squad bigger than any real roster means the query resolved the wrong
+    // set (see fetchTournamentSquad). Report it and write nothing.
+    if (squad.length > MAX_PLAUSIBLE_SQUAD) {
+      unmatched.push({ tournamentId, reason: `implausible squad size ${squad.length}` });
+      continue;
+    }
+    const { matched, unmatched: missed } = matchTournamentSquads(
+      squad.filter(m => m.label), players,
+    );
+    for (const m of matched) {
+      await db.query(
+        `insert into player_tournaments (player_id, tournament_id, source_id)
+         values ($1,$2,$3) on conflict (player_id, tournament_id) do nothing`,
+        [m.playerId, tournamentId, WIKIDATA_SOURCE_ID],
+      );
+      loaded++;
+    }
+    unmatched.push(...missed.map(m => ({ ...m, tournamentId })));
+  }
+  return { tournaments: ids.length, players: loaded, unmatched: unmatched.length };
 }
