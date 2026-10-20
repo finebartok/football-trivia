@@ -137,22 +137,24 @@ for e in rows("game_events.csv.gz"):
 WC2022 = set()
 print("WC2022 membership in this fixture comes from goal events, not Wikidata.")
 
-# --- goals scored aged 30+, from goal events and the player's date of birth
-goals_aged = collections.defaultdict(collections.Counter)
-for e in rows("game_events.csv.gz"):
-    if e.get("type") != "Goals": continue
-    pid = e.get("player_id")
-    comp, date, season = games.get(e.get("game_id"), (None, None, None))
+# --- goals scored aged 30+, from appearance rows in the 2012+ window
+# Rule: calendar-year difference (appearanceYear - birthYear), no birthday adjustment.
+goals_aged = collections.defaultdict(int)
+for a in rows("appearances.csv.gz"):
+    pid = a.get("player_id")
+    date = a.get("date")
     if not pid or not date: continue
+    year = int(date[:4])
+    if year < 2012: continue
     dob = players.get(pid, {}).get("date_of_birth", "")[:4]
     if not dob: continue
-    if int(date[:4]) - int(dob) >= 30:
-        goals_aged[pid]["goals_after_age_30"] += 1
+    if year - int(dob) >= 30:
+        goals_aged[pid] += int(a.get("goals", 0) or 0)
 
 def stats_for(pid):
     st = {}
     if pid in goals_aged:
-        st["goals_after_age_30"] = goals_aged[pid]["goals_after_age_30"]
+        st["goals_after_age_30"] = goals_aged[pid]
     return st
 
 # --- pick a covering set of players
