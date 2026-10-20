@@ -187,6 +187,9 @@ export function normaliseName(s) {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    // An apostrophe inside a name is part of the name, not a word break:
+    // "N'Golo Kante" must fold to "ngolo kante", not "n golo kante".
+    .replace(/['\u2018\u2019\u02bc]/g, '')
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -1864,8 +1867,8 @@ export function answerRound(round, { answer, stage, elapsedMs }) {
 
 - [ ] **Step 4: Run the whole suite**
 
-Run: `npm test`
-Expected: all tests PASS, including the data-spine suite.
+Run: `node --test "tests/**/*.test.js"`
+Expected: all engine tests PASS.
 
 - [ ] **Step 5: Commit**
 
@@ -1878,7 +1881,7 @@ git commit -m "feat(engine): public API - generateQuiz and answerRound"
 
 ## Definition of Done
 
-- `npm test` passes with no skipped tests.
+- `node --test "tests/**/*.test.js"` passes with no skipped tests.
 - `generateQuiz` with the committed fixture returns a ten-round plan for the "La Liga 2010s" scope, with no repeated subject and no consecutively repeated metric.
 - The same `(scope, seed)` always returns an identical plan; a different seed changes more than half the rounds.
 - Every windowed value in a rendered clue names its window; every exact value does not.
