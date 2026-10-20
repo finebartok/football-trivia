@@ -19,7 +19,8 @@
       "SE1": "Allsvenskan",
       "BE1": "Jupiler Pro League",
       "RU1": "Premier Liga",
-      "UKR1": "Premier Liga"
+      "UKR1": "Premier Liga",
+      "GR1": "Super League 1"
     },
     "clubs": [
       {
@@ -1257,6 +1258,302 @@
       {
         "id": 309,
         "name": "Barnsley Yth."
+      },
+      {
+        "id": 310,
+        "name": "Málaga CF"
+      },
+      {
+        "id": 311,
+        "name": "Real Betis"
+      },
+      {
+        "id": 312,
+        "name": "Real Betis Balompié"
+      },
+      {
+        "id": 313,
+        "name": "Valencia B"
+      },
+      {
+        "id": 314,
+        "name": "Valencia U19"
+      },
+      {
+        "id": 315,
+        "name": "Olympiakos Syndesmos Filathlon Peiraios"
+      },
+      {
+        "id": 316,
+        "name": "Cagliari Calcio"
+      },
+      {
+        "id": 317,
+        "name": "Al-Sadd"
+      },
+      {
+        "id": 318,
+        "name": "Oviedo U19"
+      },
+      {
+        "id": 319,
+        "name": "Real Oviedo"
+      },
+      {
+        "id": 320,
+        "name": "Real Oviedo You"
+      },
+      {
+        "id": 321,
+        "name": "Recr. Huelva"
+      },
+      {
+        "id": 322,
+        "name": "Villarreal"
+      },
+      {
+        "id": 323,
+        "name": "Villarreal CF"
+      },
+      {
+        "id": 324,
+        "name": "Villarreal CF B"
+      },
+      {
+        "id": 325,
+        "name": "Porto"
+      },
+      {
+        "id": 326,
+        "name": "RM Castilla"
+      },
+      {
+        "id": 327,
+        "name": "São Paulo"
+      },
+      {
+        "id": 328,
+        "name": "São Paulo U20"
+      },
+      {
+        "id": 329,
+        "name": "B. Dortmund U17"
+      },
+      {
+        "id": 330,
+        "name": "Dortmund Yth."
+      },
+      {
+        "id": 331,
+        "name": "LA Galaxy"
+      },
+      {
+        "id": 332,
+        "name": "LR Ahlen U17"
+      },
+      {
+        "id": 333,
+        "name": "Mönchengladbach"
+      },
+      {
+        "id": 334,
+        "name": "PTSV Dort. Yth."
+      },
+      {
+        "id": 335,
+        "name": "RW Ahlen U17"
+      },
+      {
+        "id": 336,
+        "name": "RW Ahlen U19"
+      },
+      {
+        "id": 337,
+        "name": "Rot Weiss Ahlen"
+      },
+      {
+        "id": 338,
+        "name": "B. Dortmund U19"
+      },
+      {
+        "id": 339,
+        "name": "Eintracht Frankfurt"
+      },
+      {
+        "id": 340,
+        "name": "Frankfurt"
+      },
+      {
+        "id": 341,
+        "name": "Hombr. SV Yth."
+      },
+      {
+        "id": 342,
+        "name": "PSV"
+      },
+      {
+        "id": 343,
+        "name": "PSV Eindhoven"
+      },
+      {
+        "id": 344,
+        "name": "Ronsberg Yth."
+      },
+      {
+        "id": 345,
+        "name": "B. München Yth."
+      },
+      {
+        "id": 346,
+        "name": "FC Bayern II"
+      },
+      {
+        "id": 347,
+        "name": "FC Bayern U17"
+      },
+      {
+        "id": 348,
+        "name": "TSV Pähl Yth."
+      },
+      {
+        "id": 349,
+        "name": "Vancouver"
+      },
+      {
+        "id": 350,
+        "name": "PSG Youth"
+      },
+      {
+        "id": 351,
+        "name": "Paris SG U17"
+      },
+      {
+        "id": 352,
+        "name": "Paris SG U19"
+      },
+      {
+        "id": 353,
+        "name": "US Sénart Jgd"
+      },
+      {
+        "id": 354,
+        "name": "Rennes B"
+      },
+      {
+        "id": 355,
+        "name": "Rennes Jugend"
+      },
+      {
+        "id": 356,
+        "name": "Rennes U17"
+      },
+      {
+        "id": 357,
+        "name": "Stade Rennais"
+      },
+      {
+        "id": 358,
+        "name": "Stade Rennais FC"
+      },
+      {
+        "id": 359,
+        "name": "Évreux Jugend"
+      },
+      {
+        "id": 360,
+        "name": "Como 1907"
+      },
+      {
+        "id": 361,
+        "name": "Lens"
+      },
+      {
+        "id": 362,
+        "name": "RC Lens U19"
+      },
+      {
+        "id": 363,
+        "name": "Atlético Yth."
+      },
+      {
+        "id": 364,
+        "name": "Como"
+      },
+      {
+        "id": 365,
+        "name": "Getafe CF Youth"
+      },
+      {
+        "id": 366,
+        "name": "Real Madrid U18"
+      },
+      {
+        "id": 367,
+        "name": "Real Madrid U19"
+      },
+      {
+        "id": 368,
+        "name": "Valencia"
+      },
+      {
+        "id": 369,
+        "name": "Valencia CF"
+      },
+      {
+        "id": 370,
+        "name": "Valencia CF You"
+      },
+      {
+        "id": 371,
+        "name": "Valencia U18"
+      },
+      {
+        "id": 372,
+        "name": "1.FC Nuremberg"
+      },
+      {
+        "id": 373,
+        "name": "Heßler 06 Yth."
+      },
+      {
+        "id": 374,
+        "name": "SSV Buer Yth."
+      },
+      {
+        "id": 375,
+        "name": "VfL Bochum U17"
+      },
+      {
+        "id": 376,
+        "name": "VfL Bochum U19"
+      },
+      {
+        "id": 377,
+        "name": "Besiktas"
+      },
+      {
+        "id": 378,
+        "name": "Beşiktaş Jimnastik Kulübü"
+      },
+      {
+        "id": 379,
+        "name": "KRC Genk"
+      },
+      {
+        "id": 380,
+        "name": "Nath Boys"
+      },
+      {
+        "id": 381,
+        "name": "Anderlecht U17"
+      },
+      {
+        "id": 382,
+        "name": "Anderlecht Yth."
+      },
+      {
+        "id": 383,
+        "name": "RSC Anderlecht"
       }
     ],
     "windows": {
@@ -3401,6 +3698,432 @@
         "kind": "season",
         "label": "Crystal Palace 22/23",
         "detail": "the season"
+      },
+      "AC Milan 13/14": {
+        "id": "AC Milan 13/14",
+        "kind": "season",
+        "label": "AC Milan 13/14",
+        "detail": "the season"
+      },
+      "Deportivo de La Coruña 12/13": {
+        "id": "Deportivo de La Coruña 12/13",
+        "kind": "season",
+        "label": "Deportivo de La Coruña 12/13",
+        "detail": "the season"
+      },
+      "Sevilla FC 14/15": {
+        "id": "Sevilla FC 14/15",
+        "kind": "season",
+        "label": "Sevilla FC 14/15",
+        "detail": "the season"
+      },
+      "Real Sociedad 14/15": {
+        "id": "Real Sociedad 14/15",
+        "kind": "season",
+        "label": "Real Sociedad 14/15",
+        "detail": "the season"
+      },
+      "Valencia CF 19/20": {
+        "id": "Valencia CF 19/20",
+        "kind": "season",
+        "label": "Valencia CF 19/20",
+        "detail": "the season"
+      },
+      "Athletic Bilbao 20/21": {
+        "id": "Athletic Bilbao 20/21",
+        "kind": "season",
+        "label": "Athletic Bilbao 20/21",
+        "detail": "the season"
+      },
+      "Málaga CF 12/13": {
+        "id": "Málaga CF 12/13",
+        "kind": "season",
+        "label": "Málaga CF 12/13",
+        "detail": "the season"
+      },
+      "Sevilla FC 22/23": {
+        "id": "Sevilla FC 22/23",
+        "kind": "season",
+        "label": "Sevilla FC 22/23",
+        "detail": "the season"
+      },
+      "Real Betis Balompié 23/24": {
+        "id": "Real Betis Balompié 23/24",
+        "kind": "season",
+        "label": "Real Betis Balompié 23/24",
+        "detail": "the season"
+      },
+      "Real Betis Balompié 24/25": {
+        "id": "Real Betis Balompié 24/25",
+        "kind": "season",
+        "label": "Real Betis Balompié 24/25",
+        "detail": "the season"
+      },
+      "Real Betis Balompié 25/26": {
+        "id": "Real Betis Balompié 25/26",
+        "kind": "season",
+        "label": "Real Betis Balompié 25/26",
+        "detail": "the season"
+      },
+      "SSC Napoli 13/14": {
+        "id": "SSC Napoli 13/14",
+        "kind": "season",
+        "label": "SSC Napoli 13/14",
+        "detail": "the season"
+      },
+      "SSC Napoli 14/15": {
+        "id": "SSC Napoli 14/15",
+        "kind": "season",
+        "label": "SSC Napoli 14/15",
+        "detail": "the season"
+      },
+      "SSC Napoli 15/16": {
+        "id": "SSC Napoli 15/16",
+        "kind": "season",
+        "label": "SSC Napoli 15/16",
+        "detail": "the season"
+      },
+      "Juventus FC 16/17": {
+        "id": "Juventus FC 16/17",
+        "kind": "season",
+        "label": "Juventus FC 16/17",
+        "detail": "the season"
+      },
+      "Juventus FC 17/18": {
+        "id": "Juventus FC 17/18",
+        "kind": "season",
+        "label": "Juventus FC 17/18",
+        "detail": "the season"
+      },
+      "Olympiakos Syndesmos Filathlon Peiraios 22/23": {
+        "id": "Olympiakos Syndesmos Filathlon Peiraios 22/23",
+        "kind": "season",
+        "label": "Olympiakos Syndesmos Filathlon Peiraios 22/23",
+        "detail": "the season"
+      },
+      "FK Spartak Moskva 12/13": {
+        "id": "FK Spartak Moskva 12/13",
+        "kind": "season",
+        "label": "FK Spartak Moskva 12/13",
+        "detail": "the season"
+      },
+      "FC Nantes 18/19": {
+        "id": "FC Nantes 18/19",
+        "kind": "season",
+        "label": "FC Nantes 18/19",
+        "detail": "the season"
+      },
+      "Atlético de Madrid 13/14": {
+        "id": "Atlético de Madrid 13/14",
+        "kind": "season",
+        "label": "Atlético de Madrid 13/14",
+        "detail": "the season"
+      },
+      "RCD Espanyol Barcelona 18/19": {
+        "id": "RCD Espanyol Barcelona 18/19",
+        "kind": "season",
+        "label": "RCD Espanyol Barcelona 18/19",
+        "detail": "the season"
+      },
+      "Cagliari Calcio 20/21": {
+        "id": "Cagliari Calcio 20/21",
+        "kind": "season",
+        "label": "Cagliari Calcio 20/21",
+        "detail": "the season"
+      },
+      "Villarreal CF 18/19": {
+        "id": "Villarreal CF 18/19",
+        "kind": "season",
+        "label": "Villarreal CF 18/19",
+        "detail": "the season"
+      },
+      "Villarreal CF 19/20": {
+        "id": "Villarreal CF 19/20",
+        "kind": "season",
+        "label": "Villarreal CF 19/20",
+        "detail": "the season"
+      },
+      "FC Porto 14/15": {
+        "id": "FC Porto 14/15",
+        "kind": "season",
+        "label": "FC Porto 14/15",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 14/15": {
+        "id": "Borussia Dortmund 14/15",
+        "kind": "season",
+        "label": "Borussia Dortmund 14/15",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 15/16": {
+        "id": "Borussia Dortmund 15/16",
+        "kind": "season",
+        "label": "Borussia Dortmund 15/16",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 16/17": {
+        "id": "Borussia Dortmund 16/17",
+        "kind": "season",
+        "label": "Borussia Dortmund 16/17",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 18/19": {
+        "id": "Borussia Dortmund 18/19",
+        "kind": "season",
+        "label": "Borussia Dortmund 18/19",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 19/20": {
+        "id": "Borussia Dortmund 19/20",
+        "kind": "season",
+        "label": "Borussia Dortmund 19/20",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 20/21": {
+        "id": "Borussia Dortmund 20/21",
+        "kind": "season",
+        "label": "Borussia Dortmund 20/21",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 21/22": {
+        "id": "Borussia Dortmund 21/22",
+        "kind": "season",
+        "label": "Borussia Dortmund 21/22",
+        "detail": "the season"
+      },
+      "Ajax Amsterdam 21/22": {
+        "id": "Ajax Amsterdam 21/22",
+        "kind": "season",
+        "label": "Ajax Amsterdam 21/22",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 22/23": {
+        "id": "Borussia Dortmund 22/23",
+        "kind": "season",
+        "label": "Borussia Dortmund 22/23",
+        "detail": "the season"
+      },
+      "Borussia Dortmund 23/24": {
+        "id": "Borussia Dortmund 23/24",
+        "kind": "season",
+        "label": "Borussia Dortmund 23/24",
+        "detail": "the season"
+      },
+      "Los Angeles Galaxy 24/25": {
+        "id": "Los Angeles Galaxy 24/25",
+        "kind": "season",
+        "label": "Los Angeles Galaxy 24/25",
+        "detail": "the season"
+      },
+      "Los Angeles Galaxy 25/26": {
+        "id": "Los Angeles Galaxy 25/26",
+        "kind": "season",
+        "label": "Los Angeles Galaxy 25/26",
+        "detail": "the season"
+      },
+      "PSV Eindhoven 20/21": {
+        "id": "PSV Eindhoven 20/21",
+        "kind": "season",
+        "label": "PSV Eindhoven 20/21",
+        "detail": "the season"
+      },
+      "PSV Eindhoven 21/22": {
+        "id": "PSV Eindhoven 21/22",
+        "kind": "season",
+        "label": "PSV Eindhoven 21/22",
+        "detail": "the season"
+      },
+      "Eintracht Frankfurt 22/23": {
+        "id": "Eintracht Frankfurt 22/23",
+        "kind": "season",
+        "label": "Eintracht Frankfurt 22/23",
+        "detail": "the season"
+      },
+      "Eintracht Frankfurt 23/24": {
+        "id": "Eintracht Frankfurt 23/24",
+        "kind": "season",
+        "label": "Eintracht Frankfurt 23/24",
+        "detail": "the season"
+      },
+      "Eintracht Frankfurt 24/25": {
+        "id": "Eintracht Frankfurt 24/25",
+        "kind": "season",
+        "label": "Eintracht Frankfurt 24/25",
+        "detail": "the season"
+      },
+      "Hamburger SV 15/16": {
+        "id": "Hamburger SV 15/16",
+        "kind": "season",
+        "label": "Hamburger SV 15/16",
+        "detail": "the season"
+      },
+      "ACF Fiorentina 24/25": {
+        "id": "ACF Fiorentina 24/25",
+        "kind": "season",
+        "label": "ACF Fiorentina 24/25",
+        "detail": "the season"
+      },
+      "Associazione Sportiva Roma 24/25": {
+        "id": "Associazione Sportiva Roma 24/25",
+        "kind": "season",
+        "label": "Associazione Sportiva Roma 24/25",
+        "detail": "the season"
+      },
+      "Bayer 04 Leverkusen 21/22": {
+        "id": "Bayer 04 Leverkusen 21/22",
+        "kind": "season",
+        "label": "Bayer 04 Leverkusen 21/22",
+        "detail": "the season"
+      },
+      "Vancouver Whitecaps FC 24/25": {
+        "id": "Vancouver Whitecaps FC 24/25",
+        "kind": "season",
+        "label": "Vancouver Whitecaps FC 24/25",
+        "detail": "the season"
+      },
+      "Vancouver Whitecaps FC 25/26": {
+        "id": "Vancouver Whitecaps FC 25/26",
+        "kind": "season",
+        "label": "Vancouver Whitecaps FC 25/26",
+        "detail": "the season"
+      },
+      "Stade Rennais FC 15/16": {
+        "id": "Stade Rennais FC 15/16",
+        "kind": "season",
+        "label": "Stade Rennais FC 15/16",
+        "detail": "the season"
+      },
+      "FC Schalke 04 13/14": {
+        "id": "FC Schalke 04 13/14",
+        "kind": "season",
+        "label": "FC Schalke 04 13/14",
+        "detail": "the season"
+      },
+      "Valencia CF 20/21": {
+        "id": "Valencia CF 20/21",
+        "kind": "season",
+        "label": "Valencia CF 20/21",
+        "detail": "the season"
+      },
+      "FC Shakhtar Donetsk 20/21": {
+        "id": "FC Shakhtar Donetsk 20/21",
+        "kind": "season",
+        "label": "FC Shakhtar Donetsk 20/21",
+        "detail": "the season"
+      },
+      "Leeds United 22/23": {
+        "id": "Leeds United 22/23",
+        "kind": "season",
+        "label": "Leeds United 22/23",
+        "detail": "the season"
+      },
+      "Atlético de Madrid 19/20": {
+        "id": "Atlético de Madrid 19/20",
+        "kind": "season",
+        "label": "Atlético de Madrid 19/20",
+        "detail": "the season"
+      },
+      "AC Milan 24/25": {
+        "id": "AC Milan 24/25",
+        "kind": "season",
+        "label": "AC Milan 24/25",
+        "detail": "the season"
+      },
+      "Como 1907 25/26": {
+        "id": "Como 1907 25/26",
+        "kind": "season",
+        "label": "Como 1907 25/26",
+        "detail": "the season"
+      },
+      "Valencia CF 18/19": {
+        "id": "Valencia CF 18/19",
+        "kind": "season",
+        "label": "Valencia CF 18/19",
+        "detail": "the season"
+      },
+      "KRC Genk 15/16": {
+        "id": "KRC Genk 15/16",
+        "kind": "season",
+        "label": "KRC Genk 15/16",
+        "detail": "the season"
+      },
+      "KRC Genk 16/17": {
+        "id": "KRC Genk 16/17",
+        "kind": "season",
+        "label": "KRC Genk 16/17",
+        "detail": "the season"
+      },
+      "Leicester City 18/19": {
+        "id": "Leicester City 18/19",
+        "kind": "season",
+        "label": "Leicester City 18/19",
+        "detail": "the season"
+      },
+      "Leicester City 19/20": {
+        "id": "Leicester City 19/20",
+        "kind": "season",
+        "label": "Leicester City 19/20",
+        "detail": "the season"
+      },
+      "Leicester City 20/21": {
+        "id": "Leicester City 20/21",
+        "kind": "season",
+        "label": "Leicester City 20/21",
+        "detail": "the season"
+      },
+      "Leicester City 21/22": {
+        "id": "Leicester City 21/22",
+        "kind": "season",
+        "label": "Leicester City 21/22",
+        "detail": "the season"
+      },
+      "Leicester City 22/23": {
+        "id": "Leicester City 22/23",
+        "kind": "season",
+        "label": "Leicester City 22/23",
+        "detail": "the season"
+      },
+      "Leicester City 23/24": {
+        "id": "Leicester City 23/24",
+        "kind": "season",
+        "label": "Leicester City 23/24",
+        "detail": "the season"
+      },
+      "Beşiktaş Jimnastik Kulübü 25/26": {
+        "id": "Beşiktaş Jimnastik Kulübü 25/26",
+        "kind": "season",
+        "label": "Beşiktaş Jimnastik Kulübü 25/26",
+        "detail": "the season"
+      },
+      "RSC Anderlecht 14/15": {
+        "id": "RSC Anderlecht 14/15",
+        "kind": "season",
+        "label": "RSC Anderlecht 14/15",
+        "detail": "the season"
+      },
+      "RSC Anderlecht 15/16": {
+        "id": "RSC Anderlecht 15/16",
+        "kind": "season",
+        "label": "RSC Anderlecht 15/16",
+        "detail": "the season"
+      },
+      "RSC Anderlecht 16/17": {
+        "id": "RSC Anderlecht 16/17",
+        "kind": "season",
+        "label": "RSC Anderlecht 16/17",
+        "detail": "the season"
+      },
+      "AS Monaco 17/18": {
+        "id": "AS Monaco 17/18",
+        "kind": "season",
+        "label": "AS Monaco 17/18",
+        "detail": "the season"
+      },
+      "AS Monaco 18/19": {
+        "id": "AS Monaco 18/19",
+        "kind": "season",
+        "label": "AS Monaco 18/19",
+        "detail": "the season"
       }
     },
     "tournaments": [
@@ -3530,6 +4253,9 @@
         "wc-2026": {
           "goals": 6
         }
+      },
+      "stats": {
+        "goals_after_age_30": 285
       }
     },
     {
@@ -3657,6 +4383,9 @@
         "wc-2010": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 362
       }
     },
     {
@@ -3763,7 +4492,8 @@
         "wc-2026": {
           "goals": 4
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 148455,
@@ -3896,6 +4626,9 @@
         "wc-2026": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 112
       }
     },
     {
@@ -4019,6 +4752,9 @@
         "SK Slavia Prague 25/26": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 340
       }
     },
     {
@@ -4157,6 +4893,9 @@
         "wc-2026": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 56
       }
     },
     {
@@ -4285,6 +5024,9 @@
         "wc-2026": {
           "goals": 3
         }
+      },
+      "stats": {
+        "goals_after_age_30": 167
       }
     },
     {
@@ -4403,6 +5145,9 @@
         "Club Internacional de Fútbol Miami 24/25": {
           "goals": 10
         }
+      },
+      "stats": {
+        "goals_after_age_30": 150
       }
     },
     {
@@ -4502,6 +5247,9 @@
         "Santos Futebol Clube 25/26": {
           "goals": 4
         }
+      },
+      "stats": {
+        "goals_after_age_30": 41
       }
     },
     {
@@ -4516,8 +5264,8 @@
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 173,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 80000000,
       "marketValueEur": 15000000,
       "teams": [
@@ -4577,6 +5325,9 @@
         "FC Barcelona 21/22": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 72
       }
     },
     {
@@ -4670,6 +5421,9 @@
         "Al-Hilal Saudi Football Club 25/26": {
           "goals": 9
         }
+      },
+      "stats": {
+        "goals_after_age_30": 227
       }
     },
     {
@@ -4771,6 +5525,9 @@
         "AC Milan 25/26": {
           "goals": 2
         }
+      },
+      "stats": {
+        "goals_after_age_30": 43
       }
     },
     {
@@ -4785,8 +5542,8 @@
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 183,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 80000000,
       "marketValueEur": 10000000,
       "teams": [
@@ -4871,6 +5628,9 @@
         "Real Madrid 23/24": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 12
       }
     },
     {
@@ -4885,8 +5645,8 @@
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 186,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 90000000,
       "marketValueEur": 2000000,
       "teams": [
@@ -4961,6 +5721,9 @@
         "wc-2022": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 24
       }
     },
     {
@@ -5082,6 +5845,9 @@
         "CF Monterrey 24/25": {
           "goals": 2
         }
+      },
+      "stats": {
+        "goals_after_age_30": 64
       }
     },
     {
@@ -5201,6 +5967,9 @@
         "wc-2026": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 23
       }
     },
     {
@@ -5319,6 +6088,9 @@
         "Al-Nassr Football Club 25/26": {
           "goals": 10
         }
+      },
+      "stats": {
+        "goals_after_age_30": 52
       }
     },
     {
@@ -5333,8 +6105,8 @@
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 175,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 150000000,
       "marketValueEur": 5000000,
       "teams": [
@@ -5408,6 +6180,9 @@
         "Real Madrid 22/23": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 4
       }
     },
     {
@@ -5518,6 +6293,9 @@
         "Inter Milan 25/26": {
           "goals": 12
         }
+      },
+      "stats": {
+        "goals_after_age_30": 31
       }
     },
     {
@@ -5532,8 +6310,8 @@
       "subPosition": "Central Midfield",
       "foot": "left",
       "heightCm": 170,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 12000000,
       "marketValueEur": 500000,
       "teams": [
@@ -5603,6 +6381,9 @@
         "Fenerbahce 19/20": {
           "goals": 3
         }
+      },
+      "stats": {
+        "goals_after_age_30": 32
       }
     },
     {
@@ -5721,6 +6502,9 @@
         "Konyaspor 25/26": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 3
       }
     },
     {
@@ -5735,8 +6519,8 @@
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 195,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 46000000,
       "marketValueEur": 2000000,
       "teams": [
@@ -5808,6 +6592,9 @@
         "AC Milan 22/23": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 199
       }
     },
     {
@@ -5919,6 +6706,9 @@
         "Atlético de Madrid 25/26": {
           "goals": 15
         }
+      },
+      "stats": {
+        "goals_after_age_30": 95
       }
     },
     {
@@ -6019,7 +6809,8 @@
         "Manchester United 21/22": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 258923,
@@ -6123,7 +6914,8 @@
         "wc-2026": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 82442,
@@ -6251,6 +7043,9 @@
         "LOSC Lille 25/26": {
           "goals": 11
         }
+      },
+      "stats": {
+        "goals_after_age_30": 140
       }
     },
     {
@@ -6312,7 +7107,8 @@
         "Atlético de Madrid 25/26": {
           "goals": 20
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 139503,
@@ -6410,6 +7206,9 @@
         "CF Pachuca 25/26": {
           "goals": 2
         }
+      },
+      "stats": {
+        "goals_after_age_30": 62
       }
     },
     {
@@ -6482,7 +7281,8 @@
         "Paris Saint-Germain 25/26": {
           "goals": 11
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 108390,
@@ -6497,7 +7297,7 @@
       "foot": "left",
       "heightCm": 199,
       "internationalCaps": 115,
-      "internationalGoals": 0,
+      "internationalGoals": null,
       "highestMarketValueEur": 75000000,
       "marketValueEur": 15000000,
       "teams": [
@@ -6551,6 +7351,9 @@
         "RCD Espanyol Barcelona 24/25": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 1
       }
     },
     {
@@ -6566,7 +7369,7 @@
       "foot": "right",
       "heightCm": 188,
       "internationalCaps": 84,
-      "internationalGoals": 0,
+      "internationalGoals": null,
       "highestMarketValueEur": 100000000,
       "marketValueEur": 15000000,
       "teams": [
@@ -6619,6 +7422,9 @@
         "Real Madrid 23/24": {
           "goals": 1
         }
+      },
+      "stats": {
+        "goals_after_age_30": 1
       }
     },
     {
@@ -6634,7 +7440,7 @@
       "foot": "right",
       "heightCm": 193,
       "internationalCaps": 128,
-      "internationalGoals": 0,
+      "internationalGoals": null,
       "highestMarketValueEur": 45000000,
       "marketValueEur": 4000000,
       "teams": [
@@ -6674,7 +7480,8 @@
         }
       ],
       "tournaments": [],
-      "windows": {}
+      "windows": {},
+      "stats": {}
     },
     {
       "id": 29035,
@@ -6688,8 +7495,8 @@
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 181,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 11000000,
       "marketValueEur": 700000,
       "teams": [
@@ -6717,7 +7524,8 @@
         "Società Sportiva Lazio S.p.A. 14/15": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 371998,
@@ -6789,7 +7597,8 @@
         "wc-2026": {
           "goals": 4
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 683840,
@@ -6853,7 +7662,8 @@
         "FC Barcelona 25/26": {
           "goals": 2
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 646740,
@@ -6906,7 +7716,8 @@
         "FC Barcelona 24/25": {
           "goals": 3
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 326330,
@@ -7000,7 +7811,8 @@
         "FC Barcelona 25/26": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 240306,
@@ -7121,6 +7933,9 @@
         "Manchester United 25/26": {
           "goals": 9
         }
+      },
+      "stats": {
+        "goals_after_age_30": 37
       }
     },
     {
@@ -7218,6 +8033,9 @@
         "Manchester City 25/26": {
           "goals": 4
         }
+      },
+      "stats": {
+        "goals_after_age_30": 15
       }
     },
     {
@@ -7232,8 +8050,8 @@
       "subPosition": "Centre-Back",
       "foot": "right",
       "heightCm": 185,
-      "internationalCaps": 0,
-      "internationalGoals": 0,
+      "internationalCaps": null,
+      "internationalGoals": null,
       "highestMarketValueEur": 2000000,
       "marketValueEur": 250000,
       "teams": [
@@ -7249,7 +8067,8 @@
         }
       ],
       "tournaments": [],
-      "windows": {}
+      "windows": {},
+      "stats": {}
     },
     {
       "id": 171424,
@@ -7346,6 +8165,9 @@
         "wc-2026": {
           "goals": 2
         }
+      },
+      "stats": {
+        "goals_after_age_30": 61
       }
     },
     {
@@ -7465,7 +8287,8 @@
         "wc-2026": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 401923,
@@ -7565,7 +8388,8 @@
         "Galatasaray 25/26": {
           "goals": 22
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 502670,
@@ -7655,7 +8479,8 @@
         "Paris Saint-Germain 25/26": {
           "goals": 19
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 341092,
@@ -7747,7 +8572,8 @@
         "Liverpool FC 25/26": {
           "goals": 3
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 406625,
@@ -7815,7 +8641,8 @@
         "wc-2026": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 709187,
@@ -7866,7 +8693,8 @@
         "Athletic Bilbao 25/26": {
           "goals": 6
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 351478,
@@ -7955,7 +8783,8 @@
         "CA Osasuna 25/26": {
           "goals": 1
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 357662,
@@ -8028,7 +8857,8 @@
         "Arsenal FC 25/26": {
           "goals": 5
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 433177,
@@ -8105,7 +8935,8 @@
         "Arsenal FC 25/26": {
           "goals": 11
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 324358,
@@ -8163,6 +8994,9 @@
         "Aston Villa 25/26": {
           "goals": 21
         }
+      },
+      "stats": {
+        "goals_after_age_30": 30
       }
     },
     {
@@ -8236,6 +9070,9 @@
         "West Ham United 25/26": {
           "goals": 11
         }
+      },
+      "stats": {
+        "goals_after_age_30": 5
       }
     },
     {
@@ -8305,7 +9142,8 @@
         "Manchester City 25/26": {
           "goals": 13
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 567576,
@@ -8320,7 +9158,7 @@
       "foot": "right",
       "heightCm": 179,
       "internationalCaps": 14,
-      "internationalGoals": 0,
+      "internationalGoals": null,
       "highestMarketValueEur": 75000000,
       "marketValueEur": 75000000,
       "teams": [
@@ -8356,7 +9194,8 @@
         "Nottingham Forest 25/26": {
           "goals": 4
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 504849,
@@ -8416,7 +9255,8 @@
         "Brighton & Hove Albion 25/26": {
           "goals": 3
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 176553,
@@ -8502,6 +9342,9 @@
         "Al-Nassr Football Club 24/25": {
           "goals": 4
         }
+      },
+      "stats": {
+        "goals_after_age_30": 4
       }
     },
     {
@@ -8599,7 +9442,8 @@
         "Manchester City 25/26": {
           "goals": 2
         }
-      }
+      },
+      "stats": {}
     },
     {
       "id": 186590,
@@ -8687,7 +9531,2448 @@
         "Manchester City 24/25": {
           "goals": 3
         }
+      },
+      "stats": {
+        "goals_after_age_30": 4
       }
+    },
+    {
+      "id": 7600,
+      "slug": "andres-iniesta",
+      "name": "Andrés Iniesta",
+      "dateOfBirth": "1984-05-11",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Midfield",
+      "subPosition": "Central Midfield",
+      "foot": "both",
+      "heightCm": 171,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 70000000,
+      "marketValueEur": 800000,
+      "teams": [
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2010"
+      ],
+      "windows": {
+        "wc-2010": {
+          "goals": 2
+        },
+        "FC Barcelona 12/13": {
+          "goals": 6
+        },
+        "FC Barcelona 13/14": {
+          "goals": 3
+        },
+        "FC Barcelona 14/15": {
+          "goals": 3
+        },
+        "FC Barcelona 15/16": {
+          "goals": 1
+        },
+        "FC Barcelona 16/17": {
+          "goals": 1
+        },
+        "FC Barcelona 17/18": {
+          "goals": 2
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 9
+      }
+    },
+    {
+      "id": 65230,
+      "slug": "sergio-busquets",
+      "name": "Sergio Busquets",
+      "dateOfBirth": "1988-07-16",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Midfield",
+      "subPosition": "Defensive Midfield",
+      "foot": "right",
+      "heightCm": 189,
+      "internationalCaps": 143,
+      "internationalGoals": 2,
+      "highestMarketValueEur": 80000000,
+      "marketValueEur": 3500000,
+      "teams": [
+        {
+          "clubId": 7,
+          "clubName": "Club Internacional de Fútbol Miami",
+          "leagueId": "MLS1",
+          "leagueName": "MLS",
+          "seasons": [
+            2025
+          ]
+        },
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "FC Barcelona 12/13": {
+          "goals": 1
+        },
+        "FC Barcelona 13/14": {
+          "goals": 3
+        },
+        "FC Barcelona 14/15": {
+          "goals": 1
+        },
+        "FC Barcelona 17/18": {
+          "goals": 1
+        },
+        "FC Barcelona 19/20": {
+          "goals": 2
+        },
+        "FC Barcelona 21/22": {
+          "goals": 3
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 5
+      }
+    },
+    {
+      "id": 18944,
+      "slug": "gerard-pique",
+      "name": "Gerard Piqué",
+      "dateOfBirth": "1987-02-02",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Defender",
+      "subPosition": "Centre-Back",
+      "foot": "right",
+      "heightCm": 194,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 50000000,
+      "marketValueEur": 3000000,
+      "teams": [
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "FC Barcelona 12/13": {
+          "goals": 3
+        },
+        "Bayern Munich 12/13": {
+          "goals": 1
+        },
+        "FC Barcelona 13/14": {
+          "goals": 4
+        },
+        "AC Milan 13/14": {
+          "goals": 1
+        },
+        "FC Barcelona 14/15": {
+          "goals": 7
+        },
+        "FC Barcelona 15/16": {
+          "goals": 5
+        },
+        "FC Barcelona 16/17": {
+          "goals": 3
+        },
+        "Real Madrid 17/18": {
+          "goals": 1
+        },
+        "FC Barcelona 17/18": {
+          "goals": 5
+        },
+        "FC Barcelona 18/19": {
+          "goals": 7
+        },
+        "FC Barcelona 19/20": {
+          "goals": 1
+        },
+        "FC Barcelona 20/21": {
+          "goals": 2
+        },
+        "FC Barcelona 21/22": {
+          "goals": 3
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 19
+      }
+    },
+    {
+      "id": 69751,
+      "slug": "jordi-alba",
+      "name": "Jordi Alba",
+      "dateOfBirth": "1989-03-21",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Defender",
+      "subPosition": "Left-Back",
+      "foot": "left",
+      "heightCm": 170,
+      "internationalCaps": 93,
+      "internationalGoals": 9,
+      "highestMarketValueEur": 70000000,
+      "marketValueEur": 4000000,
+      "teams": [
+        {
+          "clubId": 7,
+          "clubName": "Club Internacional de Fútbol Miami",
+          "leagueId": "MLS1",
+          "leagueName": "MLS",
+          "seasons": [
+            2025
+          ]
+        },
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "FC Barcelona 12/13": {
+          "goals": 5
+        },
+        "Deportivo de La Coruña 12/13": {
+          "goals": 1
+        },
+        "FC Barcelona 14/15": {
+          "goals": 2
+        },
+        "Sevilla FC 14/15": {
+          "goals": 1
+        },
+        "Real Sociedad 14/15": {
+          "goals": 1
+        },
+        "FC Barcelona 15/16": {
+          "goals": 1
+        },
+        "FC Barcelona 16/17": {
+          "goals": 1
+        },
+        "FC Barcelona 17/18": {
+          "goals": 3
+        },
+        "FC Barcelona 18/19": {
+          "goals": 3
+        },
+        "FC Barcelona 19/20": {
+          "goals": 2
+        },
+        "Valencia CF 19/20": {
+          "goals": 1
+        },
+        "FC Barcelona 20/21": {
+          "goals": 5
+        },
+        "Athletic Bilbao 20/21": {
+          "goals": 1
+        },
+        "FC Barcelona 21/22": {
+          "goals": 3
+        },
+        "FC Barcelona 22/23": {
+          "goals": 2
+        },
+        "Club Internacional de Fútbol Miami 24/25": {
+          "goals": 6
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 21
+      }
+    },
+    {
+      "id": 85288,
+      "slug": "isco",
+      "name": "Isco",
+      "dateOfBirth": "1992-04-21",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Midfield",
+      "subPosition": "Attacking Midfield",
+      "foot": "right",
+      "heightCm": 176,
+      "internationalCaps": 39,
+      "internationalGoals": 12,
+      "highestMarketValueEur": 90000000,
+      "marketValueEur": 3500000,
+      "teams": [
+        {
+          "clubId": 310,
+          "clubName": "Málaga CF",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2011,
+            2012,
+            2013
+          ]
+        },
+        {
+          "clubId": 312,
+          "clubName": "Real Betis Balompié",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ]
+        },
+        {
+          "clubId": 108,
+          "clubName": "Sevilla FC",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2022
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2018"
+      ],
+      "windows": {
+        "Málaga CF 12/13": {
+          "goals": 12
+        },
+        "Real Madrid 13/14": {
+          "goals": 11
+        },
+        "Real Madrid 14/15": {
+          "goals": 6
+        },
+        "Real Madrid 15/16": {
+          "goals": 5
+        },
+        "Real Madrid 16/17": {
+          "goals": 11
+        },
+        "Real Madrid 17/18": {
+          "goals": 9
+        },
+        "wc-2018": {
+          "goals": 1
+        },
+        "Real Madrid 18/19": {
+          "goals": 6
+        },
+        "Real Madrid 19/20": {
+          "goals": 3
+        },
+        "Real Madrid 21/22": {
+          "goals": 2
+        },
+        "Sevilla FC 22/23": {
+          "goals": 1
+        },
+        "Real Betis Balompié 23/24": {
+          "goals": 9
+        },
+        "Real Betis Balompié 24/25": {
+          "goals": 12
+        },
+        "Real Betis Balompié 25/26": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 24
+      }
+    },
+    {
+      "id": 39153,
+      "slug": "gonzalo-higuain",
+      "name": "Gonzalo Higuaín",
+      "dateOfBirth": "1987-12-10",
+      "citizenship": [
+        "Argentina"
+      ],
+      "position": "Attack",
+      "subPosition": "Centre-Forward",
+      "foot": "right",
+      "heightCm": 184,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 75000000,
+      "marketValueEur": 1000000,
+      "teams": [
+        {
+          "clubId": 93,
+          "clubName": "AC Milan",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 37,
+          "clubName": "Chelsea FC",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2019
+          ]
+        },
+        {
+          "clubId": 16,
+          "clubName": "Juventus FC",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013
+          ]
+        },
+        {
+          "clubId": 61,
+          "clubName": "SSC Napoli",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2013,
+            2014,
+            2015,
+            2016
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2010",
+        "wc-2014"
+      ],
+      "windows": {
+        "wc-2010": {
+          "goals": 4
+        },
+        "Real Madrid 12/13": {
+          "goals": 18
+        },
+        "SSC Napoli 13/14": {
+          "goals": 24
+        },
+        "wc-2014": {
+          "goals": 1
+        },
+        "SSC Napoli 14/15": {
+          "goals": 29
+        },
+        "SSC Napoli 15/16": {
+          "goals": 38
+        },
+        "Juventus FC 16/17": {
+          "goals": 32
+        },
+        "Juventus FC 17/18": {
+          "goals": 23
+        },
+        "Chelsea FC 18/19": {
+          "goals": 5
+        },
+        "AC Milan 18/19": {
+          "goals": 8
+        },
+        "Juventus FC 19/20": {
+          "goals": 11
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 66
+      }
+    },
+    {
+      "id": 44501,
+      "slug": "marcelo",
+      "name": "Marcelo",
+      "dateOfBirth": "1988-05-12",
+      "citizenship": [
+        "Brazil"
+      ],
+      "position": "Defender",
+      "subPosition": "Left-Back",
+      "foot": "left",
+      "heightCm": 174,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 70000000,
+      "marketValueEur": 1800000,
+      "teams": [
+        {
+          "clubId": 315,
+          "clubName": "Olympiakos Syndesmos Filathlon Peiraios",
+          "leagueId": "GR1",
+          "leagueName": "Super League 1",
+          "seasons": [
+            2022,
+            2023
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2014"
+      ],
+      "windows": {
+        "Real Madrid 12/13": {
+          "goals": 1
+        },
+        "Real Madrid 13/14": {
+          "goals": 2
+        },
+        "wc-2014": {
+          "goals": 1
+        },
+        "Real Madrid 14/15": {
+          "goals": 4
+        },
+        "Real Madrid 15/16": {
+          "goals": 2
+        },
+        "Real Madrid 16/17": {
+          "goals": 3
+        },
+        "Real Madrid 17/18": {
+          "goals": 5
+        },
+        "Real Madrid 18/19": {
+          "goals": 3
+        },
+        "Real Madrid 19/20": {
+          "goals": 2
+        },
+        "Olympiakos Syndesmos Filathlon Peiraios 22/23": {
+          "goals": 3
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 12
+      }
+    },
+    {
+      "id": 15951,
+      "slug": "dani-alves",
+      "name": "Dani Alves",
+      "dateOfBirth": "1983-05-06",
+      "citizenship": [
+        "Brazil"
+      ],
+      "position": "Defender",
+      "subPosition": "Right-Back",
+      "foot": "right",
+      "heightCm": 172,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 36000000,
+      "marketValueEur": 1000000,
+      "teams": [
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2022
+          ]
+        },
+        {
+          "clubId": 16,
+          "clubName": "Juventus FC",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2016,
+            2017
+          ]
+        },
+        {
+          "clubId": 12,
+          "clubName": "Paris Saint-Germain",
+          "leagueId": "FR1",
+          "leagueName": "Ligue 1",
+          "seasons": [
+            2017,
+            2018,
+            2019
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "FK Spartak Moskva 12/13": {
+          "goals": 1
+        },
+        "FC Barcelona 12/13": {
+          "goals": 1
+        },
+        "FC Barcelona 13/14": {
+          "goals": 4
+        },
+        "FC Barcelona 15/16": {
+          "goals": 1
+        },
+        "Juventus FC 16/17": {
+          "goals": 6
+        },
+        "Paris Saint-Germain 17/18": {
+          "goals": 4
+        },
+        "Paris Saint-Germain 18/19": {
+          "goals": 1
+        },
+        "FC Nantes 18/19": {
+          "goals": 1
+        },
+        "FC Barcelona 21/22": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 18
+      }
+    },
+    {
+      "id": 54928,
+      "slug": "diego-godin",
+      "name": "Diego Godín",
+      "dateOfBirth": "1986-02-16",
+      "citizenship": [
+        "Uruguay"
+      ],
+      "position": "Defender",
+      "subPosition": "Centre-Back",
+      "foot": "right",
+      "heightCm": 187,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 40000000,
+      "marketValueEur": 300000,
+      "teams": [
+        {
+          "clubId": 80,
+          "clubName": "Atlético de Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 316,
+          "clubName": "Cagliari Calcio",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2020,
+            2021
+          ]
+        },
+        {
+          "clubId": 130,
+          "clubName": "Inter Milan",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2019,
+            2020
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2014"
+      ],
+      "windows": {
+        "Atlético de Madrid 12/13": {
+          "goals": 1
+        },
+        "Atlético de Madrid 13/14": {
+          "goals": 8
+        },
+        "wc-2014": {
+          "goals": 1
+        },
+        "Atlético de Madrid 14/15": {
+          "goals": 4
+        },
+        "Atlético de Madrid 15/16": {
+          "goals": 1
+        },
+        "Atlético de Madrid 16/17": {
+          "goals": 3
+        },
+        "Atlético de Madrid 17/18": {
+          "goals": 1
+        },
+        "Atlético de Madrid 18/19": {
+          "goals": 4
+        },
+        "RCD Espanyol Barcelona 18/19": {
+          "goals": 1
+        },
+        "Inter Milan 19/20": {
+          "goals": 2
+        },
+        "Cagliari Calcio 20/21": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 12
+      }
+    },
+    {
+      "id": 15799,
+      "slug": "santi-cazorla",
+      "name": "Santi Cazorla",
+      "dateOfBirth": "1984-12-13",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Midfield",
+      "subPosition": "Central Midfield",
+      "foot": "both",
+      "heightCm": 168,
+      "internationalCaps": 81,
+      "internationalGoals": 15,
+      "highestMarketValueEur": 30000000,
+      "marketValueEur": 200000,
+      "teams": [
+        {
+          "clubId": 162,
+          "clubName": "Arsenal FC",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016
+          ]
+        },
+        {
+          "clubId": 310,
+          "clubName": "Málaga CF",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2011,
+            2012
+          ]
+        },
+        {
+          "clubId": 319,
+          "clubName": "Real Oviedo",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2023,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 323,
+          "clubName": "Villarreal CF",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2018,
+            2019,
+            2020
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "Arsenal FC 12/13": {
+          "goals": 12
+        },
+        "Arsenal FC 13/14": {
+          "goals": 7
+        },
+        "Arsenal FC 14/15": {
+          "goals": 8
+        },
+        "Arsenal FC 16/17": {
+          "goals": 2
+        },
+        "Villarreal CF 18/19": {
+          "goals": 7
+        },
+        "Villarreal CF 19/20": {
+          "goals": 15
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 38
+      }
+    },
+    {
+      "id": 16306,
+      "slug": "casemiro",
+      "name": "Casemiro",
+      "dateOfBirth": "1992-02-23",
+      "citizenship": [
+        "Brazil"
+      ],
+      "position": "Midfield",
+      "subPosition": "Defensive Midfield",
+      "foot": "right",
+      "heightCm": 185,
+      "internationalCaps": 91,
+      "internationalGoals": 10,
+      "highestMarketValueEur": 80000000,
+      "marketValueEur": 6000000,
+      "teams": [
+        {
+          "clubId": 18,
+          "clubName": "Manchester United",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2022"
+      ],
+      "windows": {
+        "FC Porto 14/15": {
+          "goals": 4
+        },
+        "Real Madrid 15/16": {
+          "goals": 1
+        },
+        "Real Madrid 16/17": {
+          "goals": 6
+        },
+        "Real Madrid 17/18": {
+          "goals": 7
+        },
+        "Real Madrid 18/19": {
+          "goals": 4
+        },
+        "Real Madrid 19/20": {
+          "goals": 5
+        },
+        "Real Madrid 20/21": {
+          "goals": 7
+        },
+        "Real Madrid 21/22": {
+          "goals": 1
+        },
+        "wc-2022": {
+          "goals": 1
+        },
+        "Manchester United 22/23": {
+          "goals": 7
+        },
+        "Manchester United 23/24": {
+          "goals": 4
+        },
+        "Manchester United 24/25": {
+          "goals": 3
+        },
+        "Manchester United 25/26": {
+          "goals": 9
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 25
+      }
+    },
+    {
+      "id": 35207,
+      "slug": "marco-reus",
+      "name": "Marco Reus",
+      "dateOfBirth": "1989-05-31",
+      "citizenship": [
+        "Germany"
+      ],
+      "position": "Midfield",
+      "subPosition": "Attacking Midfield",
+      "foot": "right",
+      "heightCm": 180,
+      "internationalCaps": 48,
+      "internationalGoals": 15,
+      "highestMarketValueEur": 50000000,
+      "marketValueEur": 1500000,
+      "teams": [
+        {
+          "clubId": 46,
+          "clubName": "Borussia Dortmund",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2018"
+      ],
+      "windows": {
+        "Borussia Dortmund 12/13": {
+          "goals": 19
+        },
+        "Borussia Dortmund 13/14": {
+          "goals": 23
+        },
+        "Borussia Dortmund 14/15": {
+          "goals": 11
+        },
+        "Borussia Dortmund 15/16": {
+          "goals": 23
+        },
+        "Borussia Dortmund 16/17": {
+          "goals": 13
+        },
+        "Borussia Dortmund 17/18": {
+          "goals": 7
+        },
+        "wc-2018": {
+          "goals": 1
+        },
+        "Borussia Dortmund 18/19": {
+          "goals": 21
+        },
+        "Borussia Dortmund 19/20": {
+          "goals": 12
+        },
+        "Borussia Dortmund 20/21": {
+          "goals": 11
+        },
+        "Borussia Dortmund 21/22": {
+          "goals": 13
+        },
+        "Ajax Amsterdam 21/22": {
+          "goals": 1
+        },
+        "Borussia Dortmund 22/23": {
+          "goals": 8
+        },
+        "Borussia Dortmund 23/24": {
+          "goals": 9
+        },
+        "Los Angeles Galaxy 24/25": {
+          "goals": 5
+        },
+        "Los Angeles Galaxy 25/26": {
+          "goals": 4
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 70
+      }
+    },
+    {
+      "id": 74842,
+      "slug": "mario-gotze",
+      "name": "Mario Götze",
+      "dateOfBirth": "1992-06-03",
+      "citizenship": [
+        "Germany"
+      ],
+      "position": "Midfield",
+      "subPosition": "Attacking Midfield",
+      "foot": "right",
+      "heightCm": 176,
+      "internationalCaps": 66,
+      "internationalGoals": 17,
+      "highestMarketValueEur": 55000000,
+      "marketValueEur": 3000000,
+      "teams": [
+        {
+          "clubId": 45,
+          "clubName": "Bayern Munich",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2013,
+            2014,
+            2015,
+            2016
+          ]
+        },
+        {
+          "clubId": 46,
+          "clubName": "Borussia Dortmund",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2012,
+            2013,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020
+          ]
+        },
+        {
+          "clubId": 339,
+          "clubName": "Eintracht Frankfurt",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 343,
+          "clubName": "PSV Eindhoven",
+          "leagueId": "NL1",
+          "leagueName": "Eredivisie",
+          "seasons": [
+            2020,
+            2021,
+            2022
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2014"
+      ],
+      "windows": {
+        "Borussia Dortmund 12/13": {
+          "goals": 16
+        },
+        "Bayern Munich 13/14": {
+          "goals": 15
+        },
+        "wc-2014": {
+          "goals": 2
+        },
+        "Bayern Munich 14/15": {
+          "goals": 15
+        },
+        "Bayern Munich 15/16": {
+          "goals": 6
+        },
+        "Borussia Dortmund 16/17": {
+          "goals": 2
+        },
+        "Borussia Dortmund 17/18": {
+          "goals": 2
+        },
+        "Borussia Dortmund 18/19": {
+          "goals": 7
+        },
+        "Borussia Dortmund 19/20": {
+          "goals": 3
+        },
+        "PSV Eindhoven 20/21": {
+          "goals": 6
+        },
+        "PSV Eindhoven 21/22": {
+          "goals": 12
+        },
+        "Eintracht Frankfurt 22/23": {
+          "goals": 3
+        },
+        "Eintracht Frankfurt 23/24": {
+          "goals": 4
+        },
+        "Eintracht Frankfurt 24/25": {
+          "goals": 5
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 19
+      }
+    },
+    {
+      "id": 39728,
+      "slug": "mats-hummels",
+      "name": "Mats Hummels",
+      "dateOfBirth": "1988-12-16",
+      "citizenship": [
+        "Germany"
+      ],
+      "position": "Defender",
+      "subPosition": "Centre-Back",
+      "foot": "right",
+      "heightCm": 191,
+      "internationalCaps": 78,
+      "internationalGoals": 5,
+      "highestMarketValueEur": 60000000,
+      "marketValueEur": 2000000,
+      "teams": [
+        {
+          "clubId": 34,
+          "clubName": "Associazione Sportiva Roma",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2024,
+            2025
+          ]
+        },
+        {
+          "clubId": 45,
+          "clubName": "Bayern Munich",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2006,
+            2007,
+            2008,
+            2009,
+            2016,
+            2017,
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 46,
+          "clubName": "Borussia Dortmund",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2014"
+      ],
+      "windows": {
+        "Borussia Dortmund 12/13": {
+          "goals": 3
+        },
+        "Borussia Dortmund 13/14": {
+          "goals": 2
+        },
+        "wc-2014": {
+          "goals": 2
+        },
+        "Borussia Dortmund 14/15": {
+          "goals": 2
+        },
+        "Borussia Dortmund 15/16": {
+          "goals": 3
+        },
+        "Hamburger SV 15/16": {
+          "goals": 1
+        },
+        "Bayern Munich 16/17": {
+          "goals": 3
+        },
+        "Bayern Munich 17/18": {
+          "goals": 3
+        },
+        "Bayern Munich 18/19": {
+          "goals": 2
+        },
+        "Bayern Munich 19/20": {
+          "goals": 1
+        },
+        "Borussia Dortmund 19/20": {
+          "goals": 1
+        },
+        "Borussia Dortmund 20/21": {
+          "goals": 6
+        },
+        "Borussia Dortmund 21/22": {
+          "goals": 1
+        },
+        "Borussia Dortmund 22/23": {
+          "goals": 1
+        },
+        "Borussia Dortmund 23/24": {
+          "goals": 4
+        },
+        "Atlético de Madrid 23/24": {
+          "goals": 1
+        },
+        "ACF Fiorentina 24/25": {
+          "goals": 1
+        },
+        "Associazione Sportiva Roma 24/25": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 20
+      }
+    },
+    {
+      "id": 58358,
+      "slug": "thomas-muller",
+      "name": "Thomas Müller",
+      "dateOfBirth": "1989-09-13",
+      "citizenship": [
+        "Germany"
+      ],
+      "position": "Attack",
+      "subPosition": "Second Striker",
+      "foot": "right",
+      "heightCm": 185,
+      "internationalCaps": 131,
+      "internationalGoals": 45,
+      "highestMarketValueEur": 75000000,
+      "marketValueEur": 4000000,
+      "teams": [
+        {
+          "clubId": 45,
+          "clubName": "Bayern Munich",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2009,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2010",
+        "wc-2014"
+      ],
+      "windows": {
+        "wc-2010": {
+          "goals": 5
+        },
+        "Bayern Munich 12/13": {
+          "goals": 23
+        },
+        "Bayern Munich 13/14": {
+          "goals": 26
+        },
+        "wc-2014": {
+          "goals": 5
+        },
+        "Bayern Munich 14/15": {
+          "goals": 21
+        },
+        "Bayern Munich 15/16": {
+          "goals": 32
+        },
+        "Bayern Munich 16/17": {
+          "goals": 9
+        },
+        "Bayern Munich 17/18": {
+          "goals": 15
+        },
+        "Bayern Munich 18/19": {
+          "goals": 9
+        },
+        "Bayern Munich 19/20": {
+          "goals": 14
+        },
+        "Bayern Munich 20/21": {
+          "goals": 15
+        },
+        "Bayern Munich 21/22": {
+          "goals": 13
+        },
+        "Bayer 04 Leverkusen 21/22": {
+          "goals": 1
+        },
+        "Bayern Munich 22/23": {
+          "goals": 8
+        },
+        "Bayern Munich 23/24": {
+          "goals": 7
+        },
+        "Bayern Munich 24/25": {
+          "goals": 6
+        },
+        "Bayern Munich 25/26": {
+          "goals": 2
+        },
+        "Vancouver Whitecaps FC 24/25": {
+          "goals": 7
+        },
+        "Vancouver Whitecaps FC 25/26": {
+          "goals": 4
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 81
+      }
+    },
+    {
+      "id": 243714,
+      "slug": "kingsley-coman",
+      "name": "Kingsley Coman",
+      "dateOfBirth": "1996-06-13",
+      "citizenship": [
+        "France"
+      ],
+      "position": "Attack",
+      "subPosition": "Left Winger",
+      "foot": "right",
+      "heightCm": 181,
+      "internationalCaps": 61,
+      "internationalGoals": 8,
+      "highestMarketValueEur": 65000000,
+      "marketValueEur": 20000000,
+      "teams": [
+        {
+          "clubId": 45,
+          "clubName": "Bayern Munich",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        },
+        {
+          "clubId": 16,
+          "clubName": "Juventus FC",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2014,
+            2015
+          ]
+        },
+        {
+          "clubId": 12,
+          "clubName": "Paris Saint-Germain",
+          "leagueId": "FR1",
+          "leagueName": "Ligue 1",
+          "seasons": [
+            2013,
+            2014
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "Juventus FC 14/15": {
+          "goals": 1
+        },
+        "Bayern Munich 15/16": {
+          "goals": 6
+        },
+        "Bayern Munich 16/17": {
+          "goals": 2
+        },
+        "Bayern Munich 17/18": {
+          "goals": 7
+        },
+        "Bayern Munich 18/19": {
+          "goals": 10
+        },
+        "Bayern Munich 19/20": {
+          "goals": 8
+        },
+        "Bayern Munich 20/21": {
+          "goals": 8
+        },
+        "Bayern Munich 21/22": {
+          "goals": 8
+        },
+        "Bayern Munich 22/23": {
+          "goals": 9
+        },
+        "Bayern Munich 23/24": {
+          "goals": 5
+        },
+        "Bayern Munich 24/25": {
+          "goals": 7
+        },
+        "Bayern Munich 25/26": {
+          "goals": 2
+        },
+        "Al-Nassr Football Club 25/26": {
+          "goals": 10
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 7
+      }
+    },
+    {
+      "id": 288230,
+      "slug": "ousmane-dembele",
+      "name": "Ousmane Dembélé",
+      "dateOfBirth": "1997-05-15",
+      "citizenship": [
+        "France"
+      ],
+      "position": "Attack",
+      "subPosition": "Centre-Forward",
+      "foot": "both",
+      "heightCm": 179,
+      "internationalCaps": 65,
+      "internationalGoals": 12,
+      "highestMarketValueEur": 120000000,
+      "marketValueEur": 100000000,
+      "teams": [
+        {
+          "clubId": 46,
+          "clubName": "Borussia Dortmund",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2016,
+            2017
+          ]
+        },
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ]
+        },
+        {
+          "clubId": 12,
+          "clubName": "Paris Saint-Germain",
+          "leagueId": "FR1",
+          "leagueName": "Ligue 1",
+          "seasons": [
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 358,
+          "clubName": "Stade Rennais FC",
+          "leagueId": "FR1",
+          "leagueName": "Ligue 1",
+          "seasons": [
+            2015,
+            2016
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2026"
+      ],
+      "windows": {
+        "Stade Rennais FC 15/16": {
+          "goals": 12
+        },
+        "Borussia Dortmund 16/17": {
+          "goals": 10
+        },
+        "FC Barcelona 17/18": {
+          "goals": 4
+        },
+        "FC Barcelona 18/19": {
+          "goals": 14
+        },
+        "FC Barcelona 19/20": {
+          "goals": 1
+        },
+        "FC Barcelona 20/21": {
+          "goals": 11
+        },
+        "FC Barcelona 21/22": {
+          "goals": 2
+        },
+        "FC Barcelona 22/23": {
+          "goals": 8
+        },
+        "Paris Saint-Germain 23/24": {
+          "goals": 5
+        },
+        "Paris Saint-Germain 24/25": {
+          "goals": 30
+        },
+        "Paris Saint-Germain 25/26": {
+          "goals": 20
+        },
+        "wc-2026": {
+          "goals": 4
+        }
+      },
+      "stats": {}
+    },
+    {
+      "id": 33947,
+      "slug": "rafinha",
+      "name": "Rafinha",
+      "dateOfBirth": "1985-09-07",
+      "citizenship": [
+        "Brazil"
+      ],
+      "position": "Defender",
+      "subPosition": "Right-Back",
+      "foot": "right",
+      "heightCm": 172,
+      "internationalCaps": null,
+      "internationalGoals": null,
+      "highestMarketValueEur": 12000000,
+      "marketValueEur": 200000,
+      "teams": [
+        {
+          "clubId": 45,
+          "clubName": "Bayern Munich",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 315,
+          "clubName": "Olympiakos Syndesmos Filathlon Peiraios",
+          "leagueId": "GR1",
+          "leagueName": "Super League 1",
+          "seasons": [
+            2020,
+            2021
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "Bayern Munich 12/13": {
+          "goals": 2
+        },
+        "FC Schalke 04 13/14": {
+          "goals": 1
+        },
+        "Bayern Munich 16/17": {
+          "goals": 1
+        },
+        "Bayern Munich 17/18": {
+          "goals": 1
+        },
+        "Bayern Munich 18/19": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 3
+      }
+    },
+    {
+      "id": 164770,
+      "slug": "raphael-varane",
+      "name": "Raphaël Varane",
+      "dateOfBirth": "1993-04-25",
+      "citizenship": [
+        "France"
+      ],
+      "position": "Defender",
+      "subPosition": "Centre-Back",
+      "foot": "right",
+      "heightCm": 191,
+      "internationalCaps": 93,
+      "internationalGoals": 5,
+      "highestMarketValueEur": 80000000,
+      "marketValueEur": 20000000,
+      "teams": [
+        {
+          "clubId": 360,
+          "clubName": "Como 1907",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2024
+          ]
+        },
+        {
+          "clubId": 18,
+          "clubName": "Manchester United",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2021,
+            2022,
+            2023,
+            2024
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2018"
+      ],
+      "windows": {
+        "Real Madrid 12/13": {
+          "goals": 2
+        },
+        "Real Madrid 14/15": {
+          "goals": 2
+        },
+        "Real Madrid 16/17": {
+          "goals": 4
+        },
+        "Tottenham Hotspur 17/18": {
+          "goals": 1
+        },
+        "wc-2018": {
+          "goals": 1
+        },
+        "Real Madrid 18/19": {
+          "goals": 2
+        },
+        "FC Barcelona 18/19": {
+          "goals": 1
+        },
+        "Real Madrid 19/20": {
+          "goals": 3
+        },
+        "Valencia CF 20/21": {
+          "goals": 1
+        },
+        "Real Madrid 20/21": {
+          "goals": 2
+        },
+        "FC Shakhtar Donetsk 20/21": {
+          "goals": 1
+        },
+        "Manchester United 21/22": {
+          "goals": 1
+        },
+        "Leeds United 22/23": {
+          "goals": 1
+        },
+        "Manchester United 23/24": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 2
+      }
+    },
+    {
+      "id": 128223,
+      "slug": "alvaro-morata",
+      "name": "Álvaro Morata",
+      "dateOfBirth": "1992-10-23",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Attack",
+      "subPosition": "Centre-Forward",
+      "foot": "right",
+      "heightCm": 189,
+      "internationalCaps": 87,
+      "internationalGoals": 37,
+      "highestMarketValueEur": 65000000,
+      "marketValueEur": 6000000,
+      "teams": [
+        {
+          "clubId": 93,
+          "clubName": "AC Milan",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2024,
+            2025
+          ]
+        },
+        {
+          "clubId": 80,
+          "clubName": "Atlético de Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2019,
+            2020,
+            2022,
+            2023,
+            2024
+          ]
+        },
+        {
+          "clubId": 37,
+          "clubName": "Chelsea FC",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2017,
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 360,
+          "clubName": "Como 1907",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 245,
+          "clubName": "Galatasaray",
+          "leagueId": "TR1",
+          "leagueName": "Super Lig",
+          "seasons": [
+            2024,
+            2025
+          ]
+        },
+        {
+          "clubId": 16,
+          "clubName": "Juventus FC",
+          "leagueId": "IT1",
+          "leagueName": "Serie A",
+          "seasons": [
+            2014,
+            2015,
+            2016,
+            2020,
+            2021,
+            2022
+          ]
+        },
+        {
+          "clubId": 21,
+          "clubName": "Real Madrid",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2016,
+            2017
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2022"
+      ],
+      "windows": {
+        "Real Madrid 12/13": {
+          "goals": 2
+        },
+        "Real Madrid 13/14": {
+          "goals": 9
+        },
+        "Juventus FC 14/15": {
+          "goals": 15
+        },
+        "Juventus FC 15/16": {
+          "goals": 12
+        },
+        "Real Madrid 16/17": {
+          "goals": 20
+        },
+        "Chelsea FC 17/18": {
+          "goals": 14
+        },
+        "Chelsea FC 18/19": {
+          "goals": 9
+        },
+        "Atlético de Madrid 18/19": {
+          "goals": 6
+        },
+        "Atlético de Madrid 19/20": {
+          "goals": 16
+        },
+        "Juventus FC 20/21": {
+          "goals": 20
+        },
+        "Juventus FC 21/22": {
+          "goals": 12
+        },
+        "wc-2022": {
+          "goals": 3
+        },
+        "Atlético de Madrid 22/23": {
+          "goals": 15
+        },
+        "Atlético de Madrid 23/24": {
+          "goals": 21
+        },
+        "AC Milan 24/25": {
+          "goals": 6
+        },
+        "Galatasaray 24/25": {
+          "goals": 6
+        },
+        "Como 1907 25/26": {
+          "goals": 1
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 58
+      }
+    },
+    {
+      "id": 398184,
+      "slug": "ferran-torres",
+      "name": "Ferran Torres",
+      "dateOfBirth": "2000-02-29",
+      "citizenship": [
+        "Spain"
+      ],
+      "position": "Attack",
+      "subPosition": "Centre-Forward",
+      "foot": "right",
+      "heightCm": 183,
+      "internationalCaps": 63,
+      "internationalGoals": 24,
+      "highestMarketValueEur": 50000000,
+      "marketValueEur": 50000000,
+      "teams": [
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2022,
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 59,
+          "clubName": "Manchester City",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2020,
+            2021
+          ]
+        },
+        {
+          "clubId": 369,
+          "clubName": "Valencia CF",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2022"
+      ],
+      "windows": {
+        "Valencia CF 18/19": {
+          "goals": 3
+        },
+        "Valencia CF 19/20": {
+          "goals": 6
+        },
+        "Manchester City 20/21": {
+          "goals": 12
+        },
+        "Manchester City 21/22": {
+          "goals": 2
+        },
+        "FC Barcelona 21/22": {
+          "goals": 7
+        },
+        "wc-2022": {
+          "goals": 2
+        },
+        "FC Barcelona 22/23": {
+          "goals": 7
+        },
+        "FC Barcelona 23/24": {
+          "goals": 11
+        },
+        "FC Barcelona 24/25": {
+          "goals": 19
+        },
+        "FC Barcelona 25/26": {
+          "goals": 21
+        }
+      },
+      "stats": {}
+    },
+    {
+      "id": 53622,
+      "slug": "ilkay-gundogan",
+      "name": "İlkay Gündoğan",
+      "dateOfBirth": "1990-10-24",
+      "citizenship": [
+        "Germany"
+      ],
+      "position": "Midfield",
+      "subPosition": "Central Midfield",
+      "foot": "right",
+      "heightCm": 180,
+      "internationalCaps": 82,
+      "internationalGoals": 19,
+      "highestMarketValueEur": 50000000,
+      "marketValueEur": 2000000,
+      "teams": [
+        {
+          "clubId": 372,
+          "clubName": "1.FC Nuremberg",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2008,
+            2011
+          ]
+        },
+        {
+          "clubId": 46,
+          "clubName": "Borussia Dortmund",
+          "leagueId": "L1",
+          "leagueName": "Bundesliga",
+          "seasons": [
+            2012,
+            2013,
+            2014,
+            2015,
+            2016
+          ]
+        },
+        {
+          "clubId": 8,
+          "clubName": "FC Barcelona",
+          "leagueId": "ES1",
+          "leagueName": "La Liga",
+          "seasons": [
+            2023,
+            2024
+          ]
+        },
+        {
+          "clubId": 245,
+          "clubName": "Galatasaray",
+          "leagueId": "TR1",
+          "leagueName": "Super Lig",
+          "seasons": [
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 59,
+          "clubName": "Manchester City",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        }
+      ],
+      "tournaments": [
+        "wc-2022"
+      ],
+      "windows": {
+        "Borussia Dortmund 12/13": {
+          "goals": 4
+        },
+        "Borussia Dortmund 13/14": {
+          "goals": 1
+        },
+        "Borussia Dortmund 14/15": {
+          "goals": 3
+        },
+        "Borussia Dortmund 15/16": {
+          "goals": 3
+        },
+        "Manchester City 16/17": {
+          "goals": 5
+        },
+        "Manchester City 17/18": {
+          "goals": 6
+        },
+        "Manchester City 18/19": {
+          "goals": 6
+        },
+        "Manchester City 19/20": {
+          "goals": 5
+        },
+        "Manchester City 20/21": {
+          "goals": 17
+        },
+        "Manchester City 21/22": {
+          "goals": 10
+        },
+        "wc-2022": {
+          "goals": 1
+        },
+        "Manchester City 22/23": {
+          "goals": 11
+        },
+        "FC Barcelona 23/24": {
+          "goals": 5
+        },
+        "Manchester City 24/25": {
+          "goals": 3
+        },
+        "Manchester City 25/26": {
+          "goals": 2
+        },
+        "Galatasaray 25/26": {
+          "goals": 2
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 53
+      }
+    },
+    {
+      "id": 274839,
+      "slug": "wilfred-ndidi",
+      "name": "Wilfred Ndidi",
+      "dateOfBirth": "1996-12-16",
+      "citizenship": [
+        "Nigeria"
+      ],
+      "position": "Midfield",
+      "subPosition": "Defensive Midfield",
+      "foot": "right",
+      "heightCm": 183,
+      "internationalCaps": 79,
+      "internationalGoals": 1,
+      "highestMarketValueEur": 60000000,
+      "marketValueEur": 8000000,
+      "teams": [
+        {
+          "clubId": 378,
+          "clubName": "Beşiktaş Jimnastik Kulübü",
+          "leagueId": "TR1",
+          "leagueName": "Super Lig",
+          "seasons": [
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 379,
+          "clubName": "KRC Genk",
+          "leagueId": "BE1",
+          "leagueName": "Jupiler Pro League",
+          "seasons": [
+            2015,
+            2016
+          ]
+        },
+        {
+          "clubId": 237,
+          "clubName": "Leicester City",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "KRC Genk 15/16": {
+          "goals": 1
+        },
+        "Leicester City 16/17": {
+          "goals": 3
+        },
+        "KRC Genk 16/17": {
+          "goals": 2
+        },
+        "Leicester City 17/18": {
+          "goals": 1
+        },
+        "Leicester City 18/19": {
+          "goals": 2
+        },
+        "Leicester City 19/20": {
+          "goals": 2
+        },
+        "Leicester City 20/21": {
+          "goals": 1
+        },
+        "Leicester City 21/22": {
+          "goals": 2
+        },
+        "Leicester City 22/23": {
+          "goals": 2
+        },
+        "Arsenal FC 24/25": {
+          "goals": 1
+        },
+        "Leicester City 23/24": {
+          "goals": 1
+        },
+        "Beşiktaş Jimnastik Kulübü 25/26": {
+          "goals": 2
+        }
+      },
+      "stats": {
+        "goals_after_age_30": 1
+      }
+    },
+    {
+      "id": 249565,
+      "slug": "youri-tielemans",
+      "name": "Youri Tielemans",
+      "dateOfBirth": "1997-05-07",
+      "citizenship": [
+        "Belgium"
+      ],
+      "position": "Midfield",
+      "subPosition": "Central Midfield",
+      "foot": "right",
+      "heightCm": 176,
+      "internationalCaps": 90,
+      "internationalGoals": 15,
+      "highestMarketValueEur": 55000000,
+      "marketValueEur": 30000000,
+      "teams": [
+        {
+          "clubId": 28,
+          "clubName": "AS Monaco",
+          "leagueId": "FR1",
+          "leagueName": "Ligue 1",
+          "seasons": [
+            2017,
+            2018,
+            2019
+          ]
+        },
+        {
+          "clubId": 159,
+          "clubName": "Aston Villa",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2023,
+            2024,
+            2025,
+            2026
+          ]
+        },
+        {
+          "clubId": 237,
+          "clubName": "Leicester City",
+          "leagueId": "GB1",
+          "leagueName": "Premier League",
+          "seasons": [
+            2019,
+            2020,
+            2021,
+            2022,
+            2023
+          ]
+        },
+        {
+          "clubId": 383,
+          "clubName": "RSC Anderlecht",
+          "leagueId": "BE1",
+          "leagueName": "Jupiler Pro League",
+          "seasons": [
+            2013,
+            2014,
+            2015,
+            2016,
+            2017
+          ]
+        }
+      ],
+      "tournaments": [],
+      "windows": {
+        "RSC Anderlecht 14/15": {
+          "goals": 3
+        },
+        "RSC Anderlecht 15/16": {
+          "goals": 4
+        },
+        "RSC Anderlecht 16/17": {
+          "goals": 17
+        },
+        "AS Monaco 17/18": {
+          "goals": 1
+        },
+        "AS Monaco 18/19": {
+          "goals": 5
+        },
+        "Leicester City 18/19": {
+          "goals": 3
+        },
+        "Leicester City 19/20": {
+          "goals": 3
+        },
+        "Leicester City 20/21": {
+          "goals": 9
+        },
+        "Leicester City 21/22": {
+          "goals": 7
+        },
+        "Leicester City 22/23": {
+          "goals": 3
+        },
+        "Aston Villa 23/24": {
+          "goals": 3
+        },
+        "Aston Villa 24/25": {
+          "goals": 5
+        },
+        "Aston Villa 25/26": {
+          "goals": 1
+        }
+      },
+      "stats": {}
     }
   ]
 }

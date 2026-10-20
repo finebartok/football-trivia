@@ -122,10 +122,34 @@ for e in rows("game_events.csv.gz"):
 WC2022 = set()
 print("WC2022 membership in this fixture comes from goal events, not Wikidata.")
 
+# --- goals scored aged 30+, from goal events and the player's date of birth
+goals_aged = collections.defaultdict(collections.Counter)
+for e in rows("game_events.csv.gz"):
+    if e.get("type") != "Goals": continue
+    pid = e.get("player_id")
+    comp, date, season = games.get(e.get("game_id"), (None, None, None))
+    if not pid or not date: continue
+    dob = players.get(pid, {}).get("date_of_birth", "")[:4]
+    if not dob: continue
+    if int(date[:4]) - int(dob) >= 30:
+        goals_aged[pid]["goals_after_age_30"] += 1
+
+def stats_for(pid):
+    st = {}
+    if pid in goals_aged:
+        st["goals_after_age_30"] = goals_aged[pid]["goals_after_age_30"]
+    return st
+
 # --- pick a covering set of players
 def to_int(v):
     try: return int(float(v))
     except: return 0
+
+def positive_or_none(v):
+    """The source writes an empty string when it has no value. For caps, goals
+    and market value, 0 and absent both mean 'not recorded'."""
+    n = to_int(v)
+    return n if n > 0 else None
 
 byname = collections.defaultdict(list)
 for p in players.values():
@@ -145,8 +169,15 @@ TARGETS = [
     "Alexander Isak", "Victor Osimhen", "Khvicha Kvaratskhelia", "Federico Chiesa",
     "Lautaro Martinez", "Nico Williams", "Mikel Oyarzabal", "Antoine Griezmann",
     "Declan Rice", "Bukayo Saka", "Ollie Watkins", "Jarrod Bowen", "Phil Foden",
-    "Elliot Anderson", "Ollie Watkins", "Mo Salah", "Son Heung-min", "Kaoru Mitoma",
-    "Aymeric Laporte", "Rúben Dias", "John Stones", "Aymeric Laporte",
+    "Elliot Anderson", "Son Heung-min", "Kaoru Mitoma",
+    "Aymeric Laporte", "Ruben Dias", "John Stones",
+    # La Liga depth, so the flagship scope is well populated
+    "Xavi Hernandez", "Andres Iniesta", "Sergio Busquets", "Gerard Pique", "Jordi Alba",
+    "Isco", "Gonzalo Higuain", "Rodrigo Moreno", "Marcelo", "Dani Alves",
+    "Diego Godin", "Santi Cazorla", "Julen Lopetegui", "Casemiro", "Marco Reus",
+    "Mario Gotze", "Mats Hummels", "Thomas Muller", "Kingsley Coman",
+    "Ousmane Dembele", "Rafinha", "Raphael Varane", "Alvaro Morata",
+    "Ferran Torres", "Ilkay Gundogan", "Wilfred Ndidi", "Youri Tielemans",
 ]
 
 selected = []
@@ -203,13 +234,14 @@ for p in selected:
         "subPosition": p.get("sub_position") or None,
         "foot": p.get("foot") or None,
         "heightCm": to_int(p.get("height_in_cm")) or None,
-        "internationalCaps": to_int(p.get("international_caps")),
-        "internationalGoals": to_int(p.get("international_goals")),
+        "internationalCaps": positive_or_none(p.get("international_caps")),
+        "internationalGoals": positive_or_none(p.get("international_goals")),
         "highestMarketValueEur": to_int(p.get("highest_market_value_in_eur")) or None,
         "marketValueEur": to_int(p.get("market_value_in_eur")) or None,
         "teams": teams,
         "tournaments": sorted(k for k in wins if k.startswith("wc-")),
         "windows": wins,
+        "stats": stats_for(pid),
     })
 
 # --- name->wikidata id map is not resolvable offline; attach WC2022 membership
