@@ -72,7 +72,11 @@ export function deriveStints({ transfers = [], appearances = [], clubsById = {} 
 // every windowed question is asked through. A window is never invented: it is
 // built only from a goal event, an appearance, or a club-season the data holds.
 // A missing value stays null - this function never fabricates one.
-export function deriveWindows({ goals = [], appearances = [], games = [], clubsById = {}, competitionsById = {} }) {
+const AGE_BAND = 30;
+// Club coverage in the dump starts 2012/13, so the age band is the 2012+ window
+// the spec's figures are stated against.
+const AGE_WINDOW_START = 2012;
+export function deriveWindows({ goals = [], appearances = [], games = [], clubsById = {}, competitionsById = {}, dobById = {} }) {
   /** @type {Map<string, Window>} */
   const windows = new Map();
   /** @type {Map<string, {playerSourceKey, windowId, metric, value, exact}>} */
@@ -83,13 +87,13 @@ export function deriveWindows({ goals = [], appearances = [], games = [], clubsB
     return w.id;
   };
 
-  const bump = (playerSourceKey, windowId, metric, delta) => {
+  const bump = (playerSourceKey, windowId, metric, delta, exact = true) => {
     const key = `${playerSourceKey}|${windowId}|${metric}`;
     const prev = stats.get(key);
     stats.set(key, {
       playerSourceKey, windowId, metric,
       value: (prev?.value ?? 0) + delta,
-      exact: true,
+      exact,
     });
   };
 
@@ -135,6 +139,31 @@ export function deriveWindows({ goals = [], appearances = [], games = [], clubsB
   for (const a of appearances) {
     const id = seasonWindow(a.clubId, a.season);
     if (id) bump(a.playerSourceKey, id, 'appearances', 1);
+  }
+
+  // The age band is the one window backed by a date of birth. Age at an
+  // appearance is the calendar-year difference (appearanceYear - birthYear),
+  // with no birthday adjustment: it is the rule the spec's measured figures
+  // (1,085 >= 10 / 285 >= 30 / 111 >= 50 / 23 >= 100 aged 30+) were taken with,
+  // and it reproduces them. Club coverage starts 2012/13, so an appearance
+  // before 2012 is outside this window and is not counted. No DOB means no age:
+  // the window and metric are simply absent for that player, never 0.
+  for (const a of appearances) {
+    const dob = dobById[a.playerSourceKey];
+    const year = a.year;
+    if (!dob || !year || year < AGE_WINDOW_START) continue;
+    const birthYear = Number.parseInt(String(dob).slice(0, 4), 10);
+    if (Number.isNaN(birthYear)) continue;
+    if (year - birthYear < AGE_BAND) continue;
+    if (!(a.goals > 0)) continue;
+    const id = addWindow({
+      id: `age-${AGE_BAND}`, kind: 'age_band',
+      label: `aged ${AGE_BAND}+`, detail: `goals scored from ${AGE_WINDOW_START} on`,
+      seasonStart: AGE_WINDOW_START, seasonEnd: null,
+      tournamentId: null, clubId: null, teamName: null,
+      ageFrom: AGE_BAND, ageTo: null,
+    });
+    bump(a.playerSourceKey, id, `goals_after_age_${AGE_BAND}`, a.goals, false);
   }
 
   // The career window is the union of every window this player appears in, so
@@ -217,6 +246,11 @@ async function report({ rawDir }) {
     competitionsById[row.competition_id] = { id: row.competition_id, name: row.name, type: row.type };
   }
 
+  const dobById = {};
+  for await (const row of readCsvGz(path.join(rawDir, 'players.csv.gz'))) {
+    if (row.date_of_birth) dobById[row.player_id] = row.date_of_birth;
+  }
+
   const goals = [];
   for await (const ev of readCsvGz(path.join(rawDir, 'game_events.csv.gz'))) {
     if (ev.type !== 'Goals') continue;
@@ -231,13 +265,30 @@ async function report({ rawDir }) {
     });
   }
 
-  const { windowStats } = deriveWindows({ goals, clubsById, competitionsById });
+  const appearances = [];
+  for await (const row of readCsvGz(path.join(rawDir, 'appearances.csv.gz'))) {
+    const year = Number.parseInt((row.date || '').slice(0, 4), 10);
+    if (!year) continue;
+    appearances.push({
+      playerSourceKey: row.player_id,
+      clubId: Number(row.player_club_id),
+      season: year,
+      year,
+      goals: Number.parseInt(row.goals, 10) || 0,
+    });
+  }
+
+  const { windowStats } = deriveWindows({ goals, appearances, clubsById, competitionsById, dobById });
   const top = windowStats
     .filter(s => s.metric === 'goals')
     .sort((a, b) => b.value - a.value)
     .slice(0, 15);
   for (const s of top) console.log(`${s.value}\t${s.windowId}\tplayer ${s.playerSourceKey}`);
   console.log(`goal events: ${goals.length}`);
+
+  const aged = windowStats.filter(s => s.metric === 'goals_after_age_30').map(s => s.value);
+  const at = (n) => aged.filter(v => v >= n).length;
+  console.log(`goals_after_age_30: >=10 ${at(10)}  >=30 ${at(30)}  >=50 ${at(50)}  >=100 ${at(100)}  max ${Math.max(0, ...aged)}`);
 }
 
 if (import.meta.url.endsWith(path.basename(process.argv[1] ?? ''))) {
