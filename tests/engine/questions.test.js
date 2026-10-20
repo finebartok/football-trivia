@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { composeRound, candidateSubjects, informativeness } from '../../js/engine/questions.js';
+import { metricsFor } from '../../js/engine/stats.js';
 import { makeRng } from '../../js/engine/rng.js';
 import { loadFixture } from '../../js/engine/fixture.js';
 
@@ -140,4 +141,60 @@ test('the reported metric and unit match the recipe actually used', () => {
   });
   assert.equal(idRound.metric, 'identity');
   assert.equal(idRound.unit, null);
+});
+
+test('the ladder never leaks the answer through another metric (80 caps vs €80M)', () => {
+  const { players, registry } = loadFixture();
+  const dias = players.find(p => p.name === 'Rúben Dias');
+  assert.ok(dias, 'Rúben Dias must be in the fixture');
+  assert.equal(dias.internationalCaps, 80);
+  assert.equal(dias.highestMarketValueEur, 80000000);
+
+  const round = composeRound({
+    subject: dias, metric: 'international_caps', window: undefined,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(round.template, 'stat_value');
+  assert.equal(round.answer, 80);
+  assert.equal(round.metric, 'international_caps');
+
+  const nums = (s) => (String(s ?? '').match(/\d+/g) ?? []).map(Number);
+  for (const c of round.clues) {
+    assert.ok(!nums(c.value).includes(80), `clue "${c.value}" leaks the answer 80`);
+  }
+  assert.ok(!round.clues.some(c => c.label === 'International caps'), 'caps hint must not leak the answer');
+  assert.ok(!round.clues.some(c => c.label === 'Peak market value'), 'market-value hint must not leak the answer');
+});
+
+test('metricsFor with a window never leaks a career total', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+  assert.ok(messi.stats?.goals_after_age_30 !== undefined, 'fixture player must have a career goals_after_age_30');
+
+  // With a window, a metric that only exists in the career block must not be
+  // reported as a windowed value.
+  const withWindow = metricsFor(messi, registry.windows['wc-2022']);
+  assert.ok(!withWindow.some(m => m.id === 'goals_after_age_30'), 'windowed metricsFor must not dress a career total as windowed');
+
+  // Without a window, the career total is a valid answer.
+  const withoutWindow = metricsFor(messi, undefined);
+  assert.ok(withoutWindow.some(m => m.id === 'goals_after_age_30' && m.value === messi.stats.goals_after_age_30),
+    'no window: career total is the value');
+});
+
+test('a round whose every hint would reveal the answer still degrades safely', () => {
+  const subject = {
+    id: 1, name: 'Synthetic', internationalCaps: 7,
+    internationalGoals: 0, highestMarketValueEur: 7000000,
+    windows: {}, stats: {},
+  };
+  const round = composeRound({
+    subject, metric: 'international_caps', window: undefined,
+    scope: { clauses: [] },
+    registry: { windows: {}, leagues: {}, clubs: [], tournaments: [] },
+    pool: [subject], rng: makeRng(1),
+  });
+  assert.ok(round.clues.length >= 1, 'a round must keep at least one clue');
+  assert.equal(round.revealSchedule.length, round.clues.length,
+    'revealSchedule must match the clue count');
 });
