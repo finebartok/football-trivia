@@ -12,7 +12,7 @@ create table if not exists players (
   name text not null,
   date_of_birth date not null,
   citizenship text[] not null default '{}',
-  position text not null check (position in ('Goalkeeper','Defender','Midfielder','Forward')),
+  position text not null check (position in ('Goalkeeper','Defender','Midfielder','Forward','Unknown')),
   sub_position text,
   preferred_foot text,
   height_cm smallint,
@@ -24,6 +24,11 @@ create table if not exists players (
   active boolean not null default false,
   quality jsonb not null default '{}'
 );
+-- Position 'Unknown' is stored, then failed by the quality gate (reason G4),
+-- never rejected at insert time. create table if not exists does not update a
+-- constraint on an existing table, so migrate it explicitly and idempotently.
+alter table players drop constraint if exists players_position_check;
+alter table players add constraint players_position_check check (position in ('Goalkeeper','Defender','Midfielder','Forward','Unknown'));
 
 create table if not exists player_sources (
   player_id bigint references players(id) on delete cascade,

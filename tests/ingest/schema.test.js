@@ -32,3 +32,15 @@ test('player_pool only exposes rows that passed the quality gate', async () => {
   assert.deepEqual(rows.map(r => r.slug), ['a']);
   await db.close();
 });
+
+test('an unmappable position is storable but failed by the gate, not the insert', async () => {
+  const db = await openDb();
+  await applyMigrations(db);
+  await db.query(`insert into players (slug, name, date_of_birth, citizenship, position, quality, active)
+    values ('u','U Unknown','1990-01-01','{"England"}','Unknown','{"status":"fail","reasons":["G4"]}',true)`);
+  const stored = (await db.query(`select position from players where slug = 'u'`)).rows;
+  assert.deepEqual(stored, [{ position: 'Unknown' }]);
+  const pool = (await db.query('select slug from player_pool')).rows;
+  assert.deepEqual(pool, []);
+  await db.close();
+});
