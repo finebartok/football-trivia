@@ -1567,12 +1567,18 @@
         "id": "FC Barcelona 12/13",
         "kind": "season",
         "label": "FC Barcelona 12/13",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "FC Barcelona 13/14": {
         "id": "FC Barcelona 13/14",
         "kind": "season",
         "label": "FC Barcelona 13/14",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "wc-2014": {
@@ -1585,24 +1591,36 @@
         "id": "FC Barcelona 14/15",
         "kind": "season",
         "label": "FC Barcelona 14/15",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "FC Barcelona 15/16": {
         "id": "FC Barcelona 15/16",
         "kind": "season",
         "label": "FC Barcelona 15/16",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "FC Barcelona 16/17": {
         "id": "FC Barcelona 16/17",
         "kind": "season",
         "label": "FC Barcelona 16/17",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "FC Barcelona 17/18": {
         "id": "FC Barcelona 17/18",
         "kind": "season",
         "label": "FC Barcelona 17/18",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "wc-2018": {
@@ -1615,24 +1633,36 @@
         "id": "FC Barcelona 18/19",
         "kind": "season",
         "label": "FC Barcelona 18/19",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "FC Barcelona 19/20": {
         "id": "FC Barcelona 19/20",
         "kind": "season",
         "label": "FC Barcelona 19/20",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "FC Barcelona 20/21": {
         "id": "FC Barcelona 20/21",
         "kind": "season",
         "label": "FC Barcelona 20/21",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Paris Saint-Germain 21/22": {
         "id": "Paris Saint-Germain 21/22",
         "kind": "season",
         "label": "Paris Saint-Germain 21/22",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "wc-2022": {
@@ -1645,18 +1675,27 @@
         "id": "Paris Saint-Germain 22/23",
         "kind": "season",
         "label": "Paris Saint-Germain 22/23",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Club Internacional de Fútbol Miami 25/26": {
         "id": "Club Internacional de Fútbol Miami 25/26",
         "kind": "season",
         "label": "Club Internacional de Fútbol Miami 25/26",
+        "teamName": "Club Internacional de Fútbol Miami",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Club Internacional de Fútbol Miami 24/25": {
         "id": "Club Internacional de Fútbol Miami 24/25",
         "kind": "season",
         "label": "Club Internacional de Fútbol Miami 24/25",
+        "teamName": "Club Internacional de Fútbol Miami",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "wc-2026": {
@@ -1669,84 +1708,126 @@
         "id": "Real Madrid 12/13",
         "kind": "season",
         "label": "Real Madrid 12/13",
+        "teamName": "Real Madrid",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Granada CF 12/13": {
         "id": "Granada CF 12/13",
         "kind": "season",
         "label": "Granada CF 12/13",
+        "teamName": "Granada CF",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Real Madrid 13/14": {
         "id": "Real Madrid 13/14",
         "kind": "season",
         "label": "Real Madrid 13/14",
+        "teamName": "Real Madrid",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Real Madrid 14/15": {
         "id": "Real Madrid 14/15",
         "kind": "season",
         "label": "Real Madrid 14/15",
+        "teamName": "Real Madrid",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Real Madrid 15/16": {
         "id": "Real Madrid 15/16",
         "kind": "season",
         "label": "Real Madrid 15/16",
+        "teamName": "Real Madrid",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Real Madrid 16/17": {
         "id": "Real Madrid 16/17",
         "kind": "season",
         "label": "Real Madrid 16/17",
+        "teamName": "Real Madrid",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Real Madrid 17/18": {
         "id": "Real Madrid 17/18",
         "kind": "season",
         "label": "Real Madrid 17/18",
+        "teamName": "Real Madrid",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Juventus FC 18/19": {
         "id": "Juventus FC 18/19",
         "kind": "season",
         "label": "Juventus FC 18/19",
+        "teamName": "Juventus FC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Juventus FC 19/20": {
         "id": "Juventus FC 19/20",
         "kind": "season",
         "label": "Juventus FC 19/20",
+        "teamName": "Juventus FC",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Juventus FC 20/21": {
         "id": "Juventus FC 20/21",
         "kind": "season",
         "label": "Juventus FC 20/21",
+        "teamName": "Juventus FC",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Manchester United 21/22": {
         "id": "Manchester United 21/22",
         "kind": "season",
         "label": "Manchester United 21/22",
+        "teamName": "Manchester United",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Manchester United 22/23": {
         "id": "Manchester United 22/23",
         "kind": "season",
         "label": "Manchester United 22/23",
+        "teamName": "Manchester United",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Al-Nassr Football Club 24/25": {
         "id": "Al-Nassr Football Club 24/25",
         "kind": "season",
         "label": "Al-Nassr Football Club 24/25",
+        "teamName": "Al-Nassr Football Club",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Al-Nassr Football Club 25/26": {
         "id": "Al-Nassr Football Club 25/26",
         "kind": "season",
         "label": "Al-Nassr Football Club 25/26",
+        "teamName": "Al-Nassr Football Club",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "wc-2010": {
@@ -1759,2370 +1840,3555 @@
         "id": "AS Monaco 15/16",
         "kind": "season",
         "label": "AS Monaco 15/16",
+        "teamName": "AS Monaco",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "AS Monaco 16/17": {
         "id": "AS Monaco 16/17",
         "kind": "season",
         "label": "AS Monaco 16/17",
+        "teamName": "AS Monaco",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Paris Saint-Germain 17/18": {
         "id": "Paris Saint-Germain 17/18",
         "kind": "season",
         "label": "Paris Saint-Germain 17/18",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Paris Saint-Germain 18/19": {
         "id": "Paris Saint-Germain 18/19",
         "kind": "season",
         "label": "Paris Saint-Germain 18/19",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Paris Saint-Germain 19/20": {
         "id": "Paris Saint-Germain 19/20",
         "kind": "season",
         "label": "Paris Saint-Germain 19/20",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Paris Saint-Germain 20/21": {
         "id": "Paris Saint-Germain 20/21",
         "kind": "season",
         "label": "Paris Saint-Germain 20/21",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Paris Saint-Germain 23/24": {
         "id": "Paris Saint-Germain 23/24",
         "kind": "season",
         "label": "Paris Saint-Germain 23/24",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Real Madrid 24/25": {
         "id": "Real Madrid 24/25",
         "kind": "season",
         "label": "Real Madrid 24/25",
+        "teamName": "Real Madrid",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Real Madrid 25/26": {
         "id": "Real Madrid 25/26",
         "kind": "season",
         "label": "Real Madrid 25/26",
+        "teamName": "Real Madrid",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "FC Basel 1893 12/13": {
         "id": "FC Basel 1893 12/13",
         "kind": "season",
         "label": "FC Basel 1893 12/13",
+        "teamName": "FC Basel 1893",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Chelsea FC 13/14": {
         "id": "Chelsea FC 13/14",
         "kind": "season",
         "label": "Chelsea FC 13/14",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "FC Basel 1893 13/14": {
         "id": "FC Basel 1893 13/14",
         "kind": "season",
         "label": "FC Basel 1893 13/14",
+        "teamName": "FC Basel 1893",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "ACF Fiorentina 14/15": {
         "id": "ACF Fiorentina 14/15",
         "kind": "season",
         "label": "ACF Fiorentina 14/15",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Associazione Sportiva Roma 15/16": {
         "id": "Associazione Sportiva Roma 15/16",
         "kind": "season",
         "label": "Associazione Sportiva Roma 15/16",
+        "teamName": "Associazione Sportiva Roma",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Associazione Sportiva Roma 16/17": {
         "id": "Associazione Sportiva Roma 16/17",
         "kind": "season",
         "label": "Associazione Sportiva Roma 16/17",
+        "teamName": "Associazione Sportiva Roma",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Liverpool FC 17/18": {
         "id": "Liverpool FC 17/18",
         "kind": "season",
         "label": "Liverpool FC 17/18",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Liverpool FC 18/19": {
         "id": "Liverpool FC 18/19",
         "kind": "season",
         "label": "Liverpool FC 18/19",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Liverpool FC 19/20": {
         "id": "Liverpool FC 19/20",
         "kind": "season",
         "label": "Liverpool FC 19/20",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Liverpool FC 20/21": {
         "id": "Liverpool FC 20/21",
         "kind": "season",
         "label": "Liverpool FC 20/21",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Liverpool FC 21/22": {
         "id": "Liverpool FC 21/22",
         "kind": "season",
         "label": "Liverpool FC 21/22",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Liverpool FC 22/23": {
         "id": "Liverpool FC 22/23",
         "kind": "season",
         "label": "Liverpool FC 22/23",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Liverpool FC 23/24": {
         "id": "Liverpool FC 23/24",
         "kind": "season",
         "label": "Liverpool FC 23/24",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Liverpool FC 24/25": {
         "id": "Liverpool FC 24/25",
         "kind": "season",
         "label": "Liverpool FC 24/25",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Liverpool FC 25/26": {
         "id": "Liverpool FC 25/26",
         "kind": "season",
         "label": "Liverpool FC 25/26",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Borussia Dortmund 12/13": {
         "id": "Borussia Dortmund 12/13",
         "kind": "season",
         "label": "Borussia Dortmund 12/13",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Borussia Dortmund 13/14": {
         "id": "Borussia Dortmund 13/14",
         "kind": "season",
         "label": "Borussia Dortmund 13/14",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Bayern Munich 14/15": {
         "id": "Bayern Munich 14/15",
         "kind": "season",
         "label": "Bayern Munich 14/15",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Bayern Munich 15/16": {
         "id": "Bayern Munich 15/16",
         "kind": "season",
         "label": "Bayern Munich 15/16",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Bayern Munich 16/17": {
         "id": "Bayern Munich 16/17",
         "kind": "season",
         "label": "Bayern Munich 16/17",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Bayern Munich 17/18": {
         "id": "Bayern Munich 17/18",
         "kind": "season",
         "label": "Bayern Munich 17/18",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Bayern Munich 18/19": {
         "id": "Bayern Munich 18/19",
         "kind": "season",
         "label": "Bayern Munich 18/19",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Bayern Munich 19/20": {
         "id": "Bayern Munich 19/20",
         "kind": "season",
         "label": "Bayern Munich 19/20",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Bayern Munich 20/21": {
         "id": "Bayern Munich 20/21",
         "kind": "season",
         "label": "Bayern Munich 20/21",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Bayern Munich 21/22": {
         "id": "Bayern Munich 21/22",
         "kind": "season",
         "label": "Bayern Munich 21/22",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "FC Barcelona 22/23": {
         "id": "FC Barcelona 22/23",
         "kind": "season",
         "label": "FC Barcelona 22/23",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "FC Barcelona 23/24": {
         "id": "FC Barcelona 23/24",
         "kind": "season",
         "label": "FC Barcelona 23/24",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "FC Barcelona 24/25": {
         "id": "FC Barcelona 24/25",
         "kind": "season",
         "label": "FC Barcelona 24/25",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "FC Barcelona 25/26": {
         "id": "FC Barcelona 25/26",
         "kind": "season",
         "label": "FC Barcelona 25/26",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "SK Slavia Prague 25/26": {
         "id": "SK Slavia Prague 25/26",
         "kind": "season",
         "label": "SK Slavia Prague 25/26",
+        "teamName": "SK Slavia Prague",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "SV Werder Bremen 12/13": {
         "id": "SV Werder Bremen 12/13",
         "kind": "season",
         "label": "SV Werder Bremen 12/13",
+        "teamName": "SV Werder Bremen",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "VfL Wolfsburg 13/14": {
         "id": "VfL Wolfsburg 13/14",
         "kind": "season",
         "label": "VfL Wolfsburg 13/14",
+        "teamName": "VfL Wolfsburg",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "VfL Wolfsburg 14/15": {
         "id": "VfL Wolfsburg 14/15",
         "kind": "season",
         "label": "VfL Wolfsburg 14/15",
+        "teamName": "VfL Wolfsburg",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "VfL Wolfsburg 15/16": {
         "id": "VfL Wolfsburg 15/16",
         "kind": "season",
         "label": "VfL Wolfsburg 15/16",
+        "teamName": "VfL Wolfsburg",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Manchester City 15/16": {
         "id": "Manchester City 15/16",
         "kind": "season",
         "label": "Manchester City 15/16",
+        "teamName": "Manchester City",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Manchester City 16/17": {
         "id": "Manchester City 16/17",
         "kind": "season",
         "label": "Manchester City 16/17",
+        "teamName": "Manchester City",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Manchester City 17/18": {
         "id": "Manchester City 17/18",
         "kind": "season",
         "label": "Manchester City 17/18",
+        "teamName": "Manchester City",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Manchester City 18/19": {
         "id": "Manchester City 18/19",
         "kind": "season",
         "label": "Manchester City 18/19",
+        "teamName": "Manchester City",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Manchester City 19/20": {
         "id": "Manchester City 19/20",
         "kind": "season",
         "label": "Manchester City 19/20",
+        "teamName": "Manchester City",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Manchester City 20/21": {
         "id": "Manchester City 20/21",
         "kind": "season",
         "label": "Manchester City 20/21",
+        "teamName": "Manchester City",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Manchester City 21/22": {
         "id": "Manchester City 21/22",
         "kind": "season",
         "label": "Manchester City 21/22",
+        "teamName": "Manchester City",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Manchester City 22/23": {
         "id": "Manchester City 22/23",
         "kind": "season",
         "label": "Manchester City 22/23",
+        "teamName": "Manchester City",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Manchester City 23/24": {
         "id": "Manchester City 23/24",
         "kind": "season",
         "label": "Manchester City 23/24",
+        "teamName": "Manchester City",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Manchester City 24/25": {
         "id": "Manchester City 24/25",
         "kind": "season",
         "label": "Manchester City 24/25",
+        "teamName": "Manchester City",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "SSC Napoli 25/26": {
         "id": "SSC Napoli 25/26",
         "kind": "season",
         "label": "SSC Napoli 25/26",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Tottenham Hotspur 13/14": {
         "id": "Tottenham Hotspur 13/14",
         "kind": "season",
         "label": "Tottenham Hotspur 13/14",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "West Ham United 13/14": {
         "id": "West Ham United 13/14",
         "kind": "season",
         "label": "West Ham United 13/14",
+        "teamName": "West Ham United",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Tottenham Hotspur 14/15": {
         "id": "Tottenham Hotspur 14/15",
         "kind": "season",
         "label": "Tottenham Hotspur 14/15",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Sunderland AFC 14/15": {
         "id": "Sunderland AFC 14/15",
         "kind": "season",
         "label": "Sunderland AFC 14/15",
+        "teamName": "Sunderland AFC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Tottenham Hotspur 15/16": {
         "id": "Tottenham Hotspur 15/16",
         "kind": "season",
         "label": "Tottenham Hotspur 15/16",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Swansea City 15/16": {
         "id": "Swansea City 15/16",
         "kind": "season",
         "label": "Swansea City 15/16",
+        "teamName": "Swansea City",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Tottenham Hotspur 16/17": {
         "id": "Tottenham Hotspur 16/17",
         "kind": "season",
         "label": "Tottenham Hotspur 16/17",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "KAA Gent 16/17": {
         "id": "KAA Gent 16/17",
         "kind": "season",
         "label": "KAA Gent 16/17",
+        "teamName": "KAA Gent",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Tottenham Hotspur 17/18": {
         "id": "Tottenham Hotspur 17/18",
         "kind": "season",
         "label": "Tottenham Hotspur 17/18",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Tottenham Hotspur 18/19": {
         "id": "Tottenham Hotspur 18/19",
         "kind": "season",
         "label": "Tottenham Hotspur 18/19",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Tottenham Hotspur 19/20": {
         "id": "Tottenham Hotspur 19/20",
         "kind": "season",
         "label": "Tottenham Hotspur 19/20",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Tottenham Hotspur 20/21": {
         "id": "Tottenham Hotspur 20/21",
         "kind": "season",
         "label": "Tottenham Hotspur 20/21",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Tottenham Hotspur 21/22": {
         "id": "Tottenham Hotspur 21/22",
         "kind": "season",
         "label": "Tottenham Hotspur 21/22",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Tottenham Hotspur 22/23": {
         "id": "Tottenham Hotspur 22/23",
         "kind": "season",
         "label": "Tottenham Hotspur 22/23",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Bayern Munich 23/24": {
         "id": "Bayern Munich 23/24",
         "kind": "season",
         "label": "Bayern Munich 23/24",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Bayern Munich 24/25": {
         "id": "Bayern Munich 24/25",
         "kind": "season",
         "label": "Bayern Munich 24/25",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Bayern Munich 25/26": {
         "id": "Bayern Munich 25/26",
         "kind": "season",
         "label": "Bayern Munich 25/26",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Liverpool FC 12/13": {
         "id": "Liverpool FC 12/13",
         "kind": "season",
         "label": "Liverpool FC 12/13",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Liverpool FC 13/14": {
         "id": "Liverpool FC 13/14",
         "kind": "season",
         "label": "Liverpool FC 13/14",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Atlético de Madrid 20/21": {
         "id": "Atlético de Madrid 20/21",
         "kind": "season",
         "label": "Atlético de Madrid 20/21",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Atlético de Madrid 21/22": {
         "id": "Atlético de Madrid 21/22",
         "kind": "season",
         "label": "Atlético de Madrid 21/22",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Santos Futebol Clube 24/25": {
         "id": "Santos Futebol Clube 24/25",
         "kind": "season",
         "label": "Santos Futebol Clube 24/25",
+        "teamName": "Santos Futebol Clube",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Santos Futebol Clube 25/26": {
         "id": "Santos Futebol Clube 25/26",
         "kind": "season",
         "label": "Santos Futebol Clube 25/26",
+        "teamName": "Santos Futebol Clube",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Manchester City 12/13": {
         "id": "Manchester City 12/13",
         "kind": "season",
         "label": "Manchester City 12/13",
+        "teamName": "Manchester City",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Manchester City 13/14": {
         "id": "Manchester City 13/14",
         "kind": "season",
         "label": "Manchester City 13/14",
+        "teamName": "Manchester City",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Manchester City 14/15": {
         "id": "Manchester City 14/15",
         "kind": "season",
         "label": "Manchester City 14/15",
+        "teamName": "Manchester City",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "FC Barcelona 21/22": {
         "id": "FC Barcelona 21/22",
         "kind": "season",
         "label": "FC Barcelona 21/22",
+        "teamName": "FC Barcelona",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Real Madrid 18/19": {
         "id": "Real Madrid 18/19",
         "kind": "season",
         "label": "Real Madrid 18/19",
+        "teamName": "Real Madrid",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Real Madrid 19/20": {
         "id": "Real Madrid 19/20",
         "kind": "season",
         "label": "Real Madrid 19/20",
+        "teamName": "Real Madrid",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Real Madrid 20/21": {
         "id": "Real Madrid 20/21",
         "kind": "season",
         "label": "Real Madrid 20/21",
+        "teamName": "Real Madrid",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Real Madrid 21/22": {
         "id": "Real Madrid 21/22",
         "kind": "season",
         "label": "Real Madrid 21/22",
+        "teamName": "Real Madrid",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Real Madrid 22/23": {
         "id": "Real Madrid 22/23",
         "kind": "season",
         "label": "Real Madrid 22/23",
+        "teamName": "Real Madrid",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Al-Ittihad Football Club 23/24": {
         "id": "Al-Ittihad Football Club 23/24",
         "kind": "season",
         "label": "Al-Ittihad Football Club 23/24",
+        "teamName": "Al-Ittihad Football Club",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Al-Ittihad Football Club 24/25": {
         "id": "Al-Ittihad Football Club 24/25",
         "kind": "season",
         "label": "Al-Ittihad Football Club 24/25",
+        "teamName": "Al-Ittihad Football Club",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Al-Ittihad Football Club 25/26": {
         "id": "Al-Ittihad Football Club 25/26",
         "kind": "season",
         "label": "Al-Ittihad Football Club 25/26",
+        "teamName": "Al-Ittihad Football Club",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Al-Hilal Saudi Football Club 25/26": {
         "id": "Al-Hilal Saudi Football Club 25/26",
         "kind": "season",
         "label": "Al-Hilal Saudi Football Club 25/26",
+        "teamName": "Al-Hilal Saudi Football Club",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Real Madrid 23/24": {
         "id": "Real Madrid 23/24",
         "kind": "season",
         "label": "Real Madrid 23/24",
+        "teamName": "Real Madrid",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "AC Milan 25/26": {
         "id": "AC Milan 25/26",
         "kind": "season",
         "label": "AC Milan 25/26",
+        "teamName": "AC Milan",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Bayern Munich 12/13": {
         "id": "Bayern Munich 12/13",
         "kind": "season",
         "label": "Bayern Munich 12/13",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Bayern Munich 13/14": {
         "id": "Bayern Munich 13/14",
         "kind": "season",
         "label": "Bayern Munich 13/14",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Tottenham Hotspur 12/13": {
         "id": "Tottenham Hotspur 12/13",
         "kind": "season",
         "label": "Tottenham Hotspur 12/13",
+        "teamName": "Tottenham Hotspur",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Manchester United 12/13": {
         "id": "Manchester United 12/13",
         "kind": "season",
         "label": "Manchester United 12/13",
+        "teamName": "Manchester United",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Sevilla FC 16/17": {
         "id": "Sevilla FC 16/17",
         "kind": "season",
         "label": "Sevilla FC 16/17",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Sevilla FC 17/18": {
         "id": "Sevilla FC 17/18",
         "kind": "season",
         "label": "Sevilla FC 17/18",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Sevilla FC 23/24": {
         "id": "Sevilla FC 23/24",
         "kind": "season",
         "label": "Sevilla FC 23/24",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "CF Monterrey 25/26": {
         "id": "CF Monterrey 25/26",
         "kind": "season",
         "label": "CF Monterrey 25/26",
+        "teamName": "CF Monterrey",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "CF Monterrey 24/25": {
         "id": "CF Monterrey 24/25",
         "kind": "season",
         "label": "CF Monterrey 24/25",
+        "teamName": "CF Monterrey",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "FC Groningen 12/13": {
         "id": "FC Groningen 12/13",
         "kind": "season",
         "label": "FC Groningen 12/13",
+        "teamName": "FC Groningen",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Celtic FC 13/14": {
         "id": "Celtic FC 13/14",
         "kind": "season",
         "label": "Celtic FC 13/14",
+        "teamName": "Celtic FC",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Celtic FC 14/15": {
         "id": "Celtic FC 14/15",
         "kind": "season",
         "label": "Celtic FC 14/15",
+        "teamName": "Celtic FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Southampton FC 15/16": {
         "id": "Southampton FC 15/16",
         "kind": "season",
         "label": "Southampton FC 15/16",
+        "teamName": "Southampton FC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Southampton FC 16/17": {
         "id": "Southampton FC 16/17",
         "kind": "season",
         "label": "Southampton FC 16/17",
+        "teamName": "Southampton FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Fußballclub Red Bull Salzburg 13/14": {
         "id": "Fußballclub Red Bull Salzburg 13/14",
         "kind": "season",
         "label": "Fußballclub Red Bull Salzburg 13/14",
+        "teamName": "Fußballclub Red Bull Salzburg",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Southampton FC 14/15": {
         "id": "Southampton FC 14/15",
         "kind": "season",
         "label": "Southampton FC 14/15",
+        "teamName": "Southampton FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Liverpool FC 16/17": {
         "id": "Liverpool FC 16/17",
         "kind": "season",
         "label": "Liverpool FC 16/17",
+        "teamName": "Liverpool FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Bayern Munich 22/23": {
         "id": "Bayern Munich 22/23",
         "kind": "season",
         "label": "Bayern Munich 22/23",
+        "teamName": "Bayern Munich",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Chelsea FC 12/13": {
         "id": "Chelsea FC 12/13",
         "kind": "season",
         "label": "Chelsea FC 12/13",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Chelsea FC 14/15": {
         "id": "Chelsea FC 14/15",
         "kind": "season",
         "label": "Chelsea FC 14/15",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Chelsea FC 15/16": {
         "id": "Chelsea FC 15/16",
         "kind": "season",
         "label": "Chelsea FC 15/16",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Chelsea FC 16/17": {
         "id": "Chelsea FC 16/17",
         "kind": "season",
         "label": "Chelsea FC 16/17",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Chelsea FC 17/18": {
         "id": "Chelsea FC 17/18",
         "kind": "season",
         "label": "Chelsea FC 17/18",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Chelsea FC 18/19": {
         "id": "Chelsea FC 18/19",
         "kind": "season",
         "label": "Chelsea FC 18/19",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Hamburger SV 13/14": {
         "id": "Hamburger SV 13/14",
         "kind": "season",
         "label": "Hamburger SV 13/14",
+        "teamName": "Hamburger SV",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Bayer 04 Leverkusen 14/15": {
         "id": "Bayer 04 Leverkusen 14/15",
         "kind": "season",
         "label": "Bayer 04 Leverkusen 14/15",
+        "teamName": "Bayer 04 Leverkusen",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Bayer 04 Leverkusen 15/16": {
         "id": "Bayer 04 Leverkusen 15/16",
         "kind": "season",
         "label": "Bayer 04 Leverkusen 15/16",
+        "teamName": "Bayer 04 Leverkusen",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Bayer 04 Leverkusen 16/17": {
         "id": "Bayer 04 Leverkusen 16/17",
         "kind": "season",
         "label": "Bayer 04 Leverkusen 16/17",
+        "teamName": "Bayer 04 Leverkusen",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "AC Milan 17/18": {
         "id": "AC Milan 17/18",
         "kind": "season",
         "label": "AC Milan 17/18",
+        "teamName": "AC Milan",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "AC Milan 18/19": {
         "id": "AC Milan 18/19",
         "kind": "season",
         "label": "AC Milan 18/19",
+        "teamName": "AC Milan",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "AC Milan 19/20": {
         "id": "AC Milan 19/20",
         "kind": "season",
         "label": "AC Milan 19/20",
+        "teamName": "AC Milan",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "AC Milan 20/21": {
         "id": "AC Milan 20/21",
         "kind": "season",
         "label": "AC Milan 20/21",
+        "teamName": "AC Milan",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Inter Milan 21/22": {
         "id": "Inter Milan 21/22",
         "kind": "season",
         "label": "Inter Milan 21/22",
+        "teamName": "Inter Milan",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Inter Milan 22/23": {
         "id": "Inter Milan 22/23",
         "kind": "season",
         "label": "Inter Milan 22/23",
+        "teamName": "Inter Milan",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Inter Milan 23/24": {
         "id": "Inter Milan 23/24",
         "kind": "season",
         "label": "Inter Milan 23/24",
+        "teamName": "Inter Milan",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Inter Milan 24/25": {
         "id": "Inter Milan 24/25",
         "kind": "season",
         "label": "Inter Milan 24/25",
+        "teamName": "Inter Milan",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Inter Milan 25/26": {
         "id": "Inter Milan 25/26",
         "kind": "season",
         "label": "Inter Milan 25/26",
+        "teamName": "Inter Milan",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Fenerbahce 12/13": {
         "id": "Fenerbahce 12/13",
         "kind": "season",
         "label": "Fenerbahce 12/13",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Atlético de Madrid 12/13": {
         "id": "Atlético de Madrid 12/13",
         "kind": "season",
         "label": "Atlético de Madrid 12/13",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Fenerbahce 13/14": {
         "id": "Fenerbahce 13/14",
         "kind": "season",
         "label": "Fenerbahce 13/14",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Fenerbahce 14/15": {
         "id": "Fenerbahce 14/15",
         "kind": "season",
         "label": "Fenerbahce 14/15",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Basaksehir FK 15/16": {
         "id": "Basaksehir FK 15/16",
         "kind": "season",
         "label": "Basaksehir FK 15/16",
+        "teamName": "Basaksehir FK",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Basaksehir FK 16/17": {
         "id": "Basaksehir FK 16/17",
         "kind": "season",
         "label": "Basaksehir FK 16/17",
+        "teamName": "Basaksehir FK",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Basaksehir FK 17/18": {
         "id": "Basaksehir FK 17/18",
         "kind": "season",
         "label": "Basaksehir FK 17/18",
+        "teamName": "Basaksehir FK",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Basaksehir FK 18/19": {
         "id": "Basaksehir FK 18/19",
         "kind": "season",
         "label": "Basaksehir FK 18/19",
+        "teamName": "Basaksehir FK",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Fenerbahce 19/20": {
         "id": "Fenerbahce 19/20",
         "kind": "season",
         "label": "Fenerbahce 19/20",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Kayserispor 13/14": {
         "id": "Kayserispor 13/14",
         "kind": "season",
         "label": "Kayserispor 13/14",
+        "teamName": "Kayserispor",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Trabzonspor 15/16": {
         "id": "Trabzonspor 15/16",
         "kind": "season",
         "label": "Trabzonspor 15/16",
+        "teamName": "Trabzonspor",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Trabzonspor 16/17": {
         "id": "Trabzonspor 16/17",
         "kind": "season",
         "label": "Trabzonspor 16/17",
+        "teamName": "Trabzonspor",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Yeni Malatyaspor 17/18": {
         "id": "Yeni Malatyaspor 17/18",
         "kind": "season",
         "label": "Yeni Malatyaspor 17/18",
+        "teamName": "Yeni Malatyaspor",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Trabzonspor 17/18": {
         "id": "Trabzonspor 17/18",
         "kind": "season",
         "label": "Trabzonspor 17/18",
+        "teamName": "Trabzonspor",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Celta de Vigo 18/19": {
         "id": "Celta de Vigo 18/19",
         "kind": "season",
         "label": "Celta de Vigo 18/19",
+        "teamName": "Celta de Vigo",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Trabzonspor 24/25": {
         "id": "Trabzonspor 24/25",
         "kind": "season",
         "label": "Trabzonspor 24/25",
+        "teamName": "Trabzonspor",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Trabzonspor 25/26": {
         "id": "Trabzonspor 25/26",
         "kind": "season",
         "label": "Trabzonspor 25/26",
+        "teamName": "Trabzonspor",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Konyaspor 25/26": {
         "id": "Konyaspor 25/26",
         "kind": "season",
         "label": "Konyaspor 25/26",
+        "teamName": "Konyaspor",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Paris Saint-Germain 12/13": {
         "id": "Paris Saint-Germain 12/13",
         "kind": "season",
         "label": "Paris Saint-Germain 12/13",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Paris Saint-Germain 13/14": {
         "id": "Paris Saint-Germain 13/14",
         "kind": "season",
         "label": "Paris Saint-Germain 13/14",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Paris Saint-Germain 14/15": {
         "id": "Paris Saint-Germain 14/15",
         "kind": "season",
         "label": "Paris Saint-Germain 14/15",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Paris Saint-Germain 15/16": {
         "id": "Paris Saint-Germain 15/16",
         "kind": "season",
         "label": "Paris Saint-Germain 15/16",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Manchester United 16/17": {
         "id": "Manchester United 16/17",
         "kind": "season",
         "label": "Manchester United 16/17",
+        "teamName": "Manchester United",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "AC Milan 21/22": {
         "id": "AC Milan 21/22",
         "kind": "season",
         "label": "AC Milan 21/22",
+        "teamName": "AC Milan",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Bologna Football Club 1909 21/22": {
         "id": "Bologna Football Club 1909 21/22",
         "kind": "season",
         "label": "Bologna Football Club 1909 21/22",
+        "teamName": "Bologna Football Club 1909",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "AC Milan 22/23": {
         "id": "AC Milan 22/23",
         "kind": "season",
         "label": "AC Milan 22/23",
+        "teamName": "AC Milan",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Real Sociedad 12/13": {
         "id": "Real Sociedad 12/13",
         "kind": "season",
         "label": "Real Sociedad 12/13",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Real Sociedad 13/14": {
         "id": "Real Sociedad 13/14",
         "kind": "season",
         "label": "Real Sociedad 13/14",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Atlético de Madrid 14/15": {
         "id": "Atlético de Madrid 14/15",
         "kind": "season",
         "label": "Atlético de Madrid 14/15",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Atlético de Madrid 15/16": {
         "id": "Atlético de Madrid 15/16",
         "kind": "season",
         "label": "Atlético de Madrid 15/16",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Atlético de Madrid 16/17": {
         "id": "Atlético de Madrid 16/17",
         "kind": "season",
         "label": "Atlético de Madrid 16/17",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Atlético de Madrid 17/18": {
         "id": "Atlético de Madrid 17/18",
         "kind": "season",
         "label": "Atlético de Madrid 17/18",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Atlético de Madrid 18/19": {
         "id": "Atlético de Madrid 18/19",
         "kind": "season",
         "label": "Atlético de Madrid 18/19",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Atlético de Madrid 22/23": {
         "id": "Atlético de Madrid 22/23",
         "kind": "season",
         "label": "Atlético de Madrid 22/23",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Atlético de Madrid 23/24": {
         "id": "Atlético de Madrid 23/24",
         "kind": "season",
         "label": "Atlético de Madrid 23/24",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Atlético de Madrid 24/25": {
         "id": "Atlético de Madrid 24/25",
         "kind": "season",
         "label": "Atlético de Madrid 24/25",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Atlético de Madrid 25/26": {
         "id": "Atlético de Madrid 25/26",
         "kind": "season",
         "label": "Atlético de Madrid 25/26",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Juventus FC 12/13": {
         "id": "Juventus FC 12/13",
         "kind": "season",
         "label": "Juventus FC 12/13",
+        "teamName": "Juventus FC",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Juventus FC 13/14": {
         "id": "Juventus FC 13/14",
         "kind": "season",
         "label": "Juventus FC 13/14",
+        "teamName": "Juventus FC",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Juventus FC 14/15": {
         "id": "Juventus FC 14/15",
         "kind": "season",
         "label": "Juventus FC 14/15",
+        "teamName": "Juventus FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Juventus FC 15/16": {
         "id": "Juventus FC 15/16",
         "kind": "season",
         "label": "Juventus FC 15/16",
+        "teamName": "Juventus FC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Manchester United 17/18": {
         "id": "Manchester United 17/18",
         "kind": "season",
         "label": "Manchester United 17/18",
+        "teamName": "Manchester United",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Manchester United 18/19": {
         "id": "Manchester United 18/19",
         "kind": "season",
         "label": "Manchester United 18/19",
+        "teamName": "Manchester United",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Manchester United 19/20": {
         "id": "Manchester United 19/20",
         "kind": "season",
         "label": "Manchester United 19/20",
+        "teamName": "Manchester United",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Manchester United 20/21": {
         "id": "Manchester United 20/21",
         "kind": "season",
         "label": "Manchester United 20/21",
+        "teamName": "Manchester United",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Manchester United 15/16": {
         "id": "Manchester United 15/16",
         "kind": "season",
         "label": "Manchester United 15/16",
+        "teamName": "Manchester United",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Manchester United 23/24": {
         "id": "Manchester United 23/24",
         "kind": "season",
         "label": "Manchester United 23/24",
+        "teamName": "Manchester United",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Manchester United 24/25": {
         "id": "Manchester United 24/25",
         "kind": "season",
         "label": "Manchester United 24/25",
+        "teamName": "Manchester United",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Aston Villa 24/25": {
         "id": "Aston Villa 24/25",
         "kind": "season",
         "label": "Aston Villa 24/25",
+        "teamName": "Aston Villa",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Arsenal FC 12/13": {
         "id": "Arsenal FC 12/13",
         "kind": "season",
         "label": "Arsenal FC 12/13",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Arsenal FC 13/14": {
         "id": "Arsenal FC 13/14",
         "kind": "season",
         "label": "Arsenal FC 13/14",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Arsenal FC 14/15": {
         "id": "Arsenal FC 14/15",
         "kind": "season",
         "label": "Arsenal FC 14/15",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Arsenal FC 15/16": {
         "id": "Arsenal FC 15/16",
         "kind": "season",
         "label": "Arsenal FC 15/16",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Sunderland AFC 15/16": {
         "id": "Sunderland AFC 15/16",
         "kind": "season",
         "label": "Sunderland AFC 15/16",
+        "teamName": "Sunderland AFC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Arsenal FC 16/17": {
         "id": "Arsenal FC 16/17",
         "kind": "season",
         "label": "Arsenal FC 16/17",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Arsenal FC 17/18": {
         "id": "Arsenal FC 17/18",
         "kind": "season",
         "label": "Arsenal FC 17/18",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Chelsea FC 19/20": {
         "id": "Chelsea FC 19/20",
         "kind": "season",
         "label": "Chelsea FC 19/20",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Chelsea FC 20/21": {
         "id": "Chelsea FC 20/21",
         "kind": "season",
         "label": "Chelsea FC 20/21",
+        "teamName": "Chelsea FC",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "AC Milan 23/24": {
         "id": "AC Milan 23/24",
         "kind": "season",
         "label": "AC Milan 23/24",
+        "teamName": "AC Milan",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Los Angeles Football Club 24/25": {
         "id": "Los Angeles Football Club 24/25",
         "kind": "season",
         "label": "Los Angeles Football Club 24/25",
+        "teamName": "Los Angeles Football Club",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "LOSC Lille 25/26": {
         "id": "LOSC Lille 25/26",
         "kind": "season",
         "label": "LOSC Lille 25/26",
+        "teamName": "LOSC Lille",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "West Ham United 14/15": {
         "id": "West Ham United 14/15",
         "kind": "season",
         "label": "West Ham United 14/15",
+        "teamName": "West Ham United",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "West Ham United 15/16": {
         "id": "West Ham United 15/16",
         "kind": "season",
         "label": "West Ham United 15/16",
+        "teamName": "West Ham United",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Everton FC 16/17": {
         "id": "Everton FC 16/17",
         "kind": "season",
         "label": "Everton FC 16/17",
+        "teamName": "Everton FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Fenerbahce 20/21": {
         "id": "Fenerbahce 20/21",
         "kind": "season",
         "label": "Fenerbahce 20/21",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Fenerbahce 21/22": {
         "id": "Fenerbahce 21/22",
         "kind": "season",
         "label": "Fenerbahce 21/22",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Fenerbahce 22/23": {
         "id": "Fenerbahce 22/23",
         "kind": "season",
         "label": "Fenerbahce 22/23",
+        "teamName": "Fenerbahce",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Sport Club Internacional 24/25": {
         "id": "Sport Club Internacional 24/25",
         "kind": "season",
         "label": "Sport Club Internacional 24/25",
+        "teamName": "Sport Club Internacional",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "CF Pachuca 25/26": {
         "id": "CF Pachuca 25/26",
         "kind": "season",
         "label": "CF Pachuca 25/26",
+        "teamName": "CF Pachuca",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "SL Benfica 19/20": {
         "id": "SL Benfica 19/20",
         "kind": "season",
         "label": "SL Benfica 19/20",
+        "teamName": "SL Benfica",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "SL Benfica 20/21": {
         "id": "SL Benfica 20/21",
         "kind": "season",
         "label": "SL Benfica 20/21",
+        "teamName": "SL Benfica",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "SL Benfica 21/22": {
         "id": "SL Benfica 21/22",
         "kind": "season",
         "label": "SL Benfica 21/22",
+        "teamName": "SL Benfica",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "SL Benfica 22/23": {
         "id": "SL Benfica 22/23",
         "kind": "season",
         "label": "SL Benfica 22/23",
+        "teamName": "SL Benfica",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Paris Saint-Germain 24/25": {
         "id": "Paris Saint-Germain 24/25",
         "kind": "season",
         "label": "Paris Saint-Germain 24/25",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Paris Saint-Germain 25/26": {
         "id": "Paris Saint-Germain 25/26",
         "kind": "season",
         "label": "Paris Saint-Germain 25/26",
+        "teamName": "Paris Saint-Germain",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "RCD Espanyol Barcelona 13/14": {
         "id": "RCD Espanyol Barcelona 13/14",
         "kind": "season",
         "label": "RCD Espanyol Barcelona 13/14",
+        "teamName": "RCD Espanyol Barcelona",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "RCD Espanyol Barcelona 24/25": {
         "id": "RCD Espanyol Barcelona 24/25",
         "kind": "season",
         "label": "RCD Espanyol Barcelona 24/25",
+        "teamName": "RCD Espanyol Barcelona",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Società Sportiva Lazio S.p.A. 12/13": {
         "id": "Società Sportiva Lazio S.p.A. 12/13",
         "kind": "season",
         "label": "Società Sportiva Lazio S.p.A. 12/13",
+        "teamName": "Società Sportiva Lazio S.p.A.",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Società Sportiva Lazio S.p.A. 13/14": {
         "id": "Società Sportiva Lazio S.p.A. 13/14",
         "kind": "season",
         "label": "Società Sportiva Lazio S.p.A. 13/14",
+        "teamName": "Società Sportiva Lazio S.p.A.",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Società Sportiva Lazio S.p.A. 14/15": {
         "id": "Società Sportiva Lazio S.p.A. 14/15",
         "kind": "season",
         "label": "Società Sportiva Lazio S.p.A. 14/15",
+        "teamName": "Società Sportiva Lazio S.p.A.",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Ajax Amsterdam 16/17": {
         "id": "Ajax Amsterdam 16/17",
         "kind": "season",
         "label": "Ajax Amsterdam 16/17",
+        "teamName": "Ajax Amsterdam",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Ajax Amsterdam 17/18": {
         "id": "Ajax Amsterdam 17/18",
         "kind": "season",
         "label": "Ajax Amsterdam 17/18",
+        "teamName": "Ajax Amsterdam",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Ajax Amsterdam 18/19": {
         "id": "Ajax Amsterdam 18/19",
         "kind": "season",
         "label": "Ajax Amsterdam 18/19",
+        "teamName": "Ajax Amsterdam",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Udinese Calcio 13/14": {
         "id": "Udinese Calcio 13/14",
         "kind": "season",
         "label": "Udinese Calcio 13/14",
+        "teamName": "Udinese Calcio",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Udinese Calcio 14/15": {
         "id": "Udinese Calcio 14/15",
         "kind": "season",
         "label": "Udinese Calcio 14/15",
+        "teamName": "Udinese Calcio",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Cagliari Calcio 14/15": {
         "id": "Cagliari Calcio 14/15",
         "kind": "season",
         "label": "Cagliari Calcio 14/15",
+        "teamName": "Cagliari Calcio",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Udinese Calcio 15/16": {
         "id": "Udinese Calcio 15/16",
         "kind": "season",
         "label": "Udinese Calcio 15/16",
+        "teamName": "Udinese Calcio",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "UC Sampdoria 16/17": {
         "id": "UC Sampdoria 16/17",
         "kind": "season",
         "label": "UC Sampdoria 16/17",
+        "teamName": "UC Sampdoria",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Sporting CP 17/18": {
         "id": "Sporting CP 17/18",
         "kind": "season",
         "label": "Sporting CP 17/18",
+        "teamName": "Sporting CP",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Sporting CP 18/19": {
         "id": "Sporting CP 18/19",
         "kind": "season",
         "label": "Sporting CP 18/19",
+        "teamName": "Sporting CP",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Sporting CP 19/20": {
         "id": "Sporting CP 19/20",
         "kind": "season",
         "label": "Sporting CP 19/20",
+        "teamName": "Sporting CP",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Manchester United 25/26": {
         "id": "Manchester United 25/26",
         "kind": "season",
         "label": "Manchester United 25/26",
+        "teamName": "Manchester United",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "AS Monaco 14/15": {
         "id": "AS Monaco 14/15",
         "kind": "season",
         "label": "AS Monaco 14/15",
+        "teamName": "AS Monaco",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Manchester City 25/26": {
         "id": "Manchester City 25/26",
         "kind": "season",
         "label": "Manchester City 25/26",
+        "teamName": "Manchester City",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Leicester City 14/15": {
         "id": "Leicester City 14/15",
         "kind": "season",
         "label": "Leicester City 14/15",
+        "teamName": "Leicester City",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Leicester City 15/16": {
         "id": "Leicester City 15/16",
         "kind": "season",
         "label": "Leicester City 15/16",
+        "teamName": "Leicester City",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Leicester City 16/17": {
         "id": "Leicester City 16/17",
         "kind": "season",
         "label": "Leicester City 16/17",
+        "teamName": "Leicester City",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Leicester City 17/18": {
         "id": "Leicester City 17/18",
         "kind": "season",
         "label": "Leicester City 17/18",
+        "teamName": "Leicester City",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Al-Ahli Saudi Football Club 24/25": {
         "id": "Al-Ahli Saudi Football Club 24/25",
         "kind": "season",
         "label": "Al-Ahli Saudi Football Club 24/25",
+        "teamName": "Al-Ahli Saudi Football Club",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Al-Ahli Saudi Football Club 25/26": {
         "id": "Al-Ahli Saudi Football Club 25/26",
         "kind": "season",
         "label": "Al-Ahli Saudi Football Club 25/26",
+        "teamName": "Al-Ahli Saudi Football Club",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Borussia Dortmund 17/18": {
         "id": "Borussia Dortmund 17/18",
         "kind": "season",
         "label": "Borussia Dortmund 17/18",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Willem II Tilburg 18/19": {
         "id": "Willem II Tilburg 18/19",
         "kind": "season",
         "label": "Willem II Tilburg 18/19",
+        "teamName": "Willem II Tilburg",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Real Sociedad 19/20": {
         "id": "Real Sociedad 19/20",
         "kind": "season",
         "label": "Real Sociedad 19/20",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Real Sociedad 20/21": {
         "id": "Real Sociedad 20/21",
         "kind": "season",
         "label": "Real Sociedad 20/21",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Real Sociedad 21/22": {
         "id": "Real Sociedad 21/22",
         "kind": "season",
         "label": "Real Sociedad 21/22",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Newcastle United 22/23": {
         "id": "Newcastle United 22/23",
         "kind": "season",
         "label": "Newcastle United 22/23",
+        "teamName": "Newcastle United",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Real Sociedad 22/23": {
         "id": "Real Sociedad 22/23",
         "kind": "season",
         "label": "Real Sociedad 22/23",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Newcastle United 23/24": {
         "id": "Newcastle United 23/24",
         "kind": "season",
         "label": "Newcastle United 23/24",
+        "teamName": "Newcastle United",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Newcastle United 24/25": {
         "id": "Newcastle United 24/25",
         "kind": "season",
         "label": "Newcastle United 24/25",
+        "teamName": "Newcastle United",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Royal Charleroi Sporting Club 18/19": {
         "id": "Royal Charleroi Sporting Club 18/19",
         "kind": "season",
         "label": "Royal Charleroi Sporting Club 18/19",
+        "teamName": "Royal Charleroi Sporting Club",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "LOSC Lille 19/20": {
         "id": "LOSC Lille 19/20",
         "kind": "season",
         "label": "LOSC Lille 19/20",
+        "teamName": "LOSC Lille",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "SSC Napoli 20/21": {
         "id": "SSC Napoli 20/21",
         "kind": "season",
         "label": "SSC Napoli 20/21",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "SSC Napoli 21/22": {
         "id": "SSC Napoli 21/22",
         "kind": "season",
         "label": "SSC Napoli 21/22",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "SSC Napoli 22/23": {
         "id": "SSC Napoli 22/23",
         "kind": "season",
         "label": "SSC Napoli 22/23",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "SSC Napoli 23/24": {
         "id": "SSC Napoli 23/24",
         "kind": "season",
         "label": "SSC Napoli 23/24",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Galatasaray 24/25": {
         "id": "Galatasaray 24/25",
         "kind": "season",
         "label": "Galatasaray 24/25",
+        "teamName": "Galatasaray",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Galatasaray 25/26": {
         "id": "Galatasaray 25/26",
         "kind": "season",
         "label": "Galatasaray 25/26",
+        "teamName": "Galatasaray",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Футбольный клуб \"Локомотив\" Москва 18/19": {
         "id": "Футбольный клуб \"Локомотив\" Москва 18/19",
         "kind": "season",
         "label": "Футбольный клуб \"Локомотив\" Москва 18/19",
+        "teamName": "Футбольный клуб \"Локомотив\" Москва",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "FC Rubin Kazan 19/20": {
         "id": "FC Rubin Kazan 19/20",
         "kind": "season",
         "label": "FC Rubin Kazan 19/20",
+        "teamName": "FC Rubin Kazan",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "FC Rubin Kazan 20/21": {
         "id": "FC Rubin Kazan 20/21",
         "kind": "season",
         "label": "FC Rubin Kazan 20/21",
+        "teamName": "FC Rubin Kazan",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "FC Rubin Kazan 21/22": {
         "id": "FC Rubin Kazan 21/22",
         "kind": "season",
         "label": "FC Rubin Kazan 21/22",
+        "teamName": "FC Rubin Kazan",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "SSC Napoli 24/25": {
         "id": "SSC Napoli 24/25",
         "kind": "season",
         "label": "SSC Napoli 24/25",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "ACF Fiorentina 16/17": {
         "id": "ACF Fiorentina 16/17",
         "kind": "season",
         "label": "ACF Fiorentina 16/17",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "ACF Fiorentina 17/18": {
         "id": "ACF Fiorentina 17/18",
         "kind": "season",
         "label": "ACF Fiorentina 17/18",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "ACF Fiorentina 18/19": {
         "id": "ACF Fiorentina 18/19",
         "kind": "season",
         "label": "ACF Fiorentina 18/19",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "ACF Fiorentina 19/20": {
         "id": "ACF Fiorentina 19/20",
         "kind": "season",
         "label": "ACF Fiorentina 19/20",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "ACF Fiorentina 20/21": {
         "id": "ACF Fiorentina 20/21",
         "kind": "season",
         "label": "ACF Fiorentina 20/21",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Juventus FC 21/22": {
         "id": "Juventus FC 21/22",
         "kind": "season",
         "label": "Juventus FC 21/22",
+        "teamName": "Juventus FC",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Juventus FC 22/23": {
         "id": "Juventus FC 22/23",
         "kind": "season",
         "label": "Juventus FC 22/23",
+        "teamName": "Juventus FC",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Juventus FC 23/24": {
         "id": "Juventus FC 23/24",
         "kind": "season",
         "label": "Juventus FC 23/24",
+        "teamName": "Juventus FC",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Inter Milan 18/19": {
         "id": "Inter Milan 18/19",
         "kind": "season",
         "label": "Inter Milan 18/19",
+        "teamName": "Inter Milan",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Inter Milan 19/20": {
         "id": "Inter Milan 19/20",
         "kind": "season",
         "label": "Inter Milan 19/20",
+        "teamName": "Inter Milan",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Inter Milan 20/21": {
         "id": "Inter Milan 20/21",
         "kind": "season",
         "label": "Inter Milan 20/21",
+        "teamName": "Inter Milan",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Athletic Bilbao 21/22": {
         "id": "Athletic Bilbao 21/22",
         "kind": "season",
         "label": "Athletic Bilbao 21/22",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Athletic Bilbao 22/23": {
         "id": "Athletic Bilbao 22/23",
         "kind": "season",
         "label": "Athletic Bilbao 22/23",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Athletic Bilbao 23/24": {
         "id": "Athletic Bilbao 23/24",
         "kind": "season",
         "label": "Athletic Bilbao 23/24",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Athletic Bilbao 24/25": {
         "id": "Athletic Bilbao 24/25",
         "kind": "season",
         "label": "Athletic Bilbao 24/25",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Athletic Bilbao 25/26": {
         "id": "Athletic Bilbao 25/26",
         "kind": "season",
         "label": "Athletic Bilbao 25/26",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Real Sociedad 15/16": {
         "id": "Real Sociedad 15/16",
         "kind": "season",
         "label": "Real Sociedad 15/16",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Real Sociedad 16/17": {
         "id": "Real Sociedad 16/17",
         "kind": "season",
         "label": "Real Sociedad 16/17",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Real Sociedad 17/18": {
         "id": "Real Sociedad 17/18",
         "kind": "season",
         "label": "Real Sociedad 17/18",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Fußballclub Red Bull Salzburg 17/18": {
         "id": "Fußballclub Red Bull Salzburg 17/18",
         "kind": "season",
         "label": "Fußballclub Red Bull Salzburg 17/18",
+        "teamName": "Fußballclub Red Bull Salzburg",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Real Sociedad 18/19": {
         "id": "Real Sociedad 18/19",
         "kind": "season",
         "label": "Real Sociedad 18/19",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Sevilla FC 18/19": {
         "id": "Sevilla FC 18/19",
         "kind": "season",
         "label": "Sevilla FC 18/19",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Real Sociedad 23/24": {
         "id": "Real Sociedad 23/24",
         "kind": "season",
         "label": "Real Sociedad 23/24",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Real Sociedad 24/25": {
         "id": "Real Sociedad 24/25",
         "kind": "season",
         "label": "Real Sociedad 24/25",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Real Sociedad 25/26": {
         "id": "Real Sociedad 25/26",
         "kind": "season",
         "label": "Real Sociedad 25/26",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "CA Osasuna 25/26": {
         "id": "CA Osasuna 25/26",
         "kind": "season",
         "label": "CA Osasuna 25/26",
+        "teamName": "CA Osasuna",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "West Ham United 18/19": {
         "id": "West Ham United 18/19",
         "kind": "season",
         "label": "West Ham United 18/19",
+        "teamName": "West Ham United",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "West Ham United 19/20": {
         "id": "West Ham United 19/20",
         "kind": "season",
         "label": "West Ham United 19/20",
+        "teamName": "West Ham United",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "West Ham United 20/21": {
         "id": "West Ham United 20/21",
         "kind": "season",
         "label": "West Ham United 20/21",
+        "teamName": "West Ham United",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "West Ham United 21/22": {
         "id": "West Ham United 21/22",
         "kind": "season",
         "label": "West Ham United 21/22",
+        "teamName": "West Ham United",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "West Ham United 22/23": {
         "id": "West Ham United 22/23",
         "kind": "season",
         "label": "West Ham United 22/23",
+        "teamName": "West Ham United",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Arsenal FC 23/24": {
         "id": "Arsenal FC 23/24",
         "kind": "season",
         "label": "Arsenal FC 23/24",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Arsenal FC 24/25": {
         "id": "Arsenal FC 24/25",
         "kind": "season",
         "label": "Arsenal FC 24/25",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Arsenal FC 25/26": {
         "id": "Arsenal FC 25/26",
         "kind": "season",
         "label": "Arsenal FC 25/26",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Arsenal FC 19/20": {
         "id": "Arsenal FC 19/20",
         "kind": "season",
         "label": "Arsenal FC 19/20",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Arsenal FC 20/21": {
         "id": "Arsenal FC 20/21",
         "kind": "season",
         "label": "Arsenal FC 20/21",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Aston Villa 20/21": {
         "id": "Aston Villa 20/21",
         "kind": "season",
         "label": "Aston Villa 20/21",
+        "teamName": "Aston Villa",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Arsenal FC 21/22": {
         "id": "Arsenal FC 21/22",
         "kind": "season",
         "label": "Arsenal FC 21/22",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Arsenal FC 22/23": {
         "id": "Arsenal FC 22/23",
         "kind": "season",
         "label": "Arsenal FC 22/23",
+        "teamName": "Arsenal FC",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Brentford FC 18/19": {
         "id": "Brentford FC 18/19",
         "kind": "season",
         "label": "Brentford FC 18/19",
+        "teamName": "Brentford FC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Aston Villa 21/22": {
         "id": "Aston Villa 21/22",
         "kind": "season",
         "label": "Aston Villa 21/22",
+        "teamName": "Aston Villa",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Aston Villa 22/23": {
         "id": "Aston Villa 22/23",
         "kind": "season",
         "label": "Aston Villa 22/23",
+        "teamName": "Aston Villa",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Aston Villa 23/24": {
         "id": "Aston Villa 23/24",
         "kind": "season",
         "label": "Aston Villa 23/24",
+        "teamName": "Aston Villa",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Aston Villa 25/26": {
         "id": "Aston Villa 25/26",
         "kind": "season",
         "label": "Aston Villa 25/26",
+        "teamName": "Aston Villa",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Hull City 17/18": {
         "id": "Hull City 17/18",
         "kind": "season",
         "label": "Hull City 17/18",
+        "teamName": "Hull City",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "West Ham United 23/24": {
         "id": "West Ham United 23/24",
         "kind": "season",
         "label": "West Ham United 23/24",
+        "teamName": "West Ham United",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "West Ham United 24/25": {
         "id": "West Ham United 24/25",
         "kind": "season",
         "label": "West Ham United 24/25",
+        "teamName": "West Ham United",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "West Ham United 25/26": {
         "id": "West Ham United 25/26",
         "kind": "season",
         "label": "West Ham United 25/26",
+        "teamName": "West Ham United",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Nottingham Forest 24/25": {
         "id": "Nottingham Forest 24/25",
         "kind": "season",
         "label": "Nottingham Forest 24/25",
+        "teamName": "Nottingham Forest",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Nottingham Forest 25/26": {
         "id": "Nottingham Forest 25/26",
         "kind": "season",
         "label": "Nottingham Forest 25/26",
+        "teamName": "Nottingham Forest",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Union Saint-Gilloise 21/22": {
         "id": "Union Saint-Gilloise 21/22",
         "kind": "season",
         "label": "Union Saint-Gilloise 21/22",
+        "teamName": "Union Saint-Gilloise",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Brighton & Hove Albion 22/23": {
         "id": "Brighton & Hove Albion 22/23",
         "kind": "season",
         "label": "Brighton & Hove Albion 22/23",
+        "teamName": "Brighton & Hove Albion",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Brighton & Hove Albion 23/24": {
         "id": "Brighton & Hove Albion 23/24",
         "kind": "season",
         "label": "Brighton & Hove Albion 23/24",
+        "teamName": "Brighton & Hove Albion",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Brighton & Hove Albion 24/25": {
         "id": "Brighton & Hove Albion 24/25",
         "kind": "season",
         "label": "Brighton & Hove Albion 24/25",
+        "teamName": "Brighton & Hove Albion",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Brighton & Hove Albion 25/26": {
         "id": "Brighton & Hove Albion 25/26",
         "kind": "season",
         "label": "Brighton & Hove Albion 25/26",
+        "teamName": "Brighton & Hove Albion",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Athletic Bilbao 13/14": {
         "id": "Athletic Bilbao 13/14",
         "kind": "season",
         "label": "Athletic Bilbao 13/14",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Athletic Bilbao 15/16": {
         "id": "Athletic Bilbao 15/16",
         "kind": "season",
         "label": "Athletic Bilbao 15/16",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Granada CF 15/16": {
         "id": "Granada CF 15/16",
         "kind": "season",
         "label": "Granada CF 15/16",
+        "teamName": "Granada CF",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Athletic Bilbao 16/17": {
         "id": "Athletic Bilbao 16/17",
         "kind": "season",
         "label": "Athletic Bilbao 16/17",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Athletic Bilbao 17/18": {
         "id": "Athletic Bilbao 17/18",
         "kind": "season",
         "label": "Athletic Bilbao 17/18",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Levante UD 17/18": {
         "id": "Levante UD 17/18",
         "kind": "season",
         "label": "Levante UD 17/18",
+        "teamName": "Levante UD",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Southampton FC 21/22": {
         "id": "Southampton FC 21/22",
         "kind": "season",
         "label": "Southampton FC 21/22",
+        "teamName": "Southampton FC",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "SL Benfica 17/18": {
         "id": "SL Benfica 17/18",
         "kind": "season",
         "label": "SL Benfica 17/18",
+        "teamName": "SL Benfica",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Portimonense SC 18/19": {
         "id": "Portimonense SC 18/19",
         "kind": "season",
         "label": "Portimonense SC 18/19",
+        "teamName": "Portimonense SC",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "SL Benfica 18/19": {
         "id": "SL Benfica 18/19",
         "kind": "season",
         "label": "SL Benfica 18/19",
+        "teamName": "SL Benfica",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "FC Porto 19/20": {
         "id": "FC Porto 19/20",
         "kind": "season",
         "label": "FC Porto 19/20",
+        "teamName": "FC Porto",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "AO FK Zenit Sankt-Peterburg 19/20": {
         "id": "AO FK Zenit Sankt-Peterburg 19/20",
         "kind": "season",
         "label": "AO FK Zenit Sankt-Peterburg 19/20",
+        "teamName": "AO FK Zenit Sankt-Peterburg",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "FC Shakhtar Donetsk 19/20": {
         "id": "FC Shakhtar Donetsk 19/20",
         "kind": "season",
         "label": "FC Shakhtar Donetsk 19/20",
+        "teamName": "FC Shakhtar Donetsk",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "West Bromwich Albion 20/21": {
         "id": "West Bromwich Albion 20/21",
         "kind": "season",
         "label": "West Bromwich Albion 20/21",
+        "teamName": "West Bromwich Albion",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Wolverhampton Wanderers 23/24": {
         "id": "Wolverhampton Wanderers 23/24",
         "kind": "season",
         "label": "Wolverhampton Wanderers 23/24",
+        "teamName": "Wolverhampton Wanderers",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Everton FC 14/15": {
         "id": "Everton FC 14/15",
         "kind": "season",
         "label": "Everton FC 14/15",
+        "teamName": "Everton FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Club Brugge KV 21/22": {
         "id": "Club Brugge KV 21/22",
         "kind": "season",
         "label": "Club Brugge KV 21/22",
+        "teamName": "Club Brugge KV",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Crystal Palace 22/23": {
         "id": "Crystal Palace 22/23",
         "kind": "season",
         "label": "Crystal Palace 22/23",
+        "teamName": "Crystal Palace",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "AC Milan 13/14": {
         "id": "AC Milan 13/14",
         "kind": "season",
         "label": "AC Milan 13/14",
+        "teamName": "AC Milan",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Deportivo de La Coruña 12/13": {
         "id": "Deportivo de La Coruña 12/13",
         "kind": "season",
         "label": "Deportivo de La Coruña 12/13",
+        "teamName": "Deportivo de La Coruña",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Sevilla FC 14/15": {
         "id": "Sevilla FC 14/15",
         "kind": "season",
         "label": "Sevilla FC 14/15",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Real Sociedad 14/15": {
         "id": "Real Sociedad 14/15",
         "kind": "season",
         "label": "Real Sociedad 14/15",
+        "teamName": "Real Sociedad",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Valencia CF 19/20": {
         "id": "Valencia CF 19/20",
         "kind": "season",
         "label": "Valencia CF 19/20",
+        "teamName": "Valencia CF",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Athletic Bilbao 20/21": {
         "id": "Athletic Bilbao 20/21",
         "kind": "season",
         "label": "Athletic Bilbao 20/21",
+        "teamName": "Athletic Bilbao",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Málaga CF 12/13": {
         "id": "Málaga CF 12/13",
         "kind": "season",
         "label": "Málaga CF 12/13",
+        "teamName": "Málaga CF",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "Sevilla FC 22/23": {
         "id": "Sevilla FC 22/23",
         "kind": "season",
         "label": "Sevilla FC 22/23",
+        "teamName": "Sevilla FC",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Real Betis Balompié 23/24": {
         "id": "Real Betis Balompié 23/24",
         "kind": "season",
         "label": "Real Betis Balompié 23/24",
+        "teamName": "Real Betis Balompié",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Real Betis Balompié 24/25": {
         "id": "Real Betis Balompié 24/25",
         "kind": "season",
         "label": "Real Betis Balompié 24/25",
+        "teamName": "Real Betis Balompié",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Real Betis Balompié 25/26": {
         "id": "Real Betis Balompié 25/26",
         "kind": "season",
         "label": "Real Betis Balompié 25/26",
+        "teamName": "Real Betis Balompié",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "SSC Napoli 13/14": {
         "id": "SSC Napoli 13/14",
         "kind": "season",
         "label": "SSC Napoli 13/14",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "SSC Napoli 14/15": {
         "id": "SSC Napoli 14/15",
         "kind": "season",
         "label": "SSC Napoli 14/15",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "SSC Napoli 15/16": {
         "id": "SSC Napoli 15/16",
         "kind": "season",
         "label": "SSC Napoli 15/16",
+        "teamName": "SSC Napoli",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Juventus FC 16/17": {
         "id": "Juventus FC 16/17",
         "kind": "season",
         "label": "Juventus FC 16/17",
+        "teamName": "Juventus FC",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Juventus FC 17/18": {
         "id": "Juventus FC 17/18",
         "kind": "season",
         "label": "Juventus FC 17/18",
+        "teamName": "Juventus FC",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "Olympiakos Syndesmos Filathlon Peiraios 22/23": {
         "id": "Olympiakos Syndesmos Filathlon Peiraios 22/23",
         "kind": "season",
         "label": "Olympiakos Syndesmos Filathlon Peiraios 22/23",
+        "teamName": "Olympiakos Syndesmos Filathlon Peiraios",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "FK Spartak Moskva 12/13": {
         "id": "FK Spartak Moskva 12/13",
         "kind": "season",
         "label": "FK Spartak Moskva 12/13",
+        "teamName": "FK Spartak Moskva",
+        "seasonStart": 2012,
+        "seasonEnd": 2013,
         "detail": "the season"
       },
       "FC Nantes 18/19": {
         "id": "FC Nantes 18/19",
         "kind": "season",
         "label": "FC Nantes 18/19",
+        "teamName": "FC Nantes",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Atlético de Madrid 13/14": {
         "id": "Atlético de Madrid 13/14",
         "kind": "season",
         "label": "Atlético de Madrid 13/14",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "RCD Espanyol Barcelona 18/19": {
         "id": "RCD Espanyol Barcelona 18/19",
         "kind": "season",
         "label": "RCD Espanyol Barcelona 18/19",
+        "teamName": "RCD Espanyol Barcelona",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Cagliari Calcio 20/21": {
         "id": "Cagliari Calcio 20/21",
         "kind": "season",
         "label": "Cagliari Calcio 20/21",
+        "teamName": "Cagliari Calcio",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Villarreal CF 18/19": {
         "id": "Villarreal CF 18/19",
         "kind": "season",
         "label": "Villarreal CF 18/19",
+        "teamName": "Villarreal CF",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Villarreal CF 19/20": {
         "id": "Villarreal CF 19/20",
         "kind": "season",
         "label": "Villarreal CF 19/20",
+        "teamName": "Villarreal CF",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "FC Porto 14/15": {
         "id": "FC Porto 14/15",
         "kind": "season",
         "label": "FC Porto 14/15",
+        "teamName": "FC Porto",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Borussia Dortmund 14/15": {
         "id": "Borussia Dortmund 14/15",
         "kind": "season",
         "label": "Borussia Dortmund 14/15",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "Borussia Dortmund 15/16": {
         "id": "Borussia Dortmund 15/16",
         "kind": "season",
         "label": "Borussia Dortmund 15/16",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "Borussia Dortmund 16/17": {
         "id": "Borussia Dortmund 16/17",
         "kind": "season",
         "label": "Borussia Dortmund 16/17",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Borussia Dortmund 18/19": {
         "id": "Borussia Dortmund 18/19",
         "kind": "season",
         "label": "Borussia Dortmund 18/19",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Borussia Dortmund 19/20": {
         "id": "Borussia Dortmund 19/20",
         "kind": "season",
         "label": "Borussia Dortmund 19/20",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Borussia Dortmund 20/21": {
         "id": "Borussia Dortmund 20/21",
         "kind": "season",
         "label": "Borussia Dortmund 20/21",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Borussia Dortmund 21/22": {
         "id": "Borussia Dortmund 21/22",
         "kind": "season",
         "label": "Borussia Dortmund 21/22",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Ajax Amsterdam 21/22": {
         "id": "Ajax Amsterdam 21/22",
         "kind": "season",
         "label": "Ajax Amsterdam 21/22",
+        "teamName": "Ajax Amsterdam",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Borussia Dortmund 22/23": {
         "id": "Borussia Dortmund 22/23",
         "kind": "season",
         "label": "Borussia Dortmund 22/23",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Borussia Dortmund 23/24": {
         "id": "Borussia Dortmund 23/24",
         "kind": "season",
         "label": "Borussia Dortmund 23/24",
+        "teamName": "Borussia Dortmund",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Los Angeles Galaxy 24/25": {
         "id": "Los Angeles Galaxy 24/25",
         "kind": "season",
         "label": "Los Angeles Galaxy 24/25",
+        "teamName": "Los Angeles Galaxy",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Los Angeles Galaxy 25/26": {
         "id": "Los Angeles Galaxy 25/26",
         "kind": "season",
         "label": "Los Angeles Galaxy 25/26",
+        "teamName": "Los Angeles Galaxy",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "PSV Eindhoven 20/21": {
         "id": "PSV Eindhoven 20/21",
         "kind": "season",
         "label": "PSV Eindhoven 20/21",
+        "teamName": "PSV Eindhoven",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "PSV Eindhoven 21/22": {
         "id": "PSV Eindhoven 21/22",
         "kind": "season",
         "label": "PSV Eindhoven 21/22",
+        "teamName": "PSV Eindhoven",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Eintracht Frankfurt 22/23": {
         "id": "Eintracht Frankfurt 22/23",
         "kind": "season",
         "label": "Eintracht Frankfurt 22/23",
+        "teamName": "Eintracht Frankfurt",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Eintracht Frankfurt 23/24": {
         "id": "Eintracht Frankfurt 23/24",
         "kind": "season",
         "label": "Eintracht Frankfurt 23/24",
+        "teamName": "Eintracht Frankfurt",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Eintracht Frankfurt 24/25": {
         "id": "Eintracht Frankfurt 24/25",
         "kind": "season",
         "label": "Eintracht Frankfurt 24/25",
+        "teamName": "Eintracht Frankfurt",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Hamburger SV 15/16": {
         "id": "Hamburger SV 15/16",
         "kind": "season",
         "label": "Hamburger SV 15/16",
+        "teamName": "Hamburger SV",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "ACF Fiorentina 24/25": {
         "id": "ACF Fiorentina 24/25",
         "kind": "season",
         "label": "ACF Fiorentina 24/25",
+        "teamName": "ACF Fiorentina",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Associazione Sportiva Roma 24/25": {
         "id": "Associazione Sportiva Roma 24/25",
         "kind": "season",
         "label": "Associazione Sportiva Roma 24/25",
+        "teamName": "Associazione Sportiva Roma",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Bayer 04 Leverkusen 21/22": {
         "id": "Bayer 04 Leverkusen 21/22",
         "kind": "season",
         "label": "Bayer 04 Leverkusen 21/22",
+        "teamName": "Bayer 04 Leverkusen",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Vancouver Whitecaps FC 24/25": {
         "id": "Vancouver Whitecaps FC 24/25",
         "kind": "season",
         "label": "Vancouver Whitecaps FC 24/25",
+        "teamName": "Vancouver Whitecaps FC",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Vancouver Whitecaps FC 25/26": {
         "id": "Vancouver Whitecaps FC 25/26",
         "kind": "season",
         "label": "Vancouver Whitecaps FC 25/26",
+        "teamName": "Vancouver Whitecaps FC",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Stade Rennais FC 15/16": {
         "id": "Stade Rennais FC 15/16",
         "kind": "season",
         "label": "Stade Rennais FC 15/16",
+        "teamName": "Stade Rennais FC",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "FC Schalke 04 13/14": {
         "id": "FC Schalke 04 13/14",
         "kind": "season",
         "label": "FC Schalke 04 13/14",
+        "teamName": "FC Schalke 04",
+        "seasonStart": 2013,
+        "seasonEnd": 2014,
         "detail": "the season"
       },
       "Valencia CF 20/21": {
         "id": "Valencia CF 20/21",
         "kind": "season",
         "label": "Valencia CF 20/21",
+        "teamName": "Valencia CF",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "FC Shakhtar Donetsk 20/21": {
         "id": "FC Shakhtar Donetsk 20/21",
         "kind": "season",
         "label": "FC Shakhtar Donetsk 20/21",
+        "teamName": "FC Shakhtar Donetsk",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Leeds United 22/23": {
         "id": "Leeds United 22/23",
         "kind": "season",
         "label": "Leeds United 22/23",
+        "teamName": "Leeds United",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Atlético de Madrid 19/20": {
         "id": "Atlético de Madrid 19/20",
         "kind": "season",
         "label": "Atlético de Madrid 19/20",
+        "teamName": "Atlético de Madrid",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "AC Milan 24/25": {
         "id": "AC Milan 24/25",
         "kind": "season",
         "label": "AC Milan 24/25",
+        "teamName": "AC Milan",
+        "seasonStart": 2024,
+        "seasonEnd": 2025,
         "detail": "the season"
       },
       "Como 1907 25/26": {
         "id": "Como 1907 25/26",
         "kind": "season",
         "label": "Como 1907 25/26",
+        "teamName": "Como 1907",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "Valencia CF 18/19": {
         "id": "Valencia CF 18/19",
         "kind": "season",
         "label": "Valencia CF 18/19",
+        "teamName": "Valencia CF",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "KRC Genk 15/16": {
         "id": "KRC Genk 15/16",
         "kind": "season",
         "label": "KRC Genk 15/16",
+        "teamName": "KRC Genk",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "KRC Genk 16/17": {
         "id": "KRC Genk 16/17",
         "kind": "season",
         "label": "KRC Genk 16/17",
+        "teamName": "KRC Genk",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "Leicester City 18/19": {
         "id": "Leicester City 18/19",
         "kind": "season",
         "label": "Leicester City 18/19",
+        "teamName": "Leicester City",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       },
       "Leicester City 19/20": {
         "id": "Leicester City 19/20",
         "kind": "season",
         "label": "Leicester City 19/20",
+        "teamName": "Leicester City",
+        "seasonStart": 2019,
+        "seasonEnd": 2020,
         "detail": "the season"
       },
       "Leicester City 20/21": {
         "id": "Leicester City 20/21",
         "kind": "season",
         "label": "Leicester City 20/21",
+        "teamName": "Leicester City",
+        "seasonStart": 2020,
+        "seasonEnd": 2021,
         "detail": "the season"
       },
       "Leicester City 21/22": {
         "id": "Leicester City 21/22",
         "kind": "season",
         "label": "Leicester City 21/22",
+        "teamName": "Leicester City",
+        "seasonStart": 2021,
+        "seasonEnd": 2022,
         "detail": "the season"
       },
       "Leicester City 22/23": {
         "id": "Leicester City 22/23",
         "kind": "season",
         "label": "Leicester City 22/23",
+        "teamName": "Leicester City",
+        "seasonStart": 2022,
+        "seasonEnd": 2023,
         "detail": "the season"
       },
       "Leicester City 23/24": {
         "id": "Leicester City 23/24",
         "kind": "season",
         "label": "Leicester City 23/24",
+        "teamName": "Leicester City",
+        "seasonStart": 2023,
+        "seasonEnd": 2024,
         "detail": "the season"
       },
       "Beşiktaş Jimnastik Kulübü 25/26": {
         "id": "Beşiktaş Jimnastik Kulübü 25/26",
         "kind": "season",
         "label": "Beşiktaş Jimnastik Kulübü 25/26",
+        "teamName": "Beşiktaş Jimnastik Kulübü",
+        "seasonStart": 2025,
+        "seasonEnd": 2026,
         "detail": "the season"
       },
       "RSC Anderlecht 14/15": {
         "id": "RSC Anderlecht 14/15",
         "kind": "season",
         "label": "RSC Anderlecht 14/15",
+        "teamName": "RSC Anderlecht",
+        "seasonStart": 2014,
+        "seasonEnd": 2015,
         "detail": "the season"
       },
       "RSC Anderlecht 15/16": {
         "id": "RSC Anderlecht 15/16",
         "kind": "season",
         "label": "RSC Anderlecht 15/16",
+        "teamName": "RSC Anderlecht",
+        "seasonStart": 2015,
+        "seasonEnd": 2016,
         "detail": "the season"
       },
       "RSC Anderlecht 16/17": {
         "id": "RSC Anderlecht 16/17",
         "kind": "season",
         "label": "RSC Anderlecht 16/17",
+        "teamName": "RSC Anderlecht",
+        "seasonStart": 2016,
+        "seasonEnd": 2017,
         "detail": "the season"
       },
       "AS Monaco 17/18": {
         "id": "AS Monaco 17/18",
         "kind": "season",
         "label": "AS Monaco 17/18",
+        "teamName": "AS Monaco",
+        "seasonStart": 2017,
+        "seasonEnd": 2018,
         "detail": "the season"
       },
       "AS Monaco 18/19": {
         "id": "AS Monaco 18/19",
         "kind": "season",
         "label": "AS Monaco 18/19",
+        "teamName": "AS Monaco",
+        "seasonStart": 2018,
+        "seasonEnd": 2019,
         "detail": "the season"
       }
     },

@@ -20,12 +20,23 @@ export const RECIPES = Object.freeze([
     template: 'stat_value',
     metric: 'club_goals',
     windowKinds: ['season'],
-    speak: ({ subject, window, value }) => ({
-      prompt: `How many goals did **${subject.name}** score for **${window?.teamName ?? window?.label ?? 'the club'}** in **${window?.seasonStart ? seasonLabel(window.seasonStart) : window?.label}**?`,
-      context: window?.label ?? null,
-      answer: value,
-      unit: 'goals',
-    }),
+    speak: ({ subject, window, value }) => {
+      const club = window?.teamName ?? null;
+      const season = window?.seasonStart != null ? seasonLabel(window.seasonStart) : null;
+      const seasonOrLabel = season ?? window?.label ?? null;
+      // Never render the same string for club and season; fall back to a
+      // single sensible phrase instead of repeating the label.
+      const seasonPhrase = seasonOrLabel && seasonOrLabel !== club ? seasonOrLabel : null;
+      const parts = [`How many goals did **${subject.name}** score`];
+      if (club) parts.push(`for **${club}**`);
+      if (seasonPhrase) parts.push(`in **${seasonPhrase}**`);
+      return {
+        prompt: parts.join(' ') + '?',
+        context: window?.label ?? null,
+        answer: value,
+        unit: 'goals',
+      };
+    },
   },
   {
     id: 'goals_in_tournament',

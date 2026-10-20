@@ -221,8 +221,18 @@ for p in selected:
                 windows_registry[wid] = {"id": wid, "kind": "tournament",
                                          "label": f"{wid[3:]} World Cup", "detail": "the tournament"}
             else:
+                # wid: "<Club Name> YY/YY" -> teamName + seasonStart/seasonEnd
+                club_name, season_part = wid.rsplit(' ', 1)
+                start_a, _ = season_part.split('/')
+                start = int(start_a)
+                if start < 100:
+                    start = 2000 + start if start <= 29 else 1900 + start
                 windows_registry[wid] = {"id": wid, "kind": "season",
-                                         "label": wid, "detail": "the season"}
+                                         "label": wid,
+                                         "teamName": club_name,
+                                         "seasonStart": start,
+                                         "seasonEnd": start + 1,
+                                         "detail": "the season"}
 
     out_players.append({
         "id": int(pid),
