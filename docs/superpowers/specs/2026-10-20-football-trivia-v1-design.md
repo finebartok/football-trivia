@@ -8,11 +8,28 @@
 
 ## 1. Summary
 
-A realtime multiplayer football trivia game for a friend group playing on their own phones. Players join a room with a short code, the host picks a **Scope** (a saved definition of which players are eligible), and everyone plays ten rounds of **Guess the Player** together — clues reveal in lockstep across every phone, each player locks in an answer when they dare, and a live leaderboard resolves the reveal.
+A realtime multiplayer football trivia game for a friend group playing on their own phones. Players join a room with a short code, the host picks a **Scope** — the lens the quiz is seen through — and everyone plays ten rounds of **Guess the Player** together.
 
-The differentiator is the Scope. Instead of picking from a fixed quiz catalogue, a group defines its own pool — "La Liga 2010s", "our club plus the Prem", "South Americans in Europe" — and plays against it.
+**The whole product is two things.**
 
-**v1 ships one game format.** That is the entire point: the Scope layer is the risky part of this product, so the format layer gets as little surface as possible to be excellent.
+**Pillar 1 — the user picks the lens.** Not a quiz from a catalogue: a season, a tournament, an era, a competition, a club, a nationality, a vibe. *"Our kind of football."* The Scope is that choice, and it is reusable, shareable and forkable.
+
+**Pillar 2 — the engine generates the quiz.** This is the product. The engine does not filter a database and dress the rows up. Given a lens, it *composes* a ten-round quiz: it decides which players are worth asking about, which facts about them are interesting and discriminable, how to word each question, which distractors would be genuinely tempting, and in what order the rounds should run. Two people playing the same Scope get different quizzes, and the quiz is different again next week.
+
+Pillar 1 without pillar 2 is a database with a filter. Pillar 2 without pillar 1 is the same generated quiz for everyone. The product is the intersection.
+
+**v1 ships one game format.** The Scope layer and the generation layer are the risky parts of this product, so the format layer gets as little surface as possible to be excellent.
+
+### 1.1 The shape of the system
+
+```
+Scope  ──────────────►  Quiz Plan  ──────────────►  Rounds  ──────────────►  Game
+(what lens?)            (what will we ask?)          (composed Q + hints)     (played live)
+  ↑                          ↑                          ↑                      ↑
+user picks it            engine decides             engine writes it       server runs it
+```
+
+Each arrow is a separate, testable component. The user touches only the first and the last.
 
 ---
 
@@ -403,7 +420,8 @@ A scope is a **disjunction of clauses**. Each clause is a **conjunction of predi
 | `positions[]` | categorical | position in array |
 | `tournaments[]` | roster | player was in the tournament's squad |
 | `stats[]` | statistical | `{metric, op, value}` — see §5.2 |
-| `seasonStart` / `seasonEnd` | range | overlaps a stint's season range |
+| `seasons[]` | temporal | season start-year in array (2014 → "2014/15") |
+| `seasonStart` / `seasonEnd` | temporal range | overlaps a stint's season range |
 
 ```json
 {
@@ -481,12 +499,14 @@ function statMatches(pred, stats) {
   return op ? op(v, pred.value) : false;
 }
 
+```js
 function clauseMatches(clause, player) {
   const L = clause.leagues?.length ? clause.leagues : null;
   const T = clause.teams?.length ? clause.teams : null;
   const N = clause.nationalities?.length ? clause.nationalities : null;
   const P = clause.positions?.length ? clause.positions : null;
   const R = clause.tournaments?.length ? clause.tournaments : null;
+  const S = clause.seasons?.length ? clause.seasons : null;
 
   if (N && !N.includes(player.nationality)) return false;
   if (P && !P.includes(player.position)) return false;
@@ -500,13 +520,17 @@ function clauseMatches(clause, player) {
     if (!clause.stats.every(p => statMatches(p, player.stats))) return false;
   }
 
-  const needsEntry = L || T || clause.seasonStart != null || clause.seasonEnd != null;
+  const needsEntry = L || T || S || clause.seasonStart != null || clause.seasonEnd != null;
   if (!needsEntry) return true;
 
   return (player.teams || []).some(e => {
     if (L && !L.includes(e.leagueId)) return false;
     if (T && !T.includes(e.clubId)) return false;
-    return seasonsOverlap(e.seasons, clause.seasonStart, clause.seasonEnd);
+    if (S && !e.seasons.some(s => S.includes(s))) return false;
+    if (clause.seasonStart != null || clause.seasonEnd != null) {
+      if (!seasonsOverlap(e.seasons, clause.seasonStart, clause.seasonEnd)) return false;
+    }
+    return true;
   });
 }
 
@@ -801,6 +825,67 @@ Hints are the ladder's payload. The catalogue below is what "wide and inclusive"
 
 **Difficulty = hint depth**, not just player obscurity. Easy ladders surface surface facts early; hard ladders surface window-level facts and withhold the obvious ones.
 
+### 6.8 The Quiz Planner — generating a quiz, not ten questions
+
+This is pillar 2. Everything above generates **a round**; the planner generates **a quiz**.
+
+A round generated in isolation produces ten unrelated questions: the same player twice, three consecutive rounds about goals, a career-total clue next to a windowed one, a hard question in round 1. That is a filtered database with extra steps.
+
+The planner takes the scope and produces the **entire ten-round set at once**, with the shape of a quiz designed in.
+
+```js
+// engine/quiz-planner.js
+export function planQuiz(scope, pool, { rounds = 10, seed, difficulty }) {
+  const candidates = collectCandidates(scope, pool);   // every (subject, metric, window) that is discriminable
+  const plan = [];
+  const used = { subjects: new Set(), metrics: new Set(), windows: new Set() };
+
+  for (let i = 0; i < rounds; i++) {
+    const target = pickBest(candidates, {
+      used,
+      // the curve: early rounds are generous, later rounds dig
+      depth: difficultyCurve(difficulty, i, rounds),
+      rng: seeded(seed, i),
+    });
+    if (!target) break;
+    const round = composeRound(target, scope, difficultyCurve(difficulty, i, rounds));
+    plan.push(round);
+    used.subjects.add(round.subject.id);
+    used.metrics.add(round.metric);
+    used.windows.add(round.window.id);
+  }
+  return { scope, seed, rounds: plan };
+}
+```
+
+**What makes a candidate worth asking.** Each (subject, metric, window) is scored on four axes, and the planner takes the highest-scoring one that does not violate the diversity constraints:
+
+| Axis | Question it answers | Example |
+|---|---|---|
+| **Informativeness** | Does the answer actually separate the subject from the other candidates? | A goal total of 61 separates; 0 does not |
+| **Specificity** | Is the fact precisely scoped rather than a vague career summary? | "61 goals for Real Madrid in 2014-15" beats "he scored a lot" |
+| **Non-obviousness** | Would a casual fan already know this? | A famous player's nationality is obvious; a teammate link is not |
+| **Novelty** | Has this fact already been used in this quiz? | "Scored in 4 of 6 windows" is unused until it isn't |
+
+**The diversity constraints** — what makes it a quiz:
+
+1. **No subject repeats** within a quiz (relaxed to at most twice only when the pool is smaller than 20).
+2. **No metric repeats consecutively**; ideally no metric repeats at all until the scope's metrics are exhausted.
+3. **The quiz spans the scope.** If the scope supports career facts, window facts and scarcity facts, the quiz uses all three families rather than ten goals questions.
+4. **A difficulty curve.** Early rounds use shallow hints and generous multipliers; later rounds dig into window-level facts. Round 1 is a warm-up; round 10 is the one people argue about.
+5. **No dead rounds.** Every generated round must have a discriminable answer and at least one hint that is not already implied by an earlier round's answer.
+
+**The plan is server-side and identical for everyone.** It is generated once when the room starts, written to the `rounds` table, and every phone renders the same ten rounds. Determinism comes from a seed (`rooms` stores it), so a plan can be regenerated and verified — and so a bug report can be reproduced exactly.
+
+**The lobby shows the plan's shape.** This is the moment the user sees that a quiz was *made*, not fetched:
+
+> **TONIGHT'S QUIZ**
+> 10 rounds · La Liga 2010–19 · 5 different stat types · 1 club-season question · difficulty curve: gentle → deep
+
+That summary is itself generated from the plan, and it is what makes the group want to press Start — the quiz already has a *shape* before the first round.
+
+**Why this is the difference between a filter and a generator.** A filter returns a set and lets the player consume it in whatever order it happens to be in. A generator returns a *designed* set: it has a beginning and an end, it varies, it builds, and it reserves its best material for when it will land hardest. If the group plays the same Scope every week, the plan being fresh each time is the retention mechanic — the Scope is stable, the quiz is not.
+
 ---
 
 ## 7. Multiplayer
@@ -818,6 +903,8 @@ create table rooms (
   max_players int not null default 12,
   current_round int not null default 0,
   total_rounds int not null default 10,
+  quiz_seed bigint,                         -- seed the quiz plan was generated with
+  plan_summary jsonb,                      -- human-readable plan shape, shown in the lobby
   round_started_at timestamptz,
   deadline_at timestamptz,
   finished_at timestamptz,
@@ -924,12 +1011,21 @@ The server is the clock and the authority. Per round it generates the target fro
 | Screen | Purpose |
 |---|---|
 | Home | Play a preset, resume a saved scope, create a room |
-| Lobby | Room code, scope card, roster, start |
-| Round | Clue ladder, clue cards, live avatar strip, 4 options, timer, rank |
-| Reveal | Collectible card with photo, your points, resolved leaderboard |
+| Lobby | Room code, scope card, roster, **the generated quiz's shape**, start |
+| Round | Window banner, clue ladder, clue cards, live avatar strip, 4 options, timer, rank |
+| Reveal | Collectible card with photo and window fact, your points, resolved leaderboard |
 | Results | Final standings, "make your own Scope" CTA, share |
 | Scope builder | Preset + fork, era slider with coverage warning, live pool count |
 | Credits | Photo attributions (CC BY-SA compliance) |
+
+**The lobby's plan card** is where the user sees pillar 2 working. It is generated from the plan, not written by hand:
+
+> **TONIGHT'S QUIZ**
+> 10 rounds · La Liga 2010–19
+> 5 different stat types · 1 club-season question · 1 scarcity question
+> Gentle → deep
+
+The group reads that and knows the quiz has a shape before round 1. It is also the strongest reason to press **Start** — which is the entire setup-friction risk the pitch names, solved by showing value before asking for commitment.
 
 ### 8.2 Theme tokens
 
@@ -999,7 +1095,18 @@ This also independently measures the data gap: if a hand-picked 20-player list i
 `scripts/ingest/*` → Postgres. `player_pool` view. Quality gate. Validation report green. `gold_standard.json` as a regression test. Photos ingested via the Commons chain. **Derived stats (`derive.js`) with window + `exact` flags.** Tournament rosters from Wikidata and from `game_lineups`.
 
 ### Phase 2 — Game engine
-`js/engine/` — pure modules: scope matcher (categorical + stat + tournament predicates), clue generator (incl. stat clues with windows), distractor generator, scoring, round state machine, **template registry with T1**. Unit-tested, no DOM. Same code runs in the browser and in server-side validation.
+`js/engine/` — pure modules:
+- scope matcher (categorical + temporal + statistical + tournament predicates)
+- window builder (§4.8)
+- **quiz planner** (§6.8) — generates the ten-round set with diversity constraints
+- question generator + recipe registry (§6.6)
+- clue generator (§6.7)
+- distractor generator
+- scoring, round state machine
+
+Unit-tested, no DOM. Same code runs in the browser and in server-side validation.
+
+**The planner is the piece to build first in this phase.** A round generator without a planner produces ten unrelated questions, and the whole product is the difference between that and a designed quiz.
 
 ### Phase 3 — Client shell
 Mobile-first PWA, Retro Collectible theme + Premium Editorial theme, four screens wired to the engine with fake data, accessibility pass (contrast, focus, reduced-motion).
@@ -1031,6 +1138,9 @@ Add T2 `stat_value` and T3 `membership` to the template registry. Each is a new 
 | Clue generation | Property tests: every clue value is non-null, comes from a real source row, and no two stages leak the same fact |
 | Question generator | Property test: for every generated round, the answer appears in the options exactly once, the true value is not among the distractors, and the prompt's numbers match the answer. **Every recipe's output is snapshot-tested** so a wording change is a visible diff. |
 | Recipe coverage | Assert every shipped metric has a recipe for every window kind it supports, and that no recipe can be selected without a non-degenerate value. |
+| Quiz planner | Property test on every generated plan: no subject repeats; no metric repeats consecutively; the plan spans ≥ 2 metric families when the scope supports them; every round has a discriminable answer; the difficulty curve is monotonic in hint depth. |
+| Quiz planner determinism | Same `(scope, seed)` → byte-identical plan. Different seed → a materially different plan (assert > 50% of rounds differ). |
+| Quiz plan summary | Assert the lobby summary is derived from the plan (round count, metric-family count, curve) and never contradicts it. |
 | Hint catalogue | Assert every shipped hint type resolves to a source row; a hint type with no source cannot be enabled. |
 | Distractors | Property test: no distractor matches the full conjunction of revealed clues; the answer is never uniquely determined by the option set |
 | Templates | One test per template asserting the round shape (`prompt`, `context`, `answer`, 4 options, 4 clues) and that the answer is present in the options exactly once |
