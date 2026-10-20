@@ -77,10 +77,14 @@ export function normalisePlayer(raw) {
   if (!name || isJunkName(name)) return null;
   const dob = dateOnly(raw.date_of_birth);
   if (!dob) return null;
+  // No source id means the row cannot be traced back to a source row, so it
+  // cannot enter the database. Emptiness, not falsiness: '0' is a real id.
+  const sourceKey = String(raw.player_id ?? '').trim();
+  if (!sourceKey) return null;
 
   const citizenship = (raw.country_of_citizenship ?? '').trim();
   return {
-    sourceKey: String(raw.player_id),
+    sourceKey,
     name,
     // normaliseName strips the apostrophe without a word break, so "N'Golo
     // Kante" slugs to "ngolo-kante" rather than "n-golo-kante".
