@@ -1403,7 +1403,7 @@ git commit -m "feat(data): derive club stints and player seasons from transfers 
   - `Window = { id, kind, label, detail, seasonStart, seasonEnd, tournamentId, clubId, teamName, ageFrom, ageTo }`.
   - `WindowStat = { playerSourceKey, windowId, metric, value, exact }`.
   - Window ids are deterministic: a tournament is `wc-<year>`; a club-season is `<clubId>-<seasonStart>`; a career window is `career`; an age band is `age-<from>`.
-  - Metrics produced: `goals`, `appearances`, `goals_aged_<from>` (age bands of 30), plus `goals_since_<seasonStart>`.
+  - Metrics produced: `goals`, `appearances`, `goals_after_age_<from>` (age bands of 30), plus `goals_since_<seasonStart>`.
 
 **This task carries the spec's §4.8 window table and the verified all-competition totals.**
 
