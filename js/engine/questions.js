@@ -5,9 +5,11 @@ import { numericDistractors, nameDistractors, buildOptions } from './distractors
 
 export function informativeness(value, values) {
   if (value === undefined || value === null) return 0;
-  const distinct = new Set(values.filter(v => v !== undefined && v !== null));
-  if (distinct.size <= 1) return 0;
-  return 1 - (1 / distinct.size);
+  const present = values.filter(v => v !== undefined && v !== null);
+  if (present.length === 0) return 0;
+  // Share of the pool whose value differs from this one: a value everybody
+  // shares scores 0; a value only this player has scores ~1.
+  return present.filter(v => v !== value).length / present.length;
 }
 
 function metricValue(subject, metric, window) {
@@ -20,8 +22,12 @@ function metricValue(subject, metric, window) {
     return window?.id ? (subject.windows?.[window.id]?.goals) : undefined;
   }
   if (metric === 'club_goals') {
-    if (window?.id && subject.windows?.[window.id]?.goals !== undefined) return subject.windows[window.id].goals;
-    return subject.stats?.club_goals;
+    // A windowed metric never falls back to a career total: "61 goals in
+    // 2014-15" and "300 career goals" are different facts. No window id, no
+    // value — missing stays undefined, it never becomes 0.
+    return window?.id && subject.windows?.[window.id]?.goals !== undefined
+      ? subject.windows[window.id].goals
+      : undefined;
   }
   if (metric === 'goals_after_age_30') return subject.stats?.goals_after_age_30;
   return undefined;
@@ -50,14 +56,26 @@ export function candidateSubjects({ scope, pool, registry, window, metric }) {
 }
 
 export function composeRound({ subject, metric, window, scope, registry, pool, rng, difficulty = 'medium', roundMs = 20000, stages = 4 }) {
-  const descriptor = metricDescriptor(metric);
-  const recipe = RECIPES.find(r => r.metric === metric && r.windowKinds.includes(window?.kind ?? 'career'))
-    ?? RECIPES.find(r => r.metric === 'identity');
+  const recipe = RECIPES.find(r => r.metric === metric && r.windowKinds.includes(window?.kind ?? 'career'));
+  if (!recipe) {
+    throw new Error(`composeRound: no recipe for metric "${metric}" in window kind "${window?.kind ?? 'career'}"`);
+  }
 
   const value = metricValue(subject, metric, window);
+  if (value === undefined || value === null) {
+    throw new Error(`composeRound: no value for metric "${metric}" on subject ${subject.id}`);
+  }
+
   const spoken = recipe.speak({ subject, window, value, pool, registry });
 
-  const hints = hintOrder(buildHints(subject, window, registry));
+  // Never let the hint ladder reveal the answer. A hint whose value contains
+  // the answer's number gives the stat away: a club_goals hint "60 goals
+  // (since 2012)" shares the same windows[id].goals as a tournament_goals=60
+  // round under a different metric id, so we match by the answer's number,
+  // not by metric id.
+  const answerToken = new RegExp(`\\b${String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
+  const hints = hintOrder(buildHints(subject, window, registry))
+    .filter(h => !answerToken.test(String(h.value ?? '')));
   const clues = hints.slice(0, Math.max(1, stages));
 
   const isNumeric = recipe.template === 'stat_value';
@@ -76,14 +94,14 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
 
   return {
     template: recipe.template,
-    metric,
-    family: recipe.family ?? descriptor?.family ?? 'career',
+    metric: recipe.metric,
+    family: recipe.family ?? metricDescriptor(metric)?.family ?? 'career',
     prompt: spoken.prompt,
     context: spoken.context ?? null,
     subjectId: subject.id,
     subjectName: subject.name,
     answer: spoken.answer,
-    unit: spoken.unit ?? descriptor?.unit ?? null,
+    unit: spoken.unit ?? null,
     options,
     clues: clues.map(c => ({ id: c.id, label: c.label, value: c.value, iconKey: c.iconKey })),
     revealSchedule,

@@ -48,3 +48,96 @@ test('the round answer equals the correct option', () => {
   const correct = round.options.find(o => o.correct);
   assert.equal(String(correct.label), String(round.answer));
 });
+
+test('the clue ladder never reveals the stat round answer', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+
+  // Tournament case: the exact answer number must not appear in any clue.
+  const tWindow = registry.windows['wc-2022'];
+  const tRound = composeRound({
+    subject: messi, metric: 'tournament_goals', window: tWindow,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(tRound.template, 'stat_value');
+  assert.equal(tRound.answer, 7);
+  for (const c of tRound.clues) {
+    assert.ok(!/\b7\b/.test(String(c.value ?? '')), `clue "${c.value}" reveals the tournament answer 7`);
+  }
+
+  // Windowed case: the answer number with a (since YYYY) suffix must not
+  // appear in any clue, under any metric id that shares the same window.
+  const sWindow = registry.windows['FC Barcelona 12/13'];
+  assert.equal(sWindow.kind, 'season');
+  const sRound = composeRound({
+    subject: messi, metric: 'club_goals', window: sWindow,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(sRound.template, 'stat_value');
+  assert.equal(sRound.answer, 60);
+  for (const c of sRound.clues) {
+    assert.ok(!/\b60\b/.test(String(c.value ?? '')), `clue "${c.value}" reveals the club_goals answer 60`);
+  }
+});
+
+test('informativeness discriminates between values in the same pool', () => {
+  assert.equal(informativeness(5, [5, 5, 5, 5]), 0);
+  // A value shared by most of the pool scores low; a unique value scores high.
+  assert.equal(informativeness(3, [5, 5, 3, 5]), 0.75);
+  const shared = informativeness(5, [5, 5, 3, 5]); // 1 of 4 differs
+  const unique = informativeness(3, [5, 5, 3, 5]);  // 3 of 4 differ
+  assert.ok(shared > 0 && unique > 0);
+  assert.ok(unique > shared, 'a unique value must be more informative than a shared one');
+});
+
+test('composeRound throws when the metric has no value for the subject', () => {
+  const { players, registry } = loadFixture();
+  const window = registry.windows['wc-2022'];
+  const nobody = players.find(p => !(p.windows?.[window.id]?.goals > 0));
+  assert.ok(nobody, 'fixture has a player without a wc-2022 goals value');
+  assert.throws(
+    () => composeRound({
+      subject: nobody, metric: 'tournament_goals', window,
+      scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+    }),
+    /no value for metric/,
+    'a missing metric must not reach buildOptions as "undefined"'
+  );
+});
+
+test('composeRound throws when no recipe matches the metric for the window kind', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+  const sWindow = registry.windows['FC Barcelona 12/13']; // kind 'season'
+  assert.equal(sWindow.kind, 'season');
+  // tournament_goals has a recipe only for tournament windows, not season.
+  assert.throws(
+    () => composeRound({
+      subject: messi, metric: 'tournament_goals', window: sWindow,
+      scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+    }),
+    /no recipe for metric/,
+    'a round must not silently report a different metric than it asks'
+  );
+});
+
+test('the reported metric and unit match the recipe actually used', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+  const window = registry.windows['wc-2022'];
+
+  const round = composeRound({
+    subject: messi, metric: 'tournament_goals', window,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(round.metric, 'tournament_goals');
+  assert.equal(round.unit, 'goals');
+
+  // An identify recipe reports metric 'identity' and a null unit.
+  const idRound = composeRound({
+    subject: messi, metric: 'identity', window,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(idRound.metric, 'identity');
+  assert.equal(idRound.unit, null);
+});

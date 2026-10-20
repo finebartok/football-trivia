@@ -5409,7 +5409,7 @@
       "citizenship": [
         "Argentina"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 170,
@@ -5532,7 +5532,7 @@
       "citizenship": [
         "Portugal"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 185,
@@ -5662,7 +5662,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 180,
@@ -5769,7 +5769,7 @@
       "citizenship": [
         "Egypt"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 175,
@@ -5905,7 +5905,7 @@
       "citizenship": [
         "Poland"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 186,
@@ -6031,7 +6031,7 @@
       "citizenship": [
         "Belgium"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 181,
@@ -6172,7 +6172,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 188,
@@ -6303,7 +6303,7 @@
       "citizenship": [
         "Uruguay"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 182,
@@ -6424,7 +6424,7 @@
       "citizenship": [
         "Brazil"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 175,
@@ -6526,7 +6526,7 @@
       "citizenship": [
         "Argentina"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 173,
@@ -6604,7 +6604,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 185,
@@ -6700,7 +6700,7 @@
       "citizenship": [
         "Croatia"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 172,
@@ -6804,7 +6804,7 @@
       "citizenship": [
         "Germany"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 183,
@@ -6907,7 +6907,7 @@
       "citizenship": [
         "Wales"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 186,
@@ -7246,7 +7246,7 @@
       "citizenship": [
         "Senegal"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 175,
@@ -7367,7 +7367,7 @@
       "citizenship": [
         "Belgium"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 175,
@@ -7459,7 +7459,7 @@
       "citizenship": [
         "Türkiye"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Defensive Midfield",
       "foot": "right",
       "heightCm": 178,
@@ -7572,7 +7572,7 @@
       "citizenship": [
         "Turkey"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "left",
       "heightCm": 170,
@@ -7660,7 +7660,7 @@
       "citizenship": [
         "Türkiye"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Defensive Midfield",
       "foot": "right",
       "heightCm": 190,
@@ -7781,7 +7781,7 @@
       "citizenship": [
         "Sweden"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 195,
@@ -7871,7 +7871,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Second Striker",
       "foot": "left",
       "heightCm": 176,
@@ -7985,7 +7985,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "both",
       "heightCm": 191,
@@ -8086,7 +8086,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 185,
@@ -8191,7 +8191,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "left",
       "heightCm": 192,
@@ -8322,7 +8322,7 @@
       "citizenship": [
         "Argentina"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 170,
@@ -8384,7 +8384,7 @@
       "citizenship": [
         "Ecuador"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 177,
@@ -8485,7 +8485,7 @@
       "citizenship": [
         "Portugal"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 185,
@@ -8757,7 +8757,7 @@
       "citizenship": [
         "Brazil"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 181,
@@ -8801,7 +8801,7 @@
       "citizenship": [
         "Brazil"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 176,
@@ -8874,7 +8874,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 174,
@@ -8939,7 +8939,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 173,
@@ -8993,7 +8993,7 @@
       "citizenship": [
         "Netherlands"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 181,
@@ -9088,7 +9088,7 @@
       "citizenship": [
         "Portugal"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 183,
@@ -9212,7 +9212,7 @@
       "citizenship": [
         "Portugal"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "left",
       "heightCm": 173,
@@ -9344,7 +9344,7 @@
       "citizenship": [
         "Algeria"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 179,
@@ -9444,7 +9444,7 @@
       "citizenship": [
         "Sweden"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 190,
@@ -9564,7 +9564,7 @@
       "citizenship": [
         "Nigeria"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 186,
@@ -9665,7 +9665,7 @@
       "citizenship": [
         "Georgia"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "both",
       "heightCm": 183,
@@ -9756,7 +9756,7 @@
       "citizenship": [
         "Italy"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "right",
       "heightCm": 175,
@@ -9849,7 +9849,7 @@
       "citizenship": [
         "Argentina"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 174,
@@ -9918,7 +9918,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 181,
@@ -9970,7 +9970,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "left",
       "heightCm": 181,
@@ -10060,7 +10060,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 188,
@@ -10134,7 +10134,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 178,
@@ -10212,7 +10212,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 180,
@@ -10273,7 +10273,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Right Winger",
       "foot": "left",
       "heightCm": 176,
@@ -10349,7 +10349,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "left",
       "heightCm": 171,
@@ -10419,7 +10419,7 @@
       "citizenship": [
         "England"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 179,
@@ -10471,7 +10471,7 @@
       "citizenship": [
         "Japan"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 178,
@@ -10810,7 +10810,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "both",
       "heightCm": 171,
@@ -10873,7 +10873,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Defensive Midfield",
       "foot": "right",
       "heightCm": 189,
@@ -11130,7 +11130,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 176,
@@ -11249,7 +11249,7 @@
       "citizenship": [
         "Argentina"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 184,
@@ -11633,7 +11633,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "both",
       "heightCm": 168,
@@ -11721,7 +11721,7 @@
       "citizenship": [
         "Brazil"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Defensive Midfield",
       "foot": "right",
       "heightCm": 185,
@@ -11818,7 +11818,7 @@
       "citizenship": [
         "Germany"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 180,
@@ -11914,7 +11914,7 @@
       "citizenship": [
         "Germany"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Attacking Midfield",
       "foot": "right",
       "heightCm": 176,
@@ -12160,7 +12160,7 @@
       "citizenship": [
         "Germany"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Second Striker",
       "foot": "right",
       "heightCm": 185,
@@ -12268,7 +12268,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Left Winger",
       "foot": "right",
       "heightCm": 181,
@@ -12371,7 +12371,7 @@
       "citizenship": [
         "France"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "both",
       "heightCm": 179,
@@ -12654,7 +12654,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 189,
@@ -12813,7 +12813,7 @@
       "citizenship": [
         "Spain"
       ],
-      "position": "Attack",
+      "position": "Forward",
       "subPosition": "Centre-Forward",
       "foot": "right",
       "heightCm": 183,
@@ -12903,7 +12903,7 @@
       "citizenship": [
         "Germany"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 180,
@@ -13039,7 +13039,7 @@
       "citizenship": [
         "Nigeria"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Defensive Midfield",
       "foot": "right",
       "heightCm": 183,
@@ -13137,7 +13137,7 @@
       "citizenship": [
         "Belgium"
       ],
-      "position": "Midfield",
+      "position": "Midfielder",
       "subPosition": "Central Midfield",
       "foot": "right",
       "heightCm": 176,

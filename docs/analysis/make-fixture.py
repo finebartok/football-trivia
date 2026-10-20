@@ -58,6 +58,21 @@ games = {}
 for g in rows("games.csv.gz"):
     games[g["game_id"]] = (g.get("competition_id"), g.get("date"), season_start(g.get("season")))
 
+# Transfermarkt's coarse positions mapped onto the game's four positions.
+# Scope clauses compare position strings exactly, so raw values like "Attack"
+# / "Midfield" must never reach the contract.
+POSITION_MAP = {
+    "Goalkeeper": "Goalkeeper",
+    "Defender": "Defender",
+    "Midfield": "Midfielder",
+    "Attack": "Forward",
+}
+
+
+def position_for(raw):
+    return POSITION_MAP.get(raw, raw)
+
+
 LEAGUE_NAMES = {
     "GB1": "Premier League", "ES1": "La Liga", "IT1": "Serie A", "FR1": "Ligue 1",
     "L1": "Bundesliga", "NL1": "Eredivisie", "PO1": "Primeira Liga", "MLS1": "MLS",
@@ -240,7 +255,7 @@ for p in selected:
         "name": p["name"],
         "dateOfBirth": p["date_of_birth"].split(" ")[0],
         "citizenship": [p["country_of_citizenship"]] if p.get("country_of_citizenship") else [],
-        "position": p.get("position") or "Unknown",
+        "position": position_for(p.get("position")) or "Unknown",
         "subPosition": p.get("sub_position") or None,
         "foot": p.get("foot") or None,
         "heightCm": to_int(p.get("height_in_cm")) or None,
