@@ -58,6 +58,16 @@ test('resolveClubAliases refuses an ambiguous alias', () => {
   assert.equal(map.has('arsenal'), false, 'an alias matching two clubs must not resolve');
 });
 
+test('normalisePlayer refuses a row with no source id, but keeps a real zero id', () => {
+  const base = { name: 'No Source Id', date_of_birth: '1990-01-01' };
+  assert.equal(normalisePlayer(base), null, 'no player_id means the row cannot be traced to a source');
+  assert.equal(normalisePlayer({ ...base, player_id: '' }), null);
+  assert.equal(normalisePlayer({ ...base, player_id: undefined }), null);
+  // '0' is a present id, not an absent one - the guard tests emptiness, not falsiness.
+  assert.equal(normalisePlayer({ ...base, player_id: '0' }).sourceKey, '0');
+  assert.equal(normalisePlayer({ ...base, player_id: 0 }).sourceKey, '0');
+});
+
 test('normalisePosition covers the real TM vocabulary in both columns', () => {
   // The coarse `position` column: only these four values occur in the source.
   assert.equal(normalisePosition('Defender'), 'Defender');
