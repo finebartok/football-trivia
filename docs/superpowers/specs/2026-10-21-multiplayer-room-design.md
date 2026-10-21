@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-21
 **Status:** approved in conversation; written up here for review
-**Supersedes:** nothing. `docs/superpowers/specs/2026-10-20-football-trivia-v1-design.md` §7 remains the product-level contract; this document is the buildable version of it, and it **diverges from §7 in three named places** (§12).
+**Supersedes:** nothing. `docs/superpowers/specs/2026-10-20-football-trivia-v1-design.md` §7 remains the product-level contract; this document is the buildable version of it, and it **diverges from §7 in four named places** (§12).
 
 ---
 
@@ -173,11 +173,22 @@ The v1 spec's schema had `round_secrets.target_player_id` and `answers.guessed_p
 | `quiz_plans` | **nobody** | service role | service role | service role |
 | `rounds` | members, and only rows whose `started_at <= now()` | service role | service role | service role |
 | `round_secrets` | **nobody** | service role | service role | service role |
-| `answers` | room members | **nobody** | **never** | never |
+| `answers` | room members, **but only for rounds that are closed** | **nobody** | **never** | never |
 
 Every table gets `alter table <table> enable row level security` and a policy per operation. `service_role` bypasses RLS by default, which is what the Edge Functions use.
 
 **`answers` has no client INSERT path at all.** The Edge Function writes the row with the service role. An RPC that took pre-computed `is_correct` and `points_earned` would be forgeable — any authenticated client could call it with the winning values — so the only route to an answer row is the Edge Function, which computes the score itself.
+
+### 4.3.1 Why an open round's answers are not readable
+
+An answer row carries `guessed_answer` and `is_correct`. If members could read the table during a round, the first player to answer correctly would hand the answer to everyone: read `is_correct = true`, read that player's `guessed_answer`, and copy it. The row is therefore unreadable until the round closes.
+
+This has two consequences, both intended:
+
+- **A score becomes visible when its round closes, not when it is earned.** The membership totals are aggregated from the answers table by the advance function when the round closes. A player who scores 7,500 in round 3 does not telegraph it to the room during round 3.
+- **The mid-round counter comes from the server, not from the table.** `current_round` returns `answered_count` — how many members have answered — which leaks nothing. The realtime subscription on `answers` fires only for closed rounds, because realtime applies the same row-level security the table does.
+
+So during a round, a player learns nothing at all from anybody else's play.
 
 ### 4.4 The functions
 
@@ -206,7 +217,7 @@ There is deliberately **no `submit_answer` RPC**. The Edge Function writes the a
 
 1. If the room is not `round_active`, return.
 2. If `now() <= deadline_at` **and** not every member has answered, return.
-3. Close the round: set `closed_at = now()`.
+3. Close the round: set `closed_at = now()`, and fold this round's answers into the memberships' running totals (`total_score`, `correct_count`, `total_response_ms`). The totals are only updated here, so nobody sees a score before the round that earned it closes.
 4. If the round was the last, set the room to `final` and `finished_at = now()`.
 5. Otherwise, take round *n+1* out of `quiz_plans.plan`, insert its `rounds` row and its `round_secrets` row, set the room's `current_round`, set `status = 'round_active'`, and set the new `started_at = now()` and `deadline_at = now() + 20s`.
 
@@ -224,7 +235,7 @@ The server's `received_at` is authoritative for scoring and for the deadline.
 
 ## 5. The server functions (Edge Functions, Deno)
 
-Three functions under `supabase/functions/`. Each uses the service-role key to read what the client cannot, and validates the caller's JWT for anything a client initiates.
+Two functions under `supabase/functions/`, plus the shared modules they both use. Each uses the service-role key to read what the client cannot, and validates the caller's JWT for anything a client initiates. The third thing the design called for, a reconnect sync, turned out to need nothing the client cannot read, so it is an RPC instead — see §5.3.
 
 ### 5.1 `start-room`
 
@@ -250,14 +261,17 @@ Three functions under `supabase/functions/`. Each uses the service-role key to r
 3. Read the round's `answer_value` from `round_secrets` (service role).
 4. Score it with the engine's `answerRound` / `scoreRound`.
 5. Insert the `answers` row with the service role. The unique constraint makes a retry idempotent — a second attempt for the same round returns the first answer's result rather than writing again.
-6. Write the membership's running totals.
-7. Return the score.
+6. Return the score.
+
+The membership's running totals are **not** updated here — `advance_room` folds them in when the round closes, so a score does not telegraph itself to the room mid-round (see §4.3.1).
 
 **Both inputs to the score are measured by the server, not reported by the client.** The stage is the number of `reveal_at` timestamps at or before `received_at` (at least 1) — the same computation the client makes locally, but from the server's clock. The elapsed time is `received_at - started_at`. A player who claims to have answered at stage 1 gets the stage the server says they answered at. The cost is that a slow network can cost a player a stage or a fraction of the time factor; the benefit is that no client can forge a 7,500-point answer.
 
-### 5.3 `sync-room`
+### 5.3 `sync_room_state`
 
-**In:** `{ room_id }` with the caller's JWT. **Out:** everything a reconnecting client needs, and nothing about the target of an open round.
+An RPC, not an Edge Function — it needs nothing the client cannot read, and a function would only add a round trip to the network for no gain.
+
+**In:** `{ room_id }` with the caller's JWT. **Out:** everything a reconnecting client needs — status, the current round, the schedule, which stages are revealed now, the player's own prior answer, the answered count and the leaderboard — and nothing about the target of an open round.
 
 ### 5.4 Shared code
 
@@ -389,3 +403,9 @@ Recorded so nobody reads §7 and thinks the code is wrong.
 3. **There is no `pg_cron` job.** §7 implied a server-driven clock that advances rooms on its own. The advance is driven by the client's 2-second poll instead, which also serves as the Realtime-degraded fallback. A room therefore only advances while somebody is watching — see §4.5 for why that is the better trade.
 
 Everything else in §7 — the table list, the RLS intent, the one-round-at-a-time materialisation, the late-join refusal, the reconnect contract, the failure-mode table — holds.
+
+### 12.1 One more divergence, found while planning
+
+**§4.3.1: an open round's answers are not readable by members, and a score becomes visible when its round closes rather than when it is earned.**
+
+§7 says "answers — SELECT: room members". Taken literally, the first player to answer correctly reveals the answer to the whole room, because the row carries both `guessed_answer` and `is_correct`. The spec's own promise — no client learns the answer before the round resolves — wins over the literal policy, so the read is narrowed to closed rounds, and the score aggregation moved to the moment the round closes.
