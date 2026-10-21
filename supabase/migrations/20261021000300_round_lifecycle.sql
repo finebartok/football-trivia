@@ -112,11 +112,12 @@ begin
   )
   returning * into v_next_round;
 
-  insert into public.round_secrets (round_id, answer_value, target_player_id)
+  insert into public.round_secrets (round_id, answer_value, target_player_id, unit)
   values (
     v_next_round.id,
     v_next->'secret'->>'answer_value',
-    nullif(v_next->'secret'->>'target_player_id', '')::bigint
+    nullif(v_next->'secret'->>'target_player_id', '')::bigint,
+    nullif(v_next->'secret'->>'unit', '')
   );
 
   update public.rooms
@@ -237,6 +238,8 @@ begin
   return jsonb_build_object(
     'round_number', p_round_number,
     'answer', v_secret.answer_value,
+    'unit', v_secret.unit,
+    'target_player_id', v_secret.target_player_id,
     'leaderboard', v_leaderboard,
     'my_answer', v_mine
   );
@@ -251,6 +254,8 @@ set search_path = public
 as $$
 declare
   v_state jsonb;
+  v_answered_round int;
+  v_mine jsonb;
 begin
   if auth.uid() is null then
     raise exception 'not signed in' using errcode = '42501';
@@ -258,7 +263,29 @@ begin
 
   v_state := public.current_round(p_room_id);
 
+  -- The player's own last answer, so a player who reloads comes back
+  -- knowing what they answered and what it was worth.
+  select max(r.round_number) into v_answered_round
+  from public.answers a
+  join public.rounds r on r.id = a.round_id
+  where a.room_id = p_room_id and a.user_id = auth.uid();
+
+  -- The same shape the submit-answer function returns, so the client
+  -- does not have to know which one it is looking at.
+  select jsonb_build_object(
+      'correct', a.is_correct,
+      'points', a.points_earned,
+      'stage', a.stage_locked,
+      'guessed_answer', a.guessed_answer
+    ) into v_mine
+  from public.answers a
+  join public.rounds r on r.id = a.round_id
+  where a.room_id = p_room_id and a.user_id = auth.uid()
+    and r.round_number = v_answered_round;
+
   return v_state || jsonb_build_object(
+    'my_answered_round', v_answered_round,
+    'my_answer', v_mine,
     'members', coalesce((
       select jsonb_agg(jsonb_build_object(
         'user_id', m.user_id,

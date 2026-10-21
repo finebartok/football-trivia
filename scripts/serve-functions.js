@@ -39,13 +39,27 @@ function readBody(req) {
   });
 }
 
+// The hosted project's gateway adds these. The local runner has to do
+// the same, or the browser refuses the call.
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+};
+
 const server = http.createServer(async (req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, CORS);
+    res.end();
+    return;
+  }
+
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const name = url.pathname.replace(/^\/+|\/+$/g, '');
   const handler = FUNCTIONS[name];
 
   if (!handler) {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.writeHead(404, { 'Content-Type': 'application/json', ...CORS });
     res.end(JSON.stringify({ error: 'no such function' }));
     return;
   }
@@ -55,10 +69,10 @@ const server = http.createServer(async (req, res) => {
     const request = new Request(url, { method: req.method, headers: req.headers, body });
     const response = await handler(request, { createClient, env });
     const text = await response.text();
-    res.writeHead(response.status, Object.fromEntries(response.headers));
+    res.writeHead(response.status, { ...Object.fromEntries(response.headers), ...CORS });
     res.end(text);
   } catch (err) {
-    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.writeHead(500, { 'Content-Type': 'application/json', ...CORS });
     res.end(JSON.stringify({ error: String(err) }));
   }
 });

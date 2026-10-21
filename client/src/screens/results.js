@@ -2,6 +2,12 @@ import { el, mount, shareText } from '../ui.js';
 import { store } from '../store.js';
 
 export function render(root) {
+  const roomState = store.state.room;
+  if (roomState?.roomId) {
+    renderRoom(root, roomState);
+    return;
+  }
+
   const quiz = store.state.quiz;
   if (!quiz) {
     location.hash = '#home';
@@ -72,5 +78,40 @@ export function render(root) {
       attrs: { href: '#vibes' },
     }),
     share,
+  ]);
+}
+
+/** The final leaderboard of a room. */
+function renderRoom(root, roomState) {
+  const board = roomState.leaderboard ?? [];
+  const me = board.find((m) => m.user_id === roomState.me);
+  const score = me?.total_score ?? 0;
+  const max = roomState.totalRounds * 7500;
+
+  mount(root, [
+    el('header', { className: 'topbar' }, [
+      el('a', { className: 'wordmark', text: '⚽ Football Trivia', attrs: { href: '#home' } }),
+    ]),
+
+    el('section', { className: 'results-hero' }, [
+      el('p', { className: 'results-hero__label', text: 'FINAL SCORE' }),
+      el('p', { className: 'results-hero__score', text: String(score), attrs: { id: 'final-score' } }),
+      el('p', { className: 'muted-note', text: `You scored ${score} of ${max}` }),
+    ]),
+
+    el('section', { className: 'card' }, [
+      el('h2', { className: 'section-title', text: 'The room' }),
+      ...board.map((m, i) => el('div', { className: 'rank-row' }, [
+        el('span', { className: 'rank-row__name', text: `${i + 1}. ${m.display_name}` }),
+        el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
+      ])),
+      el('p', { className: 'muted-note', text: 'A fresh quiz is written every time you play.' }),
+    ]),
+
+    el('a', {
+      className: 'btn btn--primary results-cta',
+      text: 'Craft your own vibe',
+      attrs: { href: '#vibes' },
+    }),
   ]);
 }

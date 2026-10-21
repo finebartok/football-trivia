@@ -6,6 +6,7 @@ const VIBES_KEY = 'football-trivia-vibes';
 const THEME_KEY = 'football-trivia-theme';
 
 const state = {
+  booting: true,
   pool: null,
   registry: null,
   scope: null,
@@ -48,12 +49,23 @@ export const store = {
     return () => listeners.delete(fn);
   },
   async init() {
+    this.loadVibes();
+    this.loadTheme();
+    // The pool is 3.7MB. It is fetched when a screen needs it - the
+    // vibe cards, the pool count, a solo game - and not before, so a
+    // player who only joins a room never downloads it.
+    await room.restore().catch(() => {});
+    state.booting = false;
+    notify();
+  },
+  /** Fetch the player pool, once. */
+  async ensurePool() {
+    if (state.pool) return state.pool;
     const pool = await loadPool();
     state.pool = pool;
     state.registry = pool.registry;
-    this.loadVibes();
-    this.loadTheme();
     notify();
+    return pool;
   },
   setScope(scope) {
     state.scope = scope;
@@ -81,8 +93,7 @@ export const store = {
     return state.theme;
   },
   async startQuiz({ scope, seed }) {
-    const pool = state.pool;
-    if (!pool) throw new Error('pool not loaded');
+    const pool = await this.ensurePool();
     const quiz = planQuiz({
       scope,
       pool: pool.players,

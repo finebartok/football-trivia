@@ -38,6 +38,7 @@ export function projectRound(round, roundNumber) {
     secret: {
       answer_value: String(round.answer),
       target_player_id: round.subjectId ?? null,
+      unit: round.unit ?? null,
     },
   };
 }

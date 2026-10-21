@@ -16,9 +16,12 @@ const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const key = process.env.SUPABASE_ANON_KEY
   ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
-// Null means "the Supabase project", which is the hosted setup. A local
-// development runner sets its own address.
-const functionsUrl = process.env.FUNCTIONS_URL ?? 'null';
+// Where the edge functions are served. The default is the local Node
+// runner, because the Supabase edge runtime cannot read the function
+// sources on a host whose SELinux policy has no docker rules. Point
+// FUNCTIONS_URL at the hosted project - or set it to "null" - to use the
+// project's own functions.
+const functionsUrl = process.env.FUNCTIONS_URL ?? 'http://127.0.0.1:54399';
 
 const body = `/**
  * Where the room backend lives.

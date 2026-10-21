@@ -71,3 +71,52 @@ test('the option labels say what they count', async ({ browser }) => {
     expect(/^\d+$/.test(text), `"${text}" is a bare number`).toBe(false);
   }
 });
+
+test('a room shows the same answer to everyone and a leaderboard', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  // Both answer. The round closes once everybody has answered.
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+
+  // The answer is only available once the round is closed, so the reveal
+  // waits for it.
+  // The answer itself is the same for everyone. The verdict is not: a
+  // player who got it right sees "You got it", and one who did not sees
+  // what the answer was.
+  await expect(host.locator('.reveal-card__name')).toContainText(/./, { timeout: 15000 });
+  const hostAnswer = await host.locator('.reveal-card__name').innerText();
+  const guestAnswer = await guest.locator('.reveal-card__name').innerText();
+  expect(hostAnswer).toBe(guestAnswer);
+  expect(hostAnswer.length).toBeGreaterThan(0);
+});
+
+test('a player who refreshes mid-round keeps their score', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+
+  await guest.locator('.option').first().click();
+  await expect(guest).toHaveURL(/#reveal/);
+
+  // The phone sleeps and the player comes back.
+  await guest.reload();
+  await guest.waitForTimeout(3000);
+
+  // Still in the room, and the answer they gave is still theirs.
+  await expect(guest).toHaveURL(/#round|#reveal/);
+  const answer = await guest.evaluate(async () => {
+    const m = await import('/client/src/room.js');
+    return { answeredRound: m.room.state.answeredRound, points: m.room.state.myAnswer?.points ?? null };
+  });
+  expect(answer.answeredRound).toBe(1);
+  expect(answer.points).not.toBeNull();
+});

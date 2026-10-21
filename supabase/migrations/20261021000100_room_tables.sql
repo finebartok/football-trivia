@@ -64,7 +64,8 @@ create index if not exists rounds_room_idx on public.rounds (room_id);
 create table if not exists public.round_secrets (
   round_id uuid primary key references public.rounds(id) on delete cascade,
   answer_value text not null,
-  target_player_id bigint
+  target_player_id bigint,
+  unit text
 );
 
 create table if not exists public.answers (

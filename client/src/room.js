@@ -32,6 +32,7 @@ const state = {
 };
 
 const listeners = new Set();
+const ROOM_KEY = 'football-trivia-room';
 let channel = null;
 let pollTimer = null;
 let client = null;
@@ -39,6 +40,34 @@ let me = null;
 
 function notify() {
   for (const fn of listeners) fn();
+}
+
+/**
+ * Remember the room, so a refresh comes back to it.
+ *
+ * A phone that sleeps and wakes, or a page that reloads, has to find its
+ * way back to the game with its score intact.
+ */
+function persist() {
+  try {
+    localStorage.setItem(ROOM_KEY, JSON.stringify({
+      roomId: state.roomId,
+      code: state.code,
+      scopeId: state.scopeId,
+      scopeName: state.scopeName,
+      scopeIcon: state.scopeIcon,
+    }));
+  } catch (err) {
+    // A browser with no storage still works, it just forgets.
+  }
+}
+
+function stored() {
+  try {
+    return JSON.parse(localStorage.getItem(ROOM_KEY) ?? 'null');
+  } catch (err) {
+    return null;
+  }
 }
 
 async function ensure() {
@@ -95,6 +124,13 @@ async function sync() {
   }
   state.error = null;
   applyPayload(data);
+
+  // A player who reloaded does not remember what they answered. The
+  // server does.
+  if (data.my_answered_round) {
+    state.answeredRound = data.my_answered_round;
+    state.myAnswer = data.my_answer ?? state.myAnswer;
+  }
   // The poll is also the heartbeat: the server marks a member offline
   // after thirty seconds without one, so it runs for as long as the
   // player is in the room.
@@ -142,6 +178,7 @@ export const room = {
     state.scopeIcon = scope.icon ?? null;
     state.status = data.status;
     state.error = null;
+    persist();
     await subscribe(data.id);
     startPolling();
     await sync();
@@ -169,11 +206,38 @@ export const room = {
     state.code = data.code;
     state.status = data.status;
     state.error = null;
+    persist();
     await subscribe(data.id);
     startPolling();
     await sync();
     notify();
     return data;
+  },
+
+  /**
+   * Come back to the room this browser was last in.
+   *
+   * The room id is read from storage before the SDK has loaded, so a
+   * reload knows which room it is in even before it can talk to the
+   * server.
+   */
+  async restore() {
+    const saved = stored();
+    if (!saved?.roomId) return null;
+
+    state.roomId = saved.roomId;
+    state.code = saved.code ?? null;
+    state.scopeId = saved.scopeId ?? null;
+    state.scopeName = saved.scopeName ?? null;
+    state.scopeIcon = saved.scopeIcon ?? null;
+    notify();
+
+    const supabase = await ensure();
+    if (!supabase) return null;
+
+    await subscribe(state.roomId);
+    startPolling();
+    return sync();
   },
 
   /** Change your own name in the room. */
@@ -204,6 +268,11 @@ export const room = {
     }
     state.roomId = null;
     state.code = null;
+    try {
+      localStorage.removeItem(ROOM_KEY);
+    } catch (err) {
+      // Nothing to forget.
+    }
     state.members = [];
     state.leaderboard = [];
     state.round = null;
@@ -260,6 +329,8 @@ export const room = {
     });
     if (error) {
       state.error = friendly(error.message);
+      // The round may still be open. Ask again on the next poll.
+      state.fetchingResult = false;
       notify();
       return null;
     }

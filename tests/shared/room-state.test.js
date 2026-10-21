@@ -40,3 +40,31 @@ test('the leaderboard is ordered by points, then correct, then speed', () => {
   ]);
   assert.deepEqual(state.leaderboard.map((m) => m.display_name), ['Top', 'Fast', 'Slow']);
 });
+
+test('a new round forgets the last answer', () => {
+  const state = {
+    round: { round_number: 1 },
+    myAnswer: { correct: true, points: 7500 },
+    answeredRound: 1,
+    lastResult: { answer: 'Lionel Messi' },
+    fetchingResult: true,
+  };
+  applyRound(state, { current_round: 2, round: { round_number: 2 } });
+  assert.equal(state.myAnswer, null);
+  assert.equal(state.answeredRound, null);
+  assert.equal(state.lastResult, null);
+  assert.equal(state.fetchingResult, false);
+});
+
+test('the same round keeps the answer', () => {
+  const state = {
+    round: { round_number: 1 },
+    myAnswer: { correct: true, points: 7500 },
+    answeredRound: 1,
+    lastResult: { answer: 'Lionel Messi' },
+    fetchingResult: true,
+  };
+  applyRound(state, { current_round: 1, round: { round_number: 1 } });
+  assert.equal(state.myAnswer.points, 7500);
+  assert.equal(state.answeredRound, 1);
+});

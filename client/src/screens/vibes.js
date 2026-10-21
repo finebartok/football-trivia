@@ -177,6 +177,8 @@ function moveRow(vibe, move, options, players, onPick) {
 }
 
 export function render(root) {
+  // The pool counts and the moves need the player pool.
+  store.ensurePool().catch(() => {});
   const players = store.state.pool?.players ?? [];
   const registry = store.state.registry;
 

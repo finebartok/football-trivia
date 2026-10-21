@@ -1,5 +1,5 @@
 import { store } from './store.js';
-import { clear } from './ui.js';
+import { clear, el } from './ui.js';
 import * as home from './screens/home.js';
 import * as vibes from './screens/vibes.js';
 import * as lobby from './screens/lobby.js';
@@ -22,6 +22,8 @@ const SCREENS = {
   '#credits': credits,
 };
 
+const ROOM_SCREENS = new Set(['#join', '#room-lobby', '#round', '#reveal', '#results']);
+
 let rendering = false;
 
 function screenFor(hash) {
@@ -40,6 +42,15 @@ export function render() {
     const app = document.getElementById('app');
     if (!app) return;
     clear(app);
+
+    // A room screen needs the room, and the room is only known once the
+    // session is back. Show nothing until then rather than bouncing the
+    // player to the home screen.
+    if (store.state.booting && ROOM_SCREENS.has(hash)) {
+      app.appendChild(el('p', { className: 'muted-note', text: 'Getting the room…' }));
+      return;
+    }
+
     screen.render(app);
   } finally {
     rendering = false;

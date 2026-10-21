@@ -7,7 +7,19 @@
 
 /** Fold the server's current-round payload into the room state. */
 export function applyRound(state, payload) {
-  state.round = payload?.round ?? null;
+  const next = payload?.round ?? null;
+
+  // A new round means the last answer is spent: the player has to be
+  // able to answer again, and the reveal has to ask about the round that
+  // just closed, not the one that just opened.
+  if (next && state.round && next.round_number !== state.round.round_number) {
+    state.myAnswer = null;
+    state.answeredRound = null;
+    state.lastResult = null;
+    state.fetchingResult = false;
+  }
+
+  state.round = next;
   state.currentRound = payload?.current_round ?? 0;
   state.totalRounds = payload?.total_rounds ?? state.totalRounds ?? 10;
   state.status = payload?.status ?? state.status ?? 'lobby';

@@ -1,11 +1,20 @@
 import { el, mount, jerseyTile } from '../ui.js';
 import { store } from '../store.js';
+import { room } from '../room.js';
 
 function findPlayer(id) {
   return (store.state.pool?.players ?? []).find((p) => p.id === id) ?? null;
 }
 
 export function render(root) {
+  const roomState = store.state.room;
+  const inRoom = Boolean(roomState?.roomId);
+
+  if (inRoom) {
+    renderRoom(root, roomState);
+    return;
+  }
+
   const quiz = store.state.quiz;
   const round = store.currentRound();
   const answer = store.state.answers[store.state.answers.length - 1];
@@ -37,12 +46,7 @@ export function render(root) {
   });
 
   // The answer needs its unit too: "It was 1 goal", not "It was 1".
-  const answerText = (() => {
-    if (!round.unit) return String(round.answer);
-    const n = Number(round.answer);
-    const unit = (n === 1 && round.unit.endsWith('s')) ? round.unit.slice(0, -1) : round.unit;
-    return `${round.answer} ${unit}`;
-  })();
+  const answerText = withUnit(round.answer, round.unit);
 
   const facts = [];
   if (player) {
@@ -88,4 +92,85 @@ export function render(root) {
 
     next,
   ].filter(Boolean));
+}
+
+/**
+ * The reveal in a room.
+ *
+ * The answer is only available once the round has closed, so the screen
+ * asks for it and waits. The next round starts on the server's clock,
+ * not on this button.
+ */
+function renderRoom(root, roomState) {
+  if (!roomState.lastResult && roomState.answeredRound) {
+    // The round may still be open. Ask again on the next poll.
+    if (!roomState.fetchingResult) {
+      roomState.fetchingResult = true;
+      room.result(roomState.answeredRound);
+    }
+    return;
+  }
+
+  const result = roomState.lastResult;
+  const answer = roomState.myAnswer;
+  const roundNumber = roomState.answeredRound ?? roomState.currentRound;
+
+  const next = el('button', {
+    className: 'btn btn--primary',
+    text: roomState.status === 'final' ? 'See how it went' : 'Next round',
+    attrs: { type: 'button', id: 'btn-next' },
+    on: {
+      click: () => {
+        if (roomState.status === 'final') {
+          location.hash = '#results';
+        } else {
+          location.hash = '#round';
+        }
+      },
+    },
+  });
+
+  const answerText = withUnit(result?.answer, result?.unit);
+
+  const board = result?.leaderboard ?? [];
+  const me = board.find((m) => m.user_id === roomState.me);
+
+  mount(root, [
+    el('header', { className: 'topbar' }, [
+      el('span', { className: 'wordmark', text: '⚽ Football Trivia' }),
+      el('span', { className: 'muted-note', text: `Round ${roundNumber}` }),
+    ]),
+
+    el('section', { className: 'reveal-card' }, [
+      el('div', { className: 'tile', text: '?' }),
+      el('h1', { className: 'reveal-card__name', text: result?.answer ?? '…' }),
+    ]),
+
+    el('section', { className: `card verdict ${answer?.correct ? 'is-good' : 'is-bad'}` }, [
+      answer?.correct
+        ? el('strong', { text: 'You got it' })
+        : el('strong', { text: `It was ${answerText}` }),
+      el('span', { className: 'verdict__points', text: `+${answer?.points ?? 0}` }),
+    ]),
+
+    el('section', { className: 'card' }, [
+      el('h2', { className: 'section-title', text: 'Running score' }),
+      ...board.map((m, i) => el('div', { className: 'rank-row' }, [
+        el('span', { className: 'rank-row__name', text: `${i + 1}. ${m.display_name}` }),
+        el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
+      ])),
+      el('p', { className: 'muted-note', text: me ? `You have ${me.total_score} points` : '' }),
+    ]),
+
+    next,
+  ].filter(Boolean));
+}
+
+/** A number with its unit: "3 goals", "1 goal". */
+function withUnit(value, unit) {
+  if (value === undefined || value === null) return '';
+  if (!unit) return String(value);
+  const n = Number(value);
+  const u = (n === 1 && unit.endsWith('s')) ? unit.slice(0, -1) : unit;
+  return `${value} ${u}`;
 }

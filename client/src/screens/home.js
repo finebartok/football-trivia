@@ -79,6 +79,9 @@ function savedCard(vibe) {
 }
 
 export function render(root) {
+  // The vibe cards show how many players each scope resolves to, which
+  // needs the pool. It arrives in the background.
+  store.ensurePool().catch(() => {});
   const vibes = store.state.vibes;
   const children = [
     topbar(),
