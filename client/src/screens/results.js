@@ -15,6 +15,21 @@ export function render(root) {
   }
 
   const answers = store.state.answers;
+
+  if (!answers.length) {
+    mount(root, [
+      el('header', { className: 'topbar' }, [
+        el('a', { className: 'wordmark', text: '⚽ Football Trivia', attrs: { href: '#home' } }),
+      ]),
+      el('section', { className: 'card' }, [
+        el('h1', { className: 'page-title', text: 'No rounds were played' }),
+        el('p', { className: 'muted-note', text: 'There is nothing to show yet.' }),
+        el('a', { className: 'btn btn--primary', text: 'Play a quiz', attrs: { href: '#vibes' } }),
+      ]),
+    ]);
+    return;
+  }
+
   const score = answers.reduce((sum, a) => sum + a.points, 0);
   const correct = answers.filter((a) => a.correct).length;
   const max = quiz.rounds.length * 7500;

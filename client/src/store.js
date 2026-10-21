@@ -7,6 +7,8 @@ const THEME_KEY = 'football-trivia-theme';
 
 const state = {
   booting: true,
+  poolError: null,
+  poolLoading: null,
   // Which game the player is in: 'solo' or 'room'. A player is in one
   // or the other, never both.
   mode: 'solo',
@@ -73,11 +75,38 @@ export const store = {
   /** Fetch the player pool, once. */
   async ensurePool() {
     if (state.pool) return state.pool;
-    const pool = await loadPool();
-    state.pool = pool;
-    state.registry = pool.registry;
+    if (state.poolLoading) return state.poolLoading;
+    state.poolLoading = loadPool()
+      .then((pool) => {
+        state.pool = pool;
+        state.registry = pool.registry;
+        state.poolError = null;
+        notify();
+        return pool;
+      })
+      .catch((err) => {
+        // The failure is kept, not swallowed: the screen says so and
+        // offers a way to try again.
+        state.poolError = 'Could not load the players. Check your connection.';
+        notify();
+        throw err;
+      })
+      .finally(() => {
+        state.poolLoading = null;
+      });
+    return state.poolLoading;
+  },
+
+  /** Try the pool again, after it failed. */
+  async retryPool() {
+    state.poolLoading = null;
+    state.poolError = null;
     notify();
-    return pool;
+    try {
+      await this.ensurePool();
+    } catch {
+      // The message is already on the screen.
+    }
   },
   setScope(scope) {
     state.scope = scope;

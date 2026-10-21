@@ -65,3 +65,29 @@ test('the reduced-motion rule switches the movement off', async ({ page }) => {
   expect(css).toContain('prefers-reduced-motion');
   expect(css).toContain('transition');
 });
+
+test('a pool that will not load says so, and can be tried again', async ({ page }) => {
+  let fail = true;
+  await page.route('**/data/fixtures/pool.sample.json', async (route) => {
+    if (fail) {
+      await route.abort('failed');
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto('./');
+  await page.waitForSelector('#pool-error');
+  await expect(page.locator('#pool-error')).toContainText('Could not load the players');
+  await expect(page.locator('#pool-retry')).toBeVisible();
+
+  // And trying again works once the network does.
+  fail = false;
+  await page.locator('#pool-retry').click();
+  await page.waitForTimeout(2000);
+  await expect(page.locator('#pool-error')).toHaveCount(0);
+
+  // The counts are back.
+  await expect(page.locator('.vibe-card__count').first()).not.toHaveText('…');
+  await expect(page.locator('.vibe-card__count').first()).toContainText('players');
+});

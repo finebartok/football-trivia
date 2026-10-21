@@ -116,6 +116,23 @@ export function render(root) {
         ]),
       ]),
     ]),
+    store.state.poolError
+      ? el('section', { className: 'card notice notice--warn', attrs: { id: 'pool-error' } }, [
+        el('p', { text: store.state.poolError }),
+        el('button', {
+          className: 'btn btn--primary',
+          text: 'Try again',
+          attrs: { type: 'button', id: 'pool-retry' },
+          on: {
+            click: async (e) => {
+              e.currentTarget.disabled = true;
+              await store.retryPool();
+              e.currentTarget.disabled = false;
+            },
+          },
+        }),
+      ])
+      : null,
     el('h2', { className: 'section-title', text: 'Start from a vibe' }),
     el('div', { className: 'vibe-grid' }, PRESETS.map(presetCard)),
     el('h2', { className: 'section-title', text: 'Your vibes' }),
