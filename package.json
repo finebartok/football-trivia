@@ -15,11 +15,13 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
-    "supabase:serve": "supabase functions serve --env-file supabase/.env.local",
-    "supabase:sync": "node scripts/supabase-sync.js"
+    "supabase:serve": "node scripts/serve-functions.js",
+    "supabase:sync": "node scripts/supabase-sync.js",
+    "supabase:serve:edge": "supabase functions serve --env-file supabase/.env.local"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",
+    "@supabase/supabase-js": "^2.118.0",
     "csv-parse": "^5.6.0",
     "pg": "^8.13.1"
   },
