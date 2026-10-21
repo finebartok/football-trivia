@@ -155,6 +155,17 @@ def stats_for(pid):
     st = {}
     if pid in goals_aged:
         st["goals_after_age_30"] = goals_aged[pid]
+    # Career totals, named the way the engine's metric registry declares them.
+    # The pipeline stores goals and appearances per window; the engine calls the
+    # career figures club_goals and club_appearances.
+    # win_stats is keyed player -> window id -> counter, so sum over its values.
+    windows = win_stats.get(pid, {})
+    total_goals = sum(c.get("goals", 0) for c in windows.values())
+    total_apps = sum(c.get("appearances", 0) for c in windows.values())
+    if total_goals:
+        st["club_goals"] = total_goals
+    if total_apps:
+        st["club_appearances"] = total_apps
     return st
 
 # --- pick a covering set of players
@@ -206,6 +217,34 @@ for name in TARGETS:
         if pid in seen: continue
         if not p.get("date_of_birth"): continue
         seen.add(pid); selected.append(p); break
+
+# Fill the pool out from the real dataset so every preset scope has enough
+# players to write a quiz from. Without this the stat-based scopes (50+ caps,
+# 100+ goals) resolve to nobody against a tiny sample, and the client shows
+# "0 players" for half its presets.
+BIG5 = {"GB1", "ES1", "IT1", "FR1", "L1", "NL1", "PO1"}
+CAP = 1500
+
+
+def has_big5_stint(p):
+    for cname, seasons in team_seasons.get(p["player_id"], {}).items():
+        if any(v.get("domestic_competition_id") in BIG5 for v in clubs_by_name.values() if v["name"] == cname):
+            return True
+    return False
+
+
+clubs_by_name = {c["name"]: c for c in clubs.values()}
+rest = [
+    p for p in players.values()
+    if p["player_id"] not in seen
+    and p.get("date_of_birth")
+    and has_big5_stint(p)
+]
+# Prefer players with real recorded output, so the pool has signal.
+rest.sort(key=lambda p: (-to_int(p.get("international_caps")), p["name"]))
+for p in rest:
+    if len(selected) >= CAP: break
+    seen.add(p["player_id"]); selected.append(p)
 
 print(f"selected {len(selected)} players")
 
