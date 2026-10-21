@@ -5,6 +5,7 @@ import * as vibes from './screens/vibes.js';
 import * as lobby from './screens/lobby.js';
 import * as join from './screens/join.js';
 import * as roomLobby from './screens/room-lobby.js';
+import * as sharedVibe from './screens/shared-vibe.js';
 import * as round from './screens/round.js';
 import * as reveal from './screens/reveal.js';
 import * as results from './screens/results.js';
@@ -16,6 +17,7 @@ const SCREENS = {
   '#lobby': lobby,
   '#join': join,
   '#room-lobby': roomLobby,
+  '#vibe': sharedVibe,
   '#round': round,
   '#reveal': reveal,
   '#results': results,
@@ -37,7 +39,8 @@ export function render() {
   rendering = true;
   try {
     document.documentElement.dataset.theme = store.state.theme;
-    const hash = location.hash || '#home';
+    // A hash may carry a query - '#vibe?c=...' is still the vibe screen.
+    const hash = (location.hash.split('?')[0]) || '#home';
     const screen = screenFor(hash);
     const app = document.getElementById('app');
     if (!app) return;

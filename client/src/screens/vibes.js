@@ -6,7 +6,7 @@ import { scopePool } from '/js/engine/index.js';
 import { nearestThreshold, describeCoverage, metricLabel } from '/lib/scope.js';
 import {
   MIN_POOL, MOVES, STAT_MOVES, STAT_METRICS,
-  erasFor, competitionsFor, clubsFor, nationsFor, tournamentsFor, applyMove, moveRow,
+  erasFor, competitionsFor, clubsFor, nationsFor, tournamentsFor, applyMove, moveRow, shareLink,
 } from '../vibe-moves.js';
 
 export function render(root) {
@@ -145,6 +145,24 @@ export function render(root) {
       el('h2', { className: 'section-title', text: 'Save it' }),
       nameInput,
       save,
+      el('button', {
+        className: 'btn btn--ghost',
+        text: 'Share this vibe',
+        attrs: { type: 'button', id: 'btn-share' },
+        on: {
+          click: async (e) => {
+            const button = e.currentTarget;
+            const link = shareLink(store.state.scope ?? vibe);
+            button.dataset.link = link;
+            try {
+              await navigator.clipboard.writeText(link);
+              button.textContent = 'Link copied';
+            } catch {
+              button.textContent = link;
+            }
+          },
+        },
+      }),
     ]),
     el('div', { className: 'vibe-actions' }, [
       el('button', {

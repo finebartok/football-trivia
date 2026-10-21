@@ -63,3 +63,25 @@ test('a suggestion one tap away fixes the threshold', async ({ page }) => {
   expect(Number(value)).toBeLessThan(200);
   await expect(page.locator('#stat-suggestion')).toHaveCount(0);
 });
+
+test('a vibe can be shared, and the link opens as a card', async ({ page, context }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+  await page.locator('#btn-share').click();
+
+  const link = await page.locator('#btn-share').getAttribute('data-link');
+  expect(link).toContain('#vibe?c=');
+
+  // A different browser opens the link and lands on a playable card.
+  const other = await (await context.browser().newContext()).newPage();
+  await other.goto(link);
+  await other.waitForTimeout(800);
+  await expect(other.locator('.vibe-summary__body')).toContainText('La Liga 2010s');
+  await expect(other.locator('#pool-count')).toBeVisible();
+});
+
+test('a link that is not a vibe says so', async ({ page }) => {
+  await page.goto('#vibe?c=not-a-scope');
+  await page.waitForTimeout(600);
+  await expect(page.locator('#vibe-error')).toContainText('not a vibe');
+});
