@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
 
+// A room's round lasts twenty seconds and the whole room shares one
+// local database, so these tests run one at a time and are given room
+// to breathe.
+test.describe.configure({ mode: 'serial' });
+test.setTimeout(60000);
+
 /** Every page error and console error seen during the test. */
 function watchErrors(page) {
   const errors = [];
