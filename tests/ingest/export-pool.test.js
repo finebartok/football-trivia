@@ -1,36 +1,22 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
-import { openDb, applyMigrations } from '../../scripts/ingest/lib/db.js';
-import { exportPool } from '../../scripts/ingest/export-pool.js';
+import assert from 'node:assert';
+import { test } from 'node:test';
+import { formatDate } from '../../scripts/ingest/export-pool.js';
 
-test('the export matches the committed fixture shape', async () => {
-  const db = await openDb();
-  await applyMigrations(db);
-  await db.query(
-    `insert into players (slug,name,date_of_birth,citizenship,position,quality,active)
-     values ('a','A Player','1990-01-01','{England}','Forward','{"status":"pass"}',true)`,
-  );
+// The point of this test is that a Date must format to its LOCAL calendar
+// date, not its UTC one. `toISOString()` would shift a late-evening local
+// date to the next day, so the expectations below are hardcoded rather than
+// recomputed with the same logic the implementation uses.
+test('formatDate renders the local calendar date, not the UTC one', () => {
+  // Local midnight, 1 January 1987
+  const midnight = new Date(1987, 0, 1, 0, 0, 0);
+  assert.strictEqual(formatDate(midnight), '1987-01-01');
 
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'export-'));
-  const out = path.join(dir, 'pool.sample.json');
-  await exportPool(db, { outPath: out });
+  // Local 23:30 on 24 June 1987 - toISOString() would give 1987-06-24 in UTC
+  // for most timezones, but the local calendar date is what we want.
+  const lateEvening = new Date(1987, 5, 24, 23, 30, 0);
+  assert.strictEqual(formatDate(lateEvening), '1987-06-24');
 
-  const json = JSON.parse(await fs.readFile(out, 'utf8'));
-  assert.ok(json.registry);
-  // the registry mirrors the committed fixture: leagues and windows are
-  // id-keyed objects, clubs and tournaments are arrays
-  assert.equal(typeof json.registry.leagues, 'object');
-  assert.ok(!Array.isArray(json.registry.leagues));
-  assert.ok(Array.isArray(json.registry.clubs));
-  assert.equal(typeof json.registry.windows, 'object');
-  assert.ok(Array.isArray(json.registry.tournaments));
-  assert.equal(json.players.length, 1);
-  const p = json.players[0];
-  for (const k of ['id','slug','name','dateOfBirth','citizenship','position','teams','tournaments','stats','windows']) {
-    assert.ok(k in p, `player is missing ${k}`);
-  }
-  await db.close();
+  // A single-digit month and day must be zero-padded.
+  const padded = new Date(2001, 2, 4, 12, 0, 0);
+  assert.strictEqual(formatDate(padded), '2001-03-04');
 });

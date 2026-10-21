@@ -92,6 +92,8 @@ export function deriveWindows({ goals = [], appearances = [], games = [], clubsB
     const prev = stats.get(key);
     stats.set(key, {
       playerSourceKey, windowId, metric,
+      // ponytail: only used for additive counts (goals, apps) where 0 is the true sum of an empty set.
+      // a missing metric must never be summed into one.
       value: (prev?.value ?? 0) + delta,
       exact,
     });

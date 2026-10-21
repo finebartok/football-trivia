@@ -2,6 +2,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { openDb, applyMigrations } from './lib/db.js';
 
+export function formatDate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export async function exportPool(db, { outPath = 'data/fixtures/pool.sample.json' } = {}) {
   const leagues = (await db.query('select id, display_name from leagues order by id')).rows
     .map(r => [r.id, r.display_name]);
@@ -33,7 +40,7 @@ export async function exportPool(db, { outPath = 'data/fixtures/pool.sample.json
 
   const byPlayer = new Map(players.map(p => [p.id, {
     id: p.id, slug: p.slug, name: p.name,
-    dateOfBirth: p.date_of_birth instanceof Date ? p.date_of_birth.toISOString().slice(0, 10) : p.date_of_birth,
+    dateOfBirth: p.date_of_birth instanceof Date ? formatDate(p.date_of_birth) : p.date_of_birth,
     citizenship: p.citizenship ?? [], position: p.position, subPosition: p.sub_position ?? null,
     foot: p.preferred_foot ?? null, heightCm: p.height_cm ?? null,
     // Absent caps are unknown, not zero.

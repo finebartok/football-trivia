@@ -223,7 +223,7 @@ async function defaultDownload(url) {
 // ponytail: no image codec here on purpose - adding a native dep (sharp) for a
 // 512px resize is not worth the build cost. chromium via Playwright is already
 // a dependency and does WebP natively, so the default resize goes through it.
-async function defaultResize(buffer) {
+export async function defaultResize(buffer) {
   const { chromium } = await import('playwright');
   const browser = await chromium.launch();
   try {
