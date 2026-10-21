@@ -493,3 +493,100 @@ test('a round with time left is not closed early', { skip }, async () => {
   const { data: stillOpen } = await server.from('rounds').select('closed_at').eq('id', round1.id).single();
   assert.equal(stillOpen.closed_at, null, 'the round must not be closed');
 });
+
+test('a room plays a whole round and keeps a leaderboard', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  const { data: secret } = await server
+    .from('round_secrets').select('*').eq('round_id', started.body.id).single();
+
+  // The host answers; the guest has not yet.
+  const answered = await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: secret.answer_value,
+  }, host.accessToken);
+  assert.equal(answered.status, 200, JSON.stringify(answered.body));
+  assert.equal(answered.body.correct, true);
+
+  // One of two answered, so the round is still open and the server
+  // counts one answer.
+  const { data: open } = await host.client.rpc('current_round', { p_room_id: room.id });
+  assert.equal(open.current_round, 1, 'the round is still open');
+  assert.equal(open.answered_count, 1, 'the server counts the answers');
+
+  // Now the guest answers too, and the round closes on the next call.
+  const guestAnswer = await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: secret.answer_value,
+  }, guest.accessToken);
+  assert.equal(guestAnswer.status, 200, JSON.stringify(guestAnswer.body));
+  assert.equal(guestAnswer.body.correct, true);
+
+  const { data: state } = await host.client.rpc('current_round', { p_room_id: room.id });
+  assert.equal(state.current_round, 2);
+
+  // The leaderboard is visible once the round is closed.
+  const { data: result } = await host.client.rpc('round_result', {
+    p_room_id: room.id, p_round_number: 1,
+  });
+  assert.equal(result.answer, secret.answer_value);
+  assert.equal(result.leaderboard.length, 2);
+  assert.ok(result.leaderboard.every((m) => m.total_score > 0), 'both players scored');
+});
+
+test('a room plays all ten rounds and finishes', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  let round = 1;
+  let scored = 0;
+
+  // Ten rounds: answer, let the room advance, repeat.
+  while (round <= 10) {
+    const { data: roundRow } = await server
+      .from('rounds').select('id')
+      .eq('room_id', room.id).eq('round_number', round).maybeSingle();
+    assert.ok(roundRow, `round ${round} exists`);
+    const { data: secret } = await server
+      .from('round_secrets').select('*')
+      .eq('round_id', roundRow.id).maybeSingle();
+    assert.ok(secret, `round ${round} has an answer key`);
+
+    // Both players answer: a round closes when everybody has answered.
+    for (const who of [host, guest]) {
+      const res = await callFunction('submit-answer', {
+        room_id: room.id, round_number: round, guessed_answer: secret.answer_value,
+      }, who.accessToken);
+      assert.equal(res.status, 200, `round ${round}: ${JSON.stringify(res.body)}`);
+    }
+    scored++;
+
+    const { data: state } = await host.client.rpc('current_round', { p_room_id: room.id });
+    if (state.status === 'final') break;
+    round = state.current_round;
+  }
+
+  assert.equal(scored, 10, 'ten rounds were played');
+  const { data: final } = await server.from('rooms').select('status, current_round').eq('id', room.id).single();
+  assert.equal(final.status, 'final');
+  assert.equal(final.current_round, 10);
+
+  const { data: board } = await server
+    .from('room_memberships').select('display_name, total_score').eq('room_id', room.id);
+  assert.ok(board[0].total_score > 0, 'the host scored');
+});
