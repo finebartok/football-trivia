@@ -54,10 +54,17 @@ test('a threshold of zero is not a crash', () => {
 test('the coverage sentence says how many and why', () => {
   // La Liga 2002-2011 really does resolve to 14 players in the fixture.
   const thin = { clauses: [{ leagues: ['ES1'], seasonStart: 2002, seasonEnd: 2011 }] };
-  const sentence = describeCoverage({ scope: thin, count: 14, floor: 20 });
+  const sentence = describeCoverage({ scope: thin, count: 14, floor: 20, registry });
   assert.match(sentence, /14/);
   assert.match(sentence, /20/);
   assert.equal(sentence.includes('scope'), false, 'the sentence must not name a scope');
+  assert.equal(sentence.includes('ES1'), false, 'the sentence must not show a raw league code');
+  assert.match(sentence, /La Liga/, 'the league is named, not coded');
+});
+
+test('a scope naming a nation the data does not know is refused', () => {
+  const result = validateScope({ clauses: [{ nationalities: ['Atlantis'] }] }, { registry, players });
+  assert.equal(result.ok, false);
 });
 
 test('a pool over the floor needs no sentence', () => {
