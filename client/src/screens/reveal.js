@@ -1,5 +1,6 @@
 import { el, mount, jerseyTile } from '../ui.js';
 import { store } from '../store.js';
+import { sounds, haptic } from '../sound.js';
 import { room } from '../room.js';
 
 function findPlayer(id) {
@@ -28,6 +29,14 @@ export function render(root) {
 
   const total = store.state.answers.reduce((sum, a) => sum + a.points, 0);
   const correct = store.state.answers.filter((a) => a.correct).length;
+
+  if (answer?.correct) {
+    sounds.right();
+    haptic(30);
+  } else {
+    sounds.wrong();
+    haptic(60);
+  }
 
   const next = el('button', {
     className: 'btn btn--primary',

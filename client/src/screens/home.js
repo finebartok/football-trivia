@@ -1,4 +1,5 @@
 import { el, mount } from '../ui.js';
+import { soundToggle } from '../sound.js';
 import { store } from '../store.js';
 import { PRESETS, countFor } from '../pool.js';
 
@@ -10,6 +11,7 @@ function topbar() {
       text: '⚽ Football Trivia',
       attrs: { href: '#home' },
     }),
+    soundToggle(),
     el('button', {
       className: 'btn btn--icon',
       text: store.state.theme === 'retro' ? 'Editorial' : 'Retro',

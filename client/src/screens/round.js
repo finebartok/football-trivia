@@ -2,6 +2,7 @@ import { el, mount } from '../ui.js';
 import { store } from '../store.js';
 import { room } from '../room.js';
 import { answerRound, STAGE_MULTIPLIERS, resolveWindow } from '/js/engine/index.js';
+import { sounds, soundToggle, haptic } from '../sound.js';
 
 const ROUND_MS = 20000;
 const LETTERS = ['A', 'B', 'C', 'D'];
@@ -93,6 +94,7 @@ export function render(root) {
     attrs: { type: 'button' },
     on: {
       click: async () => {
+        sounds.click();
         const elapsed = Math.max(0, Date.now() - startedAt);
         const stage = Math.max(1, revealedStages(round, elapsed));
         if (inRoom) {
@@ -121,11 +123,30 @@ export function render(root) {
   ]));
   const optionsHost = el('div', { attrs: { id: 'round-options' } }, optionEls);
 
+  let revealedBefore = 0;
+  let lastTick = null;
+
   const paint = () => {
     const elapsed = Math.max(0, Date.now() - startedAt);
     const revealed = revealedStages(round, elapsed);
+
+    // One note per clue, not one per tick.
+    if (revealed > revealedBefore) {
+      for (let i = revealedBefore; i < revealed; i++) {
+        sounds.reveal();
+        haptic(10);
+      }
+      revealedBefore = revealed;
+    }
     const remaining = Math.max(0, deadline - elapsed);
     const expired = remaining <= 0;
+
+    // The clock is the only thing under pressure.
+    const secondsLeft = Math.ceil(remaining / 1000);
+    if (secondsLeft > 0 && secondsLeft <= 5 && secondsLeft !== lastTick) {
+      lastTick = secondsLeft;
+      sounds.tick();
+    }
 
     timerEl.textContent = `${Math.ceil(remaining / 1000)}s`;
     timerEl.className = `round-timer ${remaining < 5000 ? 'is-urgent' : ''}`;
@@ -165,6 +186,7 @@ export function render(root) {
     el('header', { className: 'topbar' }, [
       el('span', { className: 'wordmark', text: '⚽ Football Trivia' }),
       timerEl,
+      soundToggle(),
     ]),
 
     el('div', { className: 'banner', attrs: { id: 'window-banner' } }, [
