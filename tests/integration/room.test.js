@@ -378,3 +378,94 @@ test('the game is played with the server preset, not the clauses the client sent
   const { data: room2 } = await server.from('rooms').select('pool_size').eq('id', room.id).single();
   assert.equal(room2.pool_size, 94, 'the World Cup 2022 pool, not the one the client asked for');
 });
+
+/** Start a game and hand back the first round's payload. */
+async function startGame(host, roomId) {
+  const started = await callFunction('start-room', { room_id: roomId }, host.accessToken);
+  return started;
+}
+
+test('an answer is scored by the server', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const started = await startGame(host, room.id);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  const { data: secret } = await server
+    .from('round_secrets').select('*').eq('round_id', started.body.id).single();
+
+  const res = await callFunction('submit-answer', {
+    room_id: room.id,
+    round_number: 1,
+    guessed_answer: secret.answer_value,
+  }, host.accessToken);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  assert.equal(res.body.correct, true);
+  assert.ok(res.body.points > 0, 'points for a correct answer');
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('room_id', room.id);
+  assert.equal(answers.length, 1);
+  assert.equal(answers[0].is_correct, true);
+});
+
+test('an answer after the round closed is refused', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const started = await startGame(host, room.id);
+  const server = serverClient();
+  await server.from('rounds')
+    .update({ closed_at: new Date().toISOString() })
+    .eq('id', started.body.id);
+
+  const res = await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: 'Lionel Messi',
+  }, host.accessToken);
+  assert.equal(res.status, 409, 'a late answer must be refused');
+
+  const { data: answers } = await server.from('answers').select('*').eq('room_id', room.id);
+  assert.equal(answers.length, 0, 'no row is written for a late answer');
+});
+
+test('answering twice keeps the first answer', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  await startGame(host, room.id);
+
+  await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: 'Someone Else',
+  }, host.accessToken);
+  await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: 'Someone Else',
+  }, host.accessToken);
+
+  const server = serverClient();
+  const { data: answers } = await server.from('answers').select('*').eq('room_id', room.id);
+  assert.equal(answers.length, 1, 'a retry does not write a second row');
+});
+
+test('a wrong answer scores nothing', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const started = await startGame(host, room.id);
+  const server = serverClient();
+  const { data: secret } = await server
+    .from('round_secrets').select('*').eq('round_id', started.body.id).single();
+
+  const res = await callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: 'Definitely Not The Answer',
+  }, host.accessToken);
+  assert.equal(res.status, 200);
+  assert.equal(res.body.correct, false);
+  assert.equal(res.body.points, 0);
+  assert.notEqual(secret.answer_value, 'Definitely Not The Answer');
+});

@@ -14,12 +14,14 @@ import http from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 import { handlePoolCount } from '../supabase/functions/_shared/pool-count.js';
 import { handleStartRoom } from '../supabase/functions/_shared/start-room.js';
+import { handleSubmitAnswer } from '../supabase/functions/_shared/submit-answer.js';
 
 const PORT = Number(process.env.FUNCTIONS_PORT) || 54399;
 
 const FUNCTIONS = {
   'pool-count': handlePoolCount,
   'start-room': handleStartRoom,
+  'submit-answer': handleSubmitAnswer,
 };
 
 const env = {

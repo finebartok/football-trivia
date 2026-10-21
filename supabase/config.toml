@@ -419,3 +419,6 @@ entrypoint = "functions/pool-count/index.js"
 
 [functions.start-room]
 entrypoint = "functions/start-room/index.js"
+
+[functions.submit-answer]
+entrypoint = "functions/submit-answer/index.js"
