@@ -44,14 +44,6 @@ def season_start(v):
     if n >= 1000: return n
     return 2000 + n if n <= 29 else 1900 + n
 
-POSITION_MAP = {
-    "Goalkeeper": "Goalkeeper", "Torwart": "Goalkeeper",
-    "Defender": "Defender", "Abwehr": "Defender",
-    "Midfield": "Midfielder", "Mittelfeld": "Midfielder",
-    "Attack": "Forward", "Sturm": "Forward", "Forward": "Forward",
-}
-
-
 def norm(s):
     s = unicodedata.normalize('NFKD', s or '').encode('ascii', 'ignore').decode().lower()
     return re.sub(r'\s+', ' ', re.sub(r'[^a-z ]', '', s)).strip()
@@ -65,6 +57,21 @@ comps = {c["competition_id"]: c for c in rows("competitions.csv.gz")}
 games = {}
 for g in rows("games.csv.gz"):
     games[g["game_id"]] = (g.get("competition_id"), g.get("date"), season_start(g.get("season")))
+
+# Transfermarkt's coarse positions mapped onto the game's four positions.
+# Scope clauses compare position strings exactly, so raw values like "Attack"
+# / "Midfield" must never reach the contract.
+POSITION_MAP = {
+    "Goalkeeper": "Goalkeeper", "Torwart": "Goalkeeper",
+    "Defender": "Defender", "Abwehr": "Defender",
+    "Midfield": "Midfielder", "Mittelfeld": "Midfielder",
+    "Attack": "Forward", "Sturm": "Forward", "Forward": "Forward",
+}
+
+
+def position_for(raw):
+    return POSITION_MAP.get(raw, raw)
+
 
 LEAGUE_NAMES = {
     "GB1": "Premier League", "ES1": "La Liga", "IT1": "Serie A", "FR1": "Ligue 1",
@@ -130,22 +137,24 @@ for e in rows("game_events.csv.gz"):
 WC2022 = set()
 print("WC2022 membership in this fixture comes from goal events, not Wikidata.")
 
-# --- goals scored aged 30+, from goal events and the player's date of birth
-goals_aged = collections.defaultdict(collections.Counter)
-for e in rows("game_events.csv.gz"):
-    if e.get("type") != "Goals": continue
-    pid = e.get("player_id")
-    comp, date, season = games.get(e.get("game_id"), (None, None, None))
+# --- goals scored aged 30+, from appearance rows in the 2012+ window
+# Rule: calendar-year difference (appearanceYear - birthYear), no birthday adjustment.
+goals_aged = collections.defaultdict(int)
+for a in rows("appearances.csv.gz"):
+    pid = a.get("player_id")
+    date = a.get("date")
     if not pid or not date: continue
+    year = int(date[:4])
+    if year < 2012: continue
     dob = players.get(pid, {}).get("date_of_birth", "")[:4]
     if not dob: continue
-    if int(date[:4]) - int(dob) >= 30:
-        goals_aged[pid]["goals_after_age_30"] += 1
+    if year - int(dob) >= 30:
+        goals_aged[pid] += int(a.get("goals", 0) or 0)
 
 def stats_for(pid):
     st = {}
     if pid in goals_aged:
-        st["goals_after_age_30"] = goals_aged[pid]["goals_after_age_30"]
+        st["goals_after_age_30"] = goals_aged[pid]
     return st
 
 # --- pick a covering set of players
@@ -229,8 +238,18 @@ for p in selected:
                 windows_registry[wid] = {"id": wid, "kind": "tournament",
                                          "label": f"{wid[3:]} World Cup", "detail": "the tournament"}
             else:
+                # wid: "<Club Name> YY/YY" -> teamName + seasonStart/seasonEnd
+                club_name, season_part = wid.rsplit(' ', 1)
+                start_a, _ = season_part.split('/')
+                start = int(start_a)
+                if start < 100:
+                    start = 2000 + start if start <= 29 else 1900 + start
                 windows_registry[wid] = {"id": wid, "kind": "season",
-                                         "label": wid, "detail": "the season"}
+                                         "label": wid,
+                                         "teamName": club_name,
+                                         "seasonStart": start,
+                                         "seasonEnd": start + 1,
+                                         "detail": "the season"}
 
     out_players.append({
         "id": int(pid),
@@ -238,11 +257,7 @@ for p in selected:
         "name": p["name"],
         "dateOfBirth": p["date_of_birth"].split(" ")[0],
         "citizenship": [p["country_of_citizenship"]] if p.get("country_of_citizenship") else [],
-        # The pipeline normalises TM's coarse positions onto the game's four
-        # (Goalkeeper / Defender / Midfielder / Forward). The fixture is the
-        # engine's input contract and must use the SAME vocabulary, or a
-        # scope clause like positions:['Forward'] matches nobody.
-        "position": POSITION_MAP.get((p.get("position") or "").strip(), "Unknown"),
+        "position": position_for(p.get("position")) or "Unknown",
         "subPosition": p.get("sub_position") or None,
         "foot": p.get("foot") or None,
         "heightCm": to_int(p.get("height_in_cm")) or None,
