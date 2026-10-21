@@ -1,6 +1,7 @@
 import { el, mount } from '../ui.js';
 import { store } from '../store.js';
 import { countFor } from '../pool.js';
+import { room } from '../room.js';
 
 function roomCode() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/0/1
@@ -84,5 +85,27 @@ export function render(root) {
     el('p', { className: 'fresh-quiz-note', text: 'A fresh quiz is written every time you play.' }),
 
     start,
+
+    el('div', { className: 'vibe-actions' }, [
+      el('button', {
+        className: 'btn btn--ghost',
+        text: 'Create a room instead',
+        attrs: { type: 'button', id: 'btn-create-room' },
+        on: {
+          click: async (e) => {
+            const button = e.currentTarget;
+            button.disabled = true;
+            button.textContent = 'Creating…';
+            const created = await room.create({ scope });
+            if (created) {
+              location.hash = '#room-lobby';
+            } else {
+              button.disabled = false;
+              button.textContent = 'Create a room instead';
+            }
+          },
+        },
+      }),
+    ]),
   ]);
 }

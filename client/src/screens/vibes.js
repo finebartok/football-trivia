@@ -1,5 +1,6 @@
 import { el, mount } from '../ui.js';
 import { store } from '../store.js';
+import { room } from '../room.js';
 import { PRESETS, countFor } from '../pool.js';
 
 const MIN_POOL = 20;
@@ -250,6 +251,32 @@ export function render(root) {
       el('h2', { className: 'section-title', text: 'Save it' }),
       nameInput,
       save,
+    ]),
+    el('div', { className: 'vibe-actions' }, [
+      el('button', {
+        className: 'btn btn--primary',
+        text: 'Create a room',
+        attrs: { type: 'button', id: 'btn-create-room' },
+        on: {
+          click: async (e) => {
+            const button = e.currentTarget;
+            button.disabled = true;
+            button.textContent = 'Creating…';
+            const created = await room.create({ scope: store.state.scope });
+            if (created) {
+              location.hash = '#room-lobby';
+            } else {
+              button.disabled = false;
+              button.textContent = 'Create a room';
+            }
+          },
+        },
+      }),
+      el('a', {
+        className: 'btn btn--ghost',
+        text: 'Play solo',
+        attrs: { href: '#lobby' },
+      }),
     ]),
   ];
 

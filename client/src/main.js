@@ -3,6 +3,8 @@ import { clear } from './ui.js';
 import * as home from './screens/home.js';
 import * as vibes from './screens/vibes.js';
 import * as lobby from './screens/lobby.js';
+import * as join from './screens/join.js';
+import * as roomLobby from './screens/room-lobby.js';
 import * as round from './screens/round.js';
 import * as reveal from './screens/reveal.js';
 import * as results from './screens/results.js';
@@ -12,6 +14,8 @@ const SCREENS = {
   '#home': home,
   '#vibes': vibes,
   '#lobby': lobby,
+  '#join': join,
+  '#room-lobby': roomLobby,
   '#round': round,
   '#reveal': reveal,
   '#results': results,

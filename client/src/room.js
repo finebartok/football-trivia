@@ -83,8 +83,28 @@ function stopPolling() {
   }
 }
 
+/** Ask the server what is happening. Also drives the round advance. */
+async function sync() {
+  const supabase = client;
+  if (!supabase || !state.roomId) return null;
+  const { data, error } = await supabase.rpc('sync_room_state', { p_room_id: state.roomId });
+  if (error) {
+    state.error = friendly(error.message);
+    notify();
+    return null;
+  }
+  state.error = null;
+  applyPayload(data);
+  if (data.status === 'round_active' && !pollTimer) startPolling();
+  if (data.status === 'final' && pollTimer) stopPolling();
+  notify();
+  return data;
+}
+
 export const room = {
   state,
+
+  sync,
 
   subscribe(fn) {
     listeners.add(fn);
@@ -152,6 +172,24 @@ export const room = {
     return data;
   },
 
+  /** Change your own name in the room. */
+  async setName(displayName) {
+    const supabase = await ensure();
+    if (!supabase || !state.roomId) return null;
+    const { error } = await supabase.rpc('set_display_name', {
+      p_room_id: state.roomId,
+      p_display_name: displayName,
+    });
+    if (error) {
+      state.error = friendly(error.message);
+      notify();
+      return null;
+    }
+    await sync();
+    notify();
+    return true;
+  },
+
   async leave() {
     if (!client || !state.roomId) return;
     await client.rpc('leave_room', { p_room_id: state.roomId });
@@ -204,24 +242,6 @@ export const room = {
     // which round it is revealing.
     state.answeredRound = state.round.round_number;
     state.error = null;
-    notify();
-    return data;
-  },
-
-  /** Ask the server what is happening. Also drives the round advance. */
-  async sync() {
-    const supabase = client;
-    if (!supabase || !state.roomId) return null;
-    const { data, error } = await supabase.rpc('sync_room_state', { p_room_id: state.roomId });
-    if (error) {
-      state.error = friendly(error.message);
-      notify();
-      return null;
-    }
-    state.error = null;
-    applyPayload(data);
-    if (data.status === 'round_active' && !pollTimer) startPolling();
-    if (data.status === 'final' && pollTimer) stopPolling();
     notify();
     return data;
   },

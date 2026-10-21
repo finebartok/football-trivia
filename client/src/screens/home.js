@@ -94,6 +94,23 @@ export function render(root) {
         attrs: { href: '#vibes' },
       }),
     ]),
+    el('h2', { className: 'section-title', text: 'Play together' }),
+    el('div', { className: 'vibe-grid' }, [
+      el('a', { className: 'vibe-card vibe-card--door', attrs: { href: '#vibes' } }, [
+        el('span', { className: 'vibe-card__icon', text: '👥' }),
+        el('span', { className: 'vibe-card__body' }, [
+          el('strong', { className: 'vibe-card__name', text: 'Create a room' }),
+          el('span', { className: 'vibe-card__desc', text: 'Pick a vibe, get a code, invite your friends' }),
+        ]),
+      ]),
+      el('a', { className: 'vibe-card vibe-card--door', attrs: { href: '#join' } }, [
+        el('span', { className: 'vibe-card__icon', text: '🔑' }),
+        el('span', { className: 'vibe-card__body' }, [
+          el('strong', { className: 'vibe-card__name', text: 'Join a room' }),
+          el('span', { className: 'vibe-card__desc', text: 'Got a code? Type it in' }),
+        ]),
+      ]),
+    ]),
     el('h2', { className: 'section-title', text: 'Start from a vibe' }),
     el('div', { className: 'vibe-grid' }, PRESETS.map(presetCard)),
     el('h2', { className: 'section-title', text: 'Your vibes' }),

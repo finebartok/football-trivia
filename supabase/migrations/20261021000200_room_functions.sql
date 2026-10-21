@@ -172,3 +172,25 @@ begin
   where id = p_room_id;
 end;
 $$;
+
+-- A player changes their own display name in a room they are in.
+create or replace function public.set_display_name(p_room_id uuid, p_display_name text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+
+  update public.room_memberships
+  set display_name = public.clean_display_name(p_display_name)
+  where room_id = p_room_id and user_id = auth.uid();
+
+  if not found then
+    raise exception 'not a member of that room' using errcode = '42501';
+  end if;
+end;
+$$;
