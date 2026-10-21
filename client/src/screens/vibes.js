@@ -115,8 +115,14 @@ export function render(root) {
     ]),
     tooSmall
       ? el('p', { className: 'notice notice--warn', id: 'pool-warning' }, [
-          el('strong', { text: `Only ${count} players fit that. ` }),
-          el('span', { text: 'A vibe needs at least 20 players to write a quiz from.' }),
+          el('strong', {
+            text: describeCoverage({
+              scope: store.state.scope,
+              count,
+              floor: MIN_POOL,
+              registry: store.state.registry,
+            }),
+          }),
         ])
       : null,
     el('section', { className: 'card' }, [

@@ -85,3 +85,20 @@ test('a link that is not a vibe says so', async ({ page }) => {
   await page.waitForTimeout(600);
   await expect(page.locator('#vibe-error')).toContainText('not a vibe');
 });
+
+test('a thin pool says why', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+
+  // The earliest era in the data is 2002-2011, and La Liga has only 14
+  // players in it - under the floor of 20.
+  await page.locator('select[aria-label="Different era"]').selectOption('2002-2011');
+  await page.waitForTimeout(500);
+
+  await expect(page.locator('#pool-count strong')).toHaveText('14');
+  const warning = page.locator('#pool-warning');
+  await expect(warning).toBeVisible();
+  await expect(warning).toContainText('Only 14 players');
+  await expect(warning).toContainText('La Liga');
+  await expect(warning).not.toContainText('ES1');
+});
