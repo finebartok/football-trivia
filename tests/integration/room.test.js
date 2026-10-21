@@ -224,3 +224,105 @@ test('a player who leaves gives up the host role', { skip }, async () => {
   assert.equal(members.length, 1);
   assert.equal(members[0].is_host, true, 'the host role moves to the player who stayed');
 });
+
+test('the current round is null before the game starts', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const { data, error } = await host.client.rpc('current_round', { p_room_id: room.id });
+  assert.equal(error, null, error?.message);
+  assert.equal(data.status, 'lobby');
+  assert.equal(data.round, null);
+});
+
+test('an expired round advances and the next one appears', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const server = serverClient();
+
+  // Stand in for the edge function that starts the game: one round in,
+  // and a plan with a second round waiting in it.
+  const { data: round1 } = await server.from('rounds').insert({
+    room_id: room.id,
+    round_number: 1,
+    template: 'identify',
+    prompt: 'Who is this?',
+    context: '2022 World Cup',
+    clues: [{ id: 'c1', label: 'CAREER CLUBS', value: 'Barcelona' }],
+    options: [{ id: 'opt-0', label: 'Lionel Messi', value: 'Lionel Messi' }],
+    reveal_schedule: [{ stage: 1, revealAtMs: 2000 }],
+    started_at: new Date(Date.now() - 60000).toISOString(),
+    deadline_at: new Date(Date.now() - 1000).toISOString(),
+  }).select().single();
+
+  await server.from('round_secrets').insert({
+    round_id: round1.id, answer_value: 'Lionel Messi', target_player_id: 28003,
+  });
+  await server.from('quiz_plans').insert({
+    room_id: room.id,
+    seed: 1,
+    plan: [{
+      client: {
+        round_number: 2, template: 'identify', prompt: 'Who is this?', context: null,
+        clues: [{ id: 'c1', label: 'CAREER CLUBS', value: 'Bayern' }],
+        options: [{ id: 'opt-0', label: 'Thomas Muller', value: 'Thomas Muller' }],
+        reveal_schedule: [{ stage: 1, revealAtMs: 2000 }],
+      },
+      secret: { answer_value: 'Thomas Muller', target_player_id: 1 },
+    }],
+  });
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  const { data, error } = await host.client.rpc('current_round', { p_room_id: room.id });
+  assert.equal(error, null, error?.message);
+  assert.equal(data.current_round, 2);
+  assert.equal(data.round.round_number, 2);
+  assert.equal(data.round.prompt, 'Who is this?');
+
+  const { data: closed } = await server.from('rounds').select('closed_at').eq('id', round1.id).single();
+  assert.ok(closed.closed_at, 'the first round must be closed');
+
+  const { data: secret } = await server.from('round_secrets').select('answer_value').eq('round_id', round1.id).single();
+  assert.equal(secret.answer_value, 'Lionel Messi');
+});
+
+test('the answer is only available once the round is closed', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const server = serverClient();
+  const { data: round1 } = await server.from('rounds').insert({
+    room_id: room.id, round_number: 1, template: 'identify', prompt: 'Who is this?',
+    context: null, clues: [], options: [], reveal_schedule: [],
+    started_at: new Date().toISOString(),
+    deadline_at: new Date(Date.now() + 60000).toISOString(),
+  }).select().single();
+  await server.from('round_secrets').insert({ round_id: round1.id, answer_value: 'Lionel Messi' });
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  const { error } = await host.client.rpc('round_result', {
+    p_room_id: room.id, p_round_number: 1,
+  });
+  assert.ok(error, 'the answer must not be readable while the round is open');
+
+  await server.from('rounds').update({ closed_at: new Date().toISOString() }).eq('id', round1.id);
+  const { data, error: afterError } = await host.client.rpc('round_result', {
+    p_room_id: room.id, p_round_number: 1,
+  });
+  assert.equal(afterError, null, afterError?.message);
+  assert.equal(data.answer, 'Lionel Messi');
+});
+
+test('a player who is not in the room gets nothing', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const stranger = await playerClient();
+  const { error } = await stranger.client.rpc('current_round', { p_room_id: room.id });
+  assert.ok(error, 'a stranger must not read a room');
+});
