@@ -8,6 +8,10 @@ test.describe.configure({ mode: 'serial' });
 // close waits for the deadline. Under load that is well over a minute.
 test.setTimeout(120000);
 
+// An answer is a round trip to the server and back. Five seconds is not
+// enough when the local stack is busy.
+expect.configure({ timeout: 30000 });
+
 /** Every page error and console error seen during the test. */
 function watchErrors(page) {
   const errors = [];
