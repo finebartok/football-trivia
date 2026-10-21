@@ -4,7 +4,9 @@ import { test, expect } from '@playwright/test';
 // local database, so these tests run one at a time and are given room
 // to breathe.
 test.describe.configure({ mode: 'serial' });
-test.setTimeout(60000);
+// A room's round lasts twenty seconds, and a test that waits for one to
+// close waits for the deadline. Under load that is well over a minute.
+test.setTimeout(120000);
 
 /** Every page error and console error seen during the test. */
 function watchErrors(page) {
