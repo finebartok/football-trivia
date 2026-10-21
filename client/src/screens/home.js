@@ -1,0 +1,117 @@
+import { el, mount } from '../ui.js';
+import { store } from '../store.js';
+import { PRESETS, countFor } from '../pool.js';
+
+function topbar() {
+  const next = store.state.theme === 'retro' ? 'editorial' : 'retro';
+  return el('header', { className: 'topbar' }, [
+    el('a', {
+      className: 'wordmark',
+      text: '⚽ Football Trivia',
+      attrs: { href: '#home' },
+    }),
+    el('button', {
+      className: 'btn btn--icon',
+      text: store.state.theme === 'retro' ? 'Editorial' : 'Retro',
+      attrs: { title: 'Switch theme', 'aria-label': 'Switch theme' },
+      on: {
+        click: () => {
+          store.setTheme(next);
+        },
+      },
+    }),
+  ]);
+}
+
+function presetCard(preset) {
+  const live = countFor({ clauses: preset.clauses });
+  const count = store.state.pool ? `${live} players` : '…';
+  return el('button', {
+    className: 'vibe-card vibe-card--preset',
+    attrs: { type: 'button' },
+    on: {
+      click: () => {
+        store.setScope({ id: preset.id, name: preset.name, icon: preset.icon, clauses: preset.clauses });
+        location.hash = '#lobby';
+      },
+    },
+  }, [
+    el('span', { className: 'vibe-card__icon', text: preset.icon }),
+    el('span', { className: 'vibe-card__body' }, [
+      el('strong', { className: 'vibe-card__name', text: preset.name }),
+      el('span', { className: 'vibe-card__desc', text: preset.desc }),
+    ]),
+    el('span', { className: 'vibe-card__count', text: count }),
+  ]);
+}
+
+function savedCard(vibe) {
+  return el('div', { className: 'vibe-card vibe-card--saved' }, [
+    el('span', { className: 'vibe-card__icon', text: vibe.icon || '⚽' }),
+    el('span', { className: 'vibe-card__body' }, [
+      el('strong', { className: 'vibe-card__name', text: vibe.name }),
+      el('span', { className: 'vibe-card__desc', text: 'Your vibe' }),
+    ]),
+    el('span', { className: 'vibe-card__actions' }, [
+      el('button', {
+        className: 'btn btn--primary btn--tiny',
+        text: 'Play',
+        attrs: { type: 'button' },
+        on: {
+          click: () => {
+            store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
+            location.hash = '#lobby';
+          },
+        },
+      }),
+      el('button', {
+        className: 'btn btn--tiny',
+        text: '✕',
+        attrs: { type: 'button', 'aria-label': `Delete ${vibe.name}` },
+        on: {
+          click: () => {
+            store.deleteVibe(vibe.id);
+          },
+        },
+      }),
+    ]),
+  ]);
+}
+
+export function render(root) {
+  const vibes = store.state.vibes;
+  const children = [
+    topbar(),
+    el('section', { className: 'hero' }, [
+      el('h1', { className: 'hero__title', text: 'Craft a vibe' }),
+      el('p', {
+        className: 'hero__sub',
+        text: 'Pick the football you want. A quiz gets written around it.',
+      }),
+      el('a', {
+        className: 'btn btn--primary hero__cta',
+        text: 'Craft a vibe',
+        attrs: { href: '#vibes' },
+      }),
+    ]),
+    el('h2', { className: 'section-title', text: 'Start from a vibe' }),
+    el('div', { className: 'vibe-grid' }, PRESETS.map(presetCard)),
+    el('h2', { className: 'section-title', text: 'Your vibes' }),
+  ];
+
+  if (vibes.length === 0) {
+    children.push(
+      el('p', { className: 'muted-note', text: 'Nothing saved yet. Craft one and it will be here.' }),
+    );
+  } else {
+    children.push(el('div', { className: 'vibe-grid' }, vibes.map(savedCard)));
+  }
+
+  children.push(
+    el('footer', { className: 'home-foot' }, [
+      el('a', { className: 'muted-note', text: 'Photo credits & sources', attrs: { href: '#credits' } }),
+    ]),
+  );
+
+  mount(root, children);
+}

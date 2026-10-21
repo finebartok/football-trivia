@@ -1,0 +1,55 @@
+:root, [data-theme="retro"] {
+  --bg: #f6ecd6;
+  --ink: #2b2119;
+  --gold: #b8860b;
+  --red: #c0392b;
+  --win: #1f5d3a;
+  --surface: #fff8e6;
+  --highlight: #ffe9a8;
+  --line: #2b2119;
+  --muted: #7a6448;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --border: 2px solid var(--ink);
+  --shadow: 0 3px 0 var(--ink);
+  --shadow-lg: 0 6px 0 var(--ink);
+  --font-display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --paper: radial-gradient(rgba(0,0,0,.05) 1px, transparent 1px);
+  --paper-size: 9px 9px;
+}
+
+[data-theme="editorial"] {
+  --bg: #faf8f3;
+  --ink: #17130f;
+  --gold: #c8102e;
+  --red: #c8102e;
+  --win: #1f5d3a;
+  --surface: #ffffff;
+  --highlight: #f3efe7;
+  --line: #e4ded2;
+  --muted: #8a8175;
+  --radius: 2px;
+  --radius-sm: 2px;
+  --radius-lg: 3px;
+  --border: 1px solid var(--line);
+  --shadow: 0 1px 0 var(--line);
+  --shadow-lg: 0 2px 0 var(--line);
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --paper: none;
+  --paper-size: 0 0;
+}
+
+body {
+  background-color: var(--bg);
+  background-image: var(--paper);
+  background-size: var(--paper-size);
+  color: var(--ink);
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
