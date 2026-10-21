@@ -1,0 +1,30 @@
+.wordmark { font-family: var(--font-display); font-weight: 700; text-decoration: none; color: var(--ink); font-size: 15px; }
+.btn.btn--icon { width: auto; padding: 6px 10px; font-size: 12px; flex-shrink: 0; }
+.hero { padding: 26px 16px 20px; text-align: center; }
+.hero__title { font-family: var(--font-display); font-size: 30px; line-height: 1.05; margin: 0 0 6px; color: var(--ink); }
+.hero__sub { color: var(--muted); font-size: 14px; margin: 0 0 16px; font-family: var(--font-body); }
+.hero__cta { display: block; text-align: center; }
+.section-title { font-family: var(--font-display); font-size: 15px; letter-spacing: .02em; margin: 0 0 10px; color: var(--ink); }
+.vibe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px; }
+/* Grid items default to min-width:auto, which refuses to shrink below their
+   content and pushes the card wider than its column. */
+.vibe-grid > * { min-width: 0; }
+.vibe-card { display: flex; align-items: center; gap: 8px; text-align: left; font-family: var(--font-body); color: var(--ink); cursor: pointer; margin: 0; }
+.vibe-card--preset { width: 100%; box-sizing: border-box; max-width: 100%; }
+.vibe-card__icon { font-size: 20px; flex-shrink: 0; }
+.vibe-card__body { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+.vibe-card__name { font-size: 12.5px; line-height: 1.2; overflow-wrap: anywhere; }
+.vibe-card__desc { font-size: 10px; opacity: .65; line-height: 1.25; overflow-wrap: anywhere; }
+.vibe-card__count { font-size: 9.5px; font-weight: 700; color: var(--gold); flex: 0 0 auto; white-space: nowrap; }
+.vibe-card__actions { display: flex; flex-direction: column; gap: 4px; }
+.btn.btn--tiny { width: auto; padding: 4px 8px; font-size: 11px; }
+.muted-note { font-size: 11.5px; color: var(--muted); line-height: 1.5; display: block; }
+.home-foot { text-align: center; padding: 18px 12px 26px; }
+.home-foot a { text-decoration: none; }
+
+/* Two columns of vibe cards only fit when the internals can shrink. Below
+   360px there is not enough room, so they stack. */
+@media (max-width: 359px) {
+  .vibe-grid { grid-template-columns: 1fr; }
+  .vibe-card__body { min-width: 0; }
+}

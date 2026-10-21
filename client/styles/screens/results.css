@@ -1,0 +1,8 @@
+.results-hero { text-align: center; padding: 22px 12px 12px; }
+.results-hero__label { font-size: 10px; letter-spacing: .18em; color: var(--muted); margin: 0; font-family: var(--font-body); }
+.results-hero__score { font-family: var(--font-display); font-size: 54px; line-height: 1; margin: 4px 0; color: var(--gold); }
+.rank-row__name { font-size: 13px; font-family: var(--font-body); }
+.rank-row__points { font-family: var(--font-display); font-size: 15px; }
+.rank-row__points.is-good { color: var(--win); }
+.rank-row__points.is-bad { color: var(--muted); }
+.results-cta { text-align: center; }
