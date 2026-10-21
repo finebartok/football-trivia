@@ -353,6 +353,11 @@ export const room = {
       notify();
       return null;
     }
+    // The round is still open: the reveal is waiting for it.
+    if (data?.pending) {
+      notify();
+      return null;
+    }
     state.lastResult = data;
     applyLeaderboard(state, data.leaderboard);
     notify();

@@ -108,7 +108,7 @@ begin
 
   -- The lock keeps two players joining at the same moment from taking
   -- the same join order, and from both squeezing past the cap.
-  perform 1 from public.rooms where id = v_room.id for update;
+  perform 1 from public.rooms where id = v_room.id for no key update;
 
   select count(*) into v_count
   from public.room_memberships

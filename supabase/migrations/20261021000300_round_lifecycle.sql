@@ -27,7 +27,10 @@ begin
     raise exception 'not a member of that room' using errcode = '42501';
   end if;
 
-  select * into v_room from public.rooms where id = p_room_id for update;
+  -- FOR NO KEY UPDATE, not FOR UPDATE: a join inserting a membership row
+  -- takes a key-share lock on this room for its foreign key, and FOR
+  -- UPDATE would block that - two of them waiting on each other.
+  select * into v_room from public.rooms where id = p_room_id for no key update;
   if v_room.id is null or v_room.status <> 'round_active' then
     return;
   end if;
@@ -159,12 +162,14 @@ begin
     raise exception 'not a member of that room' using errcode = '42501';
   end if;
 
-  -- The poll is the heartbeat, so liveness costs no extra traffic.
+  perform public.advance_room(p_room_id);
+
+  -- The poll is the heartbeat, so liveness costs no extra traffic. It
+  -- comes after the advance so that every transaction takes the room's
+  -- lock before it takes a membership's.
   update public.room_memberships
   set last_seen_at = now()
   where room_id = p_room_id and user_id = auth.uid();
-
-  perform public.advance_room(p_room_id);
 
   select * into v_room from public.rooms where id = p_room_id;
 
@@ -221,7 +226,9 @@ begin
   end if;
 
   if v_round.closed_at is null and now() <= v_round.deadline_at then
-    raise exception 'that round is still open' using errcode = 'P0002';
+    -- The round is still open, so there is no answer to give. This is
+    -- not an error: the reveal is waiting for the round to close.
+    return jsonb_build_object('pending', true, 'round_number', p_round_number);
   end if;
 
   select * into v_secret from public.round_secrets where round_id = v_round.id;

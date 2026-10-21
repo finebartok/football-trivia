@@ -304,10 +304,13 @@ test('the answer is only available once the round is closed', { skip }, async ()
   await server.from('round_secrets').insert({ round_id: round1.id, answer_value: 'Lionel Messi' });
   await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
 
-  const { error } = await host.client.rpc('round_result', {
+  const { data: pending, error } = await host.client.rpc('round_result', {
     p_room_id: room.id, p_round_number: 1,
   });
-  assert.ok(error, 'the answer must not be readable while the round is open');
+  assert.equal(error, null, error?.message);
+  assert.equal(pending.pending, true, 'the answer is not available while the round is open');
+  assert.equal(pending.answer, undefined, 'no answer while the round is open');
+  assert.equal(pending.leaderboard, undefined, 'no leaderboard while the round is open');
 
   await server.from('rounds').update({ closed_at: new Date().toISOString() }).eq('id', round1.id);
   const { data, error: afterError } = await host.client.rpc('round_result', {
@@ -737,4 +740,25 @@ test('the room tables are published for realtime', { skip }, async () => {
   assert.equal(rows !== null, true, 'the rounds table is readable');
   assert.equal(tables, null);
   assert.equal(error, null);
+});
+
+test('two players polling at once do not deadlock', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200);
+
+  // Both players poll at the same time, as they do every two seconds.
+  for (let i = 0; i < 5; i++) {
+    const [a, b] = await Promise.all([
+      host.client.rpc('current_round', { p_room_id: room.id }),
+      guest.client.rpc('current_round', { p_room_id: room.id }),
+    ]);
+    assert.equal(a.error, null, `host poll: ${a.error?.message}`);
+    assert.equal(b.error, null, `guest poll: ${b.error?.message}`);
+  }
 });

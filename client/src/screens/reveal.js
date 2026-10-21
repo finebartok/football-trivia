@@ -118,6 +118,9 @@ function renderRoom(root, roomState) {
   const answer = roomState.myAnswer;
   const roundNumber = roomState.answeredRound ?? roomState.currentRound;
 
+  // "1 goal", not "1". The unit belongs with the number.
+  const answerText = withUnit(result?.answer, result?.unit);
+
   const next = el('button', {
     className: 'btn btn--primary',
     text: roomState.status === 'final' ? 'See how it went' : 'Next round',
@@ -133,8 +136,6 @@ function renderRoom(root, roomState) {
     },
   });
 
-  const answerText = withUnit(result?.answer, result?.unit);
-
   const board = result?.leaderboard ?? [];
   const me = board.find((m) => m.user_id === roomState.me);
 
@@ -146,7 +147,7 @@ function renderRoom(root, roomState) {
 
     el('section', { className: 'reveal-card' }, [
       el('div', { className: 'tile', text: '?' }),
-      el('h1', { className: 'reveal-card__name', text: result?.answer ?? '…' }),
+      el('h1', { className: 'reveal-card__name', text: answerText || '…' }),
     ]),
 
     el('section', { className: `card verdict ${answer?.correct ? 'is-good' : 'is-bad'}` }, [
