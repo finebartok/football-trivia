@@ -45,6 +45,7 @@ export function render() {
     const app = document.getElementById('app');
     if (!app) return;
     clear(app);
+    app.className = 'screen';
 
     // A room screen needs the room, and the room is only known once the
     // session is back. Show nothing until then rather than bouncing the

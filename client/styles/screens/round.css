@@ -7,3 +7,16 @@
 .clue-card.is-locked .clue-card__value { opacity: .35; }
 .clue-card.is-revealed { background: var(--highlight); }
 .option__label { font-family: var(--font-body); font-weight: 600; }
+
+/* A clue arrives in place. The ladder does not jump. */
+.clue-card.is-revealed {
+  animation: clue-in 240ms ease both;
+}
+
+.verdict.is-good {
+  animation: verdict-pulse 400ms ease both;
+}
+
+.verdict.is-bad {
+  animation: verdict-pulse 400ms ease both;
+}

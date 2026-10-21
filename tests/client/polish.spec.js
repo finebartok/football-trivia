@@ -55,3 +55,13 @@ test('the game still works with the sound off', async ({ page }) => {
 
   expect(errors).toEqual([]);
 });
+
+test('the reduced-motion rule switches the movement off', async ({ page }) => {
+  await page.goto('./');
+  const css = await page.evaluate(async () => {
+    const res = await fetch('/client/styles/app.css');
+    return res.text();
+  });
+  expect(css).toContain('prefers-reduced-motion');
+  expect(css).toContain('transition');
+});
