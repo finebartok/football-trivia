@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test \"tests/**/*.test.js\"",
-    "dev": "python3 -m http.server 8099",
+    "dev": "node scripts/dev-server.js",
     "test:client": "playwright test",
     "db:apply": "node scripts/ingest/lib/db.js --apply",
     "ingest:all": "node scripts/ingest/fetch.js && node scripts/ingest/load.js && node scripts/ingest/derive.js && node scripts/ingest/validate.js",
