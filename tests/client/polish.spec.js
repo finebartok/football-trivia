@@ -91,3 +91,24 @@ test('a pool that will not load says so, and can be tried again', async ({ page 
   await expect(page.locator('.vibe-card__count').first()).not.toHaveText('…');
   await expect(page.locator('.vibe-card__count').first()).toContainText('players');
 });
+
+test('the manifest is served and says what the game is', async ({ request }) => {
+  const res = await request.get('/client/manifest.webmanifest');
+  expect(res.status()).toBe(200);
+  const manifest = await res.json();
+  expect(manifest.name).toContain('Football Trivia');
+  expect(manifest.display).toBe('standalone');
+  expect(manifest.icons.length).toBeGreaterThan(0);
+});
+
+test('the service worker is served', async ({ request }) => {
+  const res = await request.get('/client/sw.js');
+  expect(res.status()).toBe(200);
+  expect(await res.text()).toContain('addEventListener');
+});
+
+test('the page asks for the manifest and the worker', async ({ page }) => {
+  await page.goto('./');
+  const html = await page.content();
+  expect(html).toContain('manifest.webmanifest');
+});

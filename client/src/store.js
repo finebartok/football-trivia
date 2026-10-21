@@ -42,7 +42,7 @@ room.subscribe(() => {
   notify();
 });
 
-function notify() {
+export function notify() {
   for (const fn of listeners) fn();
 }
 

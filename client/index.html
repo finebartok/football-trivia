@@ -10,9 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/client/styles/tokens.css">
   <link rel="stylesheet" href="/client/styles/app.css">
+  <link rel="manifest" href="/client/manifest.webmanifest">
+  <meta name="theme-color" content="#b8860b">
+  <meta name="description" content="Craft a vibe. The engine writes the quiz. Play it with your friends.">
 </head>
 <body>
   <div id="app"></div>
   <script type="module" src="/client/src/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/client/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

@@ -1,7 +1,17 @@
 import { el, mount } from '../ui.js';
 import { soundToggle } from '../sound.js';
-import { store } from '../store.js';
+import { store, notify } from '../store.js';
 import { PRESETS, countFor } from '../pool.js';
+
+// The browser's offer to install the game. It is a quiet line, not a
+// popup, and a browser that never offers it never shows it.
+let installPrompt = null;
+
+globalThis.addEventListener?.('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  notify();
+});
 
 function topbar() {
   const next = store.state.theme === 'retro' ? 'editorial' : 'retro';
@@ -128,6 +138,24 @@ export function render(root) {
               e.currentTarget.disabled = true;
               await store.retryPool();
               e.currentTarget.disabled = false;
+            },
+          },
+        }),
+      ])
+      : null,
+    installPrompt
+      ? el('div', { className: 'install-hint', attrs: { id: 'install-hint' } }, [
+        el('span', { text: 'Add Football Trivia to your home screen' }),
+        el('button', {
+          className: 'btn btn--tiny',
+          text: 'Add',
+          attrs: { type: 'button' },
+          on: {
+            click: async () => {
+              const prompt = installPrompt;
+              installPrompt = null;
+              notify();
+              if (prompt) await prompt.prompt();
             },
           },
         }),
