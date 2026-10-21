@@ -21,7 +21,8 @@ export function answerRound(round, { answer, stage, elapsedMs }) {
   let correct = false;
   if (round.template === 'stat_value') {
     // Decision: numeric equality for stat_value rounds.
-    // Both are converted to trimmed strings to handle potential types.
+    // An option's label carries its unit ("4 goals"); its value carries the
+    // number. Validate against the value, never the decorated label.
     correct = String(answer).trim() === String(round.answer).trim();
   } else {
     // Decision: identify rounds use normalised name matching.

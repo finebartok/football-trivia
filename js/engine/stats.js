@@ -19,11 +19,11 @@ function withWindow(text, window) {
 export const METRICS = Object.freeze({
   international_caps: {
     id: 'international_caps', label: 'International caps', unit: 'caps', exact: true, family: 'career',
-    format: v => `${v} caps`,
+    format: v => String(v),
   },
   international_goals: {
     id: 'international_goals', label: 'International goals', unit: 'goals', exact: true, family: 'career',
-    format: v => `${v} goals`,
+    format: v => String(v),
   },
   highest_market_value_eur: {
     id: 'highest_market_value_eur', label: 'Peak market value', unit: '€M', exact: true, family: 'career',
@@ -31,23 +31,23 @@ export const METRICS = Object.freeze({
   },
   club_goals: {
     id: 'club_goals', label: 'Goals', unit: 'goals', exact: false, family: 'window',
-    format: v => `${v} goals`,
+    format: v => String(v),
   },
   club_appearances: {
     id: 'club_appearances', label: 'Appearances', unit: 'apps', exact: false, family: 'window',
-    format: v => `${v} appearances`,
+    format: v => String(v),
   },
   goals_after_age_30: {
     id: 'goals_after_age_30', label: 'Goals aged 30+', unit: 'goals', exact: false, family: 'window',
-    format: v => `${v}+ goals aged 30+`,
+    format: v => `${v}+`,
   },
   tournament_goals: {
     id: 'tournament_goals', label: 'Tournament goals', unit: 'goals', exact: true, family: 'roster',
-    format: v => `${v} goals`,
+    format: v => String(v),
   },
   scarcity_peers: {
     id: 'scarcity_peers', label: 'Players with this', unit: 'players', exact: true, family: 'scarcity',
-    format: v => `one of only ${v}`,
+    format: v => `${v} players`,
   },
 });
 
@@ -79,12 +79,22 @@ export function metricsFor(player, window) {
       value = window?.id ? (player.windows?.[window.id]?.goals) : undefined;
     } else if (m.id === 'scarcity_peers') {
       value = player.stats?.scarcity_peers;
+    } else if (m.id === 'tournament_goals') {
+      // A tournament window holds tournament goals. It is not a club season,
+      // so club_goals must not read it - otherwise one number produces two
+      // identical clues, one of them mislabelled.
+      value = (window?.kind === 'tournament' && window?.id)
+        ? player.windows?.[window.id]?.goals
+        : undefined;
+    } else if (m.id === 'club_goals' || m.id === 'club_appearances') {
+      if (window?.kind === 'tournament') {
+        value = undefined;
+      } else if (window?.id) {
+        const w = player.windows?.[window.id] ?? {};
+        value = m.id === 'club_goals' ? (w.goals ?? w.club_goals) : (w.appearances ?? w.club_appearances);
+      }
     } else if (window?.id && player.windows?.[window.id]?.[m.id] !== undefined) {
       value = player.windows[window.id][m.id];
-    } else if (window?.id && m.id === 'club_goals' && player.windows?.[window.id]?.goals !== undefined) {
-      value = player.windows[window.id].goals;
-    } else if (window?.id && m.id === 'club_appearances' && player.windows?.[window.id]?.appearances !== undefined) {
-      value = player.windows[window.id].appearances;
     } else if (!window && player.stats?.[m.id] !== undefined) {
       // A career total is only a valid answer when no window is in play. With
       // a window, the window IS the scope of the claim - a career figure

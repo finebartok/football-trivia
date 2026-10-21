@@ -99,7 +99,12 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
     ? numericDistractors({ value, pool, subject, metric, window, rng, count: 3 }).map(String)
     : nameDistractors({ pool, subject, scope, rng, count: 3 });
 
-  const options = buildOptions({ answer: spoken.answer, distractors, rng });
+  const options = buildOptions({
+    answer: spoken.answer,
+    distractors,
+    rng,
+    unit: spoken.unit ?? null,
+  });
 
   // Stages land at 2.0s, 6.5s, 11.0s and 15.5s, so the last clue always
   // arrives before the round closes at 20s.

@@ -10,7 +10,16 @@ test('a windowed metric always states its window', () => {
 
 test('an exact metric never gets a window qualifier', () => {
   const s = formatMetric('international_caps', 204, { kind: 'season', seasonStart: 2014, label: 'x' });
-  assert.equal(s, '204 caps');
+  assert.equal(s, '204');
+});
+
+test('a metric value does not repeat the unit its label already carries', () => {
+  // "International caps / 204" - not "International caps / 204 caps".
+  assert.equal(metricDescriptor('international_caps').label, 'International caps');
+  assert.equal(metricDescriptor('international_caps').format(204), '204');
+  assert.equal(metricDescriptor('international_goals').format(52), '52');
+  assert.equal(metricDescriptor('goals_after_age_30').format(50), '50+');
+  assert.equal(metricDescriptor('club_goals').format(60), '60');
 });
 
 test('metric families are assigned for the planner', () => {

@@ -47,7 +47,15 @@ export function nameDistractors({ pool, subject, scope, rng, count = 3 }) {
   return shuffle(rng, candidates).slice(0, count);
 }
 
-export function buildOptions({ answer, distractors, rng }) {
+/** "4 goals", "1 goal" - a bare number tells the player nothing. */
+export function withUnit(value, unit) {
+  if (!unit) return String(value);
+  const n = Number(value);
+  const u = (n === 1 && unit.endsWith('s')) ? unit.slice(0, -1) : unit;
+  return `${value} ${u}`;
+}
+
+export function buildOptions({ answer, distractors, rng, unit = null }) {
   const wrong = (distractors ?? [])
     .map(d => (typeof d === 'object' && d !== null ? d.name : String(d)))
     .filter(label => label !== String(answer));
@@ -64,9 +72,16 @@ export function buildOptions({ answer, distractors, rng }) {
     if (bump > 50) break;
   }
 
+  // Each option carries the raw value it stands for, so an answer is validated
+  // against the value and not against its decorated label.
   const all = [
-    { id: 'opt-0', label: String(answer), correct: true },
-    ...uniqueWrong.map((label, i) => ({ id: `opt-${i + 1}`, label, correct: false })),
+    { id: 'opt-0', label: withUnit(answer, unit), value: answer, correct: true },
+    ...uniqueWrong.map((label, i) => ({
+      id: `opt-${i + 1}`,
+      label: unit ? withUnit(label, unit) : label,
+      value: label,
+      correct: false,
+    })),
   ];
   return shuffle(rng, all).slice(0, OPTION_COUNT);
 }

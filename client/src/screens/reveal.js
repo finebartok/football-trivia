@@ -36,6 +36,14 @@ export function render(root) {
     },
   });
 
+  // The answer needs its unit too: "It was 1 goal", not "It was 1".
+  const answerText = (() => {
+    if (!round.unit) return String(round.answer);
+    const n = Number(round.answer);
+    const unit = (n === 1 && round.unit.endsWith('s')) ? round.unit.slice(0, -1) : round.unit;
+    return `${round.answer} ${unit}`;
+  })();
+
   const facts = [];
   if (player) {
     if (player.citizenship?.length) facts.push(player.citizenship[0]);
@@ -65,7 +73,7 @@ export function render(root) {
     el('section', { className: `card verdict ${answer?.correct ? 'is-good' : 'is-bad'}` }, [
       answer?.correct
         ? el('strong', { text: 'You got it' })
-        : el('strong', { text: `It was ${round.answer}` }),
+        : el('strong', { text: `It was ${answerText}` }),
       el('span', { className: 'verdict__points', text: `+${answer?.points ?? 0}` }),
     ]),
 

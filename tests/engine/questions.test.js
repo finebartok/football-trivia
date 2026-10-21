@@ -47,7 +47,22 @@ test('the round answer equals the correct option', () => {
     scope: { clauses: [] }, registry, pool: players, rng: makeRng(1), difficulty: 'medium',
   });
   const correct = round.options.find(o => o.correct);
-  assert.equal(String(correct.label), String(round.answer));
+  assert.equal(String(correct.value), String(round.answer));
+});
+
+test('a numeric option says what it counts', () => {
+  const { players, registry } = loadFixture();
+  const window = registry.windows['wc-2022'];
+  const cands = candidateSubjects({ scope: { clauses: [] }, pool: players, registry, window, metric: 'tournament_goals' });
+  const round = composeRound({
+    subject: cands[0].subject, metric: 'tournament_goals', window,
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1), difficulty: 'medium',
+  });
+  for (const opt of round.options) {
+    assert.match(opt.label, /goals?$/, `option "${opt.label}" must name its unit`);
+  }
+  const correct = round.options.find(o => o.correct);
+  assert.equal(correct.label, `${correct.value} goal${correct.value === 1 ? '' : 's'}`);
 });
 
 test('the clue ladder never reveals the stat round answer', () => {

@@ -70,7 +70,7 @@ export function render(root) {
       click: () => {
         const elapsed = Math.max(0, Date.now() - startedAt);
         const stage = Math.max(1, revealedStages(round, elapsed));
-        const scored = answerRound(round, { answer: opt.label, stage, elapsedMs: elapsed });
+        const scored = answerRound(round, { answer: opt.value ?? opt.label, stage, elapsedMs: elapsed });
         store.recordAnswer({
           roundIndex: store.state.roundIndex,
           stage,
