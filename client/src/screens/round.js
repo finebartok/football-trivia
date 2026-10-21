@@ -19,17 +19,6 @@ function revealedStages(round, elapsed) {
   return round.revealSchedule.filter((s) => elapsed >= s.revealAtMs).length;
 }
 
-function ladder(round, elapsed) {
-  const revealed = revealedStages(round, elapsed);
-  const steps = [1, 2, 3, 4].map((n) => STAGE_MULTIPLIERS[n]);
-  return el('div', { className: 'clue-ladder', attrs: { id: 'clue-ladder' } },
-    steps.map((mult, i) => el('div', {
-      className: `step ${i < revealed ? 'is-done' : ''} ${i === revealed ? 'is-current' : ''}`,
-      text: `×${mult}`,
-      attrs: { 'aria-label': `Stage ${i + 1}, multiplier ${mult}` },
-    })));
-}
-
 export function render(root) {
   stopTimer();
 
@@ -40,60 +29,89 @@ export function render(root) {
     return;
   }
 
-  const startedAt = store.state.roundStartedAt || Date.now();
-  const started = Date.now();
+  // The round has already been answered - the reveal screen is next.
+  if (store.state.answers.some((a) => a.roundIndex === store.state.roundIndex)) {
+    location.hash = '#reveal';
+    return;
+  }
 
-  const clueHost = el('div', { attrs: { id: 'clue-cards' } });
+  const startedAt = store.state.roundStartedAt || Date.now();
+
   const timerEl = el('span', { className: 'round-timer', attrs: { id: 'round-timer' } });
-  const optionsHost = el('div', { attrs: { id: 'round-options' } });
+
+  // The clue ladder is built once and only its classes change.
+  const stepEls = [1, 2, 3, 4].map((n) => el('div', {
+    className: 'step',
+    text: `×${STAGE_MULTIPLIERS[n]}`,
+    attrs: { 'aria-label': `Stage ${n}, multiplier ${STAGE_MULTIPLIERS[n]}` },
+  }));
+  const ladderEl = el('div', { className: 'clue-ladder', attrs: { id: 'clue-ladder' } }, stepEls);
+
+  // The clue cards are built once; only their value text changes. Rebuilding
+  // them on every tick would swap the element under the player's finger.
+  const clueEls = round.clues.map((clue) => {
+    const valueEl = el('span', { className: 'clue-card__value', text: '— — —' });
+    const cardEl = el('div', { className: 'clue-card is-locked' }, [
+      el('span', { className: 'clue-card__label', text: clue.label }),
+      valueEl,
+    ]);
+    return { cardEl, valueEl };
+  });
+  const clueHost = el('div', { attrs: { id: 'clue-cards' } }, clueEls.map((c) => c.cardEl));
+
+  // The options are built once, in the engine's own order, and are NEVER
+  // rebuilt. If they were, a press that started on one button and ended on
+  // its replacement would never fire a click - the browser needs mousedown
+  // and mouseup on the same element.
+  const optionEls = round.options.map((opt, i) => el('button', {
+    className: 'option',
+    attrs: { type: 'button' },
+    on: {
+      click: () => {
+        const elapsed = Math.max(0, Date.now() - startedAt);
+        const stage = Math.max(1, revealedStages(round, elapsed));
+        const scored = answerRound(round, { answer: opt.label, stage, elapsedMs: elapsed });
+        store.recordAnswer({
+          roundIndex: store.state.roundIndex,
+          stage,
+          correct: scored.correct,
+          points: scored.points,
+          chosen: opt.label,
+          answer: round.answer,
+        });
+        location.hash = '#reveal';
+      },
+    },
+  }, [
+    el('span', { className: 'option__letter', text: LETTERS[i] }),
+    el('span', { className: 'option__label', text: opt.label }),
+  ]));
+  const optionsHost = el('div', { attrs: { id: 'round-options' } }, optionEls);
 
   const paint = () => {
     const elapsed = Math.max(0, Date.now() - startedAt);
     const revealed = revealedStages(round, elapsed);
     const remaining = Math.max(0, ROUND_MS - elapsed);
+    const expired = remaining <= 0;
 
     timerEl.textContent = `${Math.ceil(remaining / 1000)}s`;
     timerEl.className = `round-timer ${remaining < 5000 ? 'is-urgent' : ''}`;
 
-    // clue cards: revealed ones show their value, unrevealed ones show a lock
-    mount(clueHost, round.clues.map((clue, i) => {
+    clueEls.forEach((c, i) => {
       const shown = i < revealed;
-      return el('div', {
-        className: `clue-card ${shown ? 'is-revealed' : 'is-locked'}`,
-      }, [
-        el('span', { className: 'clue-card__label', text: clue.label }),
-        el('span', { className: 'clue-card__value', text: shown ? clue.value : '— — —' }),
-      ]);
-    }));
+      c.valueEl.textContent = shown ? round.clues[i].value : '— — —';
+      c.cardEl.classList.toggle('is-revealed', shown);
+      c.cardEl.classList.toggle('is-locked', !shown);
+    });
 
-    // options: the engine's own, in the engine's own order
-    mount(optionsHost, round.options.map((opt, i) => el('button', {
-      className: 'option',
-      // Only set the attribute when it should be present: a null attribute
-      // value still renders as the string "null", which disables the button.
-      attrs: { type: 'button', ...(remaining <= 0 ? { disabled: 'disabled' } : {}) },
-      on: {
-        click: () => {
-          const scored = answerRound(round, {
-            answer: opt.label,
-            stage: Math.max(1, revealed),
-            elapsedMs: elapsed,
-          });
-          store.recordAnswer({
-            roundIndex: store.state.roundIndex,
-            stage: Math.max(1, revealed),
-            correct: scored.correct,
-            points: scored.points,
-            chosen: opt.label,
-            answer: round.answer,
-          });
-          location.hash = '#reveal';
-        },
-      },
-    }, [
-      el('span', { className: 'option__letter', text: LETTERS[i] }),
-      el('span', { className: 'option__label', text: opt.label }),
-    ])));
+    stepEls.forEach((s, i) => {
+      s.classList.toggle('is-done', i < revealed);
+      s.classList.toggle('is-current', i === revealed);
+    });
+
+    optionEls.forEach((b) => {
+      if (b.disabled !== expired) b.disabled = expired;
+    });
   };
 
   paint();
@@ -120,12 +138,10 @@ export function render(root) {
       el('span', { className: 'muted-note', text: `Round ${round.stage} of ${quiz.rounds.length}` }),
     ]),
 
-    ladder(round, Date.now() - startedAt),
+    ladderEl,
     clueHost,
     optionsHost,
   ]);
 
-  // The timer must not keep running once the screen is replaced.
   window.addEventListener('hashchange', stopTimer, { once: true });
-  void started;
 }

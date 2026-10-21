@@ -88,6 +88,39 @@ test('clues reveal on the schedule and the answer leads to the reveal', async ({
   expect(errors).toEqual([]);
 });
 
+test('the answer buttons are not rebuilt while the round ticks', async ({ page }) => {
+  // A press that starts on one button and ends on its replacement never fires a
+  // click - the browser needs mousedown and mouseup on the SAME element. If
+  // the round screen recreates its options on every tick, a real player
+  // cannot answer at all.
+  await startQuiz(page);
+  await page.waitForSelector('.option');
+
+  const survived = await page.evaluate(async () => {
+    const first = document.querySelector('.option');
+    first.dataset.stamp = 'original';
+    await new Promise((r) => setTimeout(r, 600));
+    const now = document.querySelector('.option');
+    return now.dataset.stamp === 'original';
+  });
+  expect(survived, 'the option button must survive the round timer').toBe(true);
+});
+
+test('a human-speed press answers the round', async ({ page }) => {
+  await startQuiz(page);
+  await page.waitForSelector('.option');
+
+  // press, hold across several timer ticks, release
+  const box = await page.locator('.option').first().boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(350);
+  await page.mouse.up();
+
+  await expect(page).toHaveURL(/#reveal/);
+  await expect(page.locator('.reveal-card__name')).not.toBeEmpty();
+});
+
 test('a player with no photo gets a jersey tile, never a broken image', async ({ page }) => {
   const errors = watchErrors(page);
   await startQuiz(page);

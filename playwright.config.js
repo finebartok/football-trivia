@@ -7,7 +7,7 @@ const PORT = 8123;
 
 export default defineConfig({
   webServer: {
-    command: `python3 -m http.server ${PORT}`,
+    command: `PORT=${PORT} node scripts/dev-server.js`,
     url: `http://localhost:${PORT}/client/`,
     reuseExistingServer: false,
   },
