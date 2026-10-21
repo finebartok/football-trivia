@@ -16,6 +16,10 @@ const url = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
 const key = process.env.SUPABASE_ANON_KEY
   ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
 
+// Null means "the Supabase project", which is the hosted setup. A local
+// development runner sets its own address.
+const functionsUrl = process.env.FUNCTIONS_URL ?? 'null';
+
 const body = `/**
  * Where the room backend lives.
  *
@@ -27,6 +31,12 @@ const body = `/**
 export const config = {
   supabaseUrl: '${url}',
   supabaseAnonKey: '${key}',
+
+  // Where the edge functions live. Null means "the Supabase project",
+  // which is the hosted setup. Locally the functions are served by the
+  // Node runner, because this host's SELinux policy keeps the Supabase
+  // edge runtime from reading the function sources.
+  functionsUrl: ${functionsUrl === 'null' ? 'null' : `'${functionsUrl}'`},
 };
 `;
 
