@@ -168,10 +168,13 @@ The v1 spec's schema had `round_secrets.target_player_id` and `answers.guessed_p
 
 | Table | SELECT | INSERT | UPDATE | DELETE |
 |---|---|---|---|---|
-| `rooms` | creator or member | authenticated | `SECURITY DEFINER` functions only | creator |
+| `rooms` | creator or member | **nobody** — `create_room` makes the room, and only it generates the code | `SECURITY DEFINER` functions only | creator |
 | `room_memberships` | same-room members | `auth.uid() = user_id`, room is `lobby`, not full | own row only | own row or creator |
 | `quiz_plans` | **nobody** | service role | service role | service role |
 | `rounds` | members, and only rows whose `started_at <= now()` | service role | service role | service role |
+
+The four room tables are added to the `supabase_realtime` publication. Without that the
+client's subscription is a wasted socket and every change arrives by poll.
 | `round_secrets` | **nobody** | service role | service role | service role |
 | `answers` | room members, **but only for rounds that are closed** | **nobody** | **never** | never |
 
@@ -186,7 +189,7 @@ An answer row carries `guessed_answer` and `is_correct`. If members could read t
 This has two consequences, both intended:
 
 - **A score becomes visible when its round closes, not when it is earned.** The membership totals are aggregated from the answers table by the advance function when the round closes. A player who scores 7,500 in round 3 does not telegraph it to the room during round 3.
-- **The mid-round counter comes from the server, not from the table.** `current_round` returns `answered_count` — how many members have answered — which leaks nothing. The realtime subscription on `answers` fires only for closed rounds, because realtime applies the same row-level security the table does.
+- **There is no mid-round counter.** An earlier draft had `current_round` return `answered_count` — how many members had answered — on the grounds that it leaks nothing. It does leak something: it tells the room that other people have answered. A review of the built branch caught it, and the count was removed rather than argued about. The realtime subscription on `answers` fires only for closed rounds, because realtime applies the same row-level security the table does.
 
 So during a round, a player learns nothing at all from anybody else's play.
 
@@ -213,7 +216,9 @@ There is deliberately **no `submit_answer` RPC**. The Edge Function writes the a
 
 ### 4.5 The advance
 
-`advance_room(room_id)` — `SECURITY DEFINER`, called from `current_round`:
+`advance_room(room_id)` — `SECURITY DEFINER`, called from `current_round`. It checks the
+caller is signed in and is a member of the room, like every other function that touches
+a room: a function with no caller check is a function any client can call.
 
 1. If the room is not `round_active`, return.
 2. If `now() <= deadline_at` **and** not every member has answered, return.
@@ -403,6 +408,15 @@ Recorded so nobody reads §7 and thinks the code is wrong.
 3. **There is no `pg_cron` job.** §7 implied a server-driven clock that advances rooms on its own. The advance is driven by the client's 2-second poll instead, which also serves as the Realtime-degraded fallback. A room therefore only advances while somebody is watching — see §4.5 for why that is the better trade.
 
 Everything else in §7 — the table list, the RLS intent, the one-round-at-a-time materialisation, the late-join refusal, the reconnect contract, the failure-mode table — holds.
+
+### 12.2 Two more divergences, found while building
+
+**The client remembers which game it is in.** A player is in a room or playing solo, not
+both. The store holds a mode, and starting a solo game while a room is running plays the
+solo quiz. Without it the room's round won, and the solo quiz was silently discarded.
+
+**`rooms` has no insert policy.** A client that could insert its own room would choose
+its own invite code and its own size. `create_room` is the only way in.
 
 ### 12.1 One more divergence, found while planning
 
