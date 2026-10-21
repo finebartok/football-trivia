@@ -26,12 +26,17 @@ const listeners = new Set();
 
 // The room client owns the room's state; the store mirrors it so the
 // screens can read it the same way they read everything else.
+let wasInRoom = false;
+
 room.subscribe(() => {
   state.room = room.state;
-  // Which game the player is in follows the room: being in a room makes
-  // it a room game, and leaving it makes it a solo game again.
-  if (room.state.active) state.mode = 'room';
-  else if (state.mode === 'room') state.mode = 'solo';
+  // Which game the player is in follows the room, but only when the
+  // membership changes: a poll must not pull a player who has started a
+  // solo game back into the room.
+  if (room.state.active !== wasInRoom) {
+    wasInRoom = room.state.active;
+    state.mode = wasInRoom ? 'room' : 'solo';
+  }
   notify();
 });
 

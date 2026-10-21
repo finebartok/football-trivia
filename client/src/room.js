@@ -124,14 +124,15 @@ async function sync() {
     notify();
     return null;
   }
-  state.error = null;
+  // The poll does not clear an error: the player has to see it, and
+  // only the next thing they do clears it.
   applyPayload(data);
 
   // The room knows which vibe it is playing. A player who joined is told.
-  if (data.scope_id && !state.scopeName) {
+  if (data.scope_id) {
     const preset = presetById(data.scope_id);
     state.scopeId = data.scope_id;
-    state.scopeName = preset?.name ?? null;
+    state.scopeName = data.scope_name || preset?.name || null;
     state.scopeIcon = preset?.icon ?? null;
   }
 
@@ -182,6 +183,7 @@ export const room = {
       p_scope_id: isPreset ? preset.id : 'custom',
       p_scope_clauses: scope.clauses ?? [],
       p_display_name: scope.displayName ?? 'Host',
+      p_scope_name: scope.name ?? null,
     });
     if (error) {
       state.error = friendly(error.message);
@@ -194,6 +196,7 @@ export const room = {
     state.scopeId = scope.id;
     state.scopeName = scope.name;
     state.scopeIcon = scope.icon ?? null;
+    void 0;
     state.status = data.status;
     state.error = null;
     persist();
@@ -306,6 +309,7 @@ export const room = {
   async start() {
     const supabase = await ensure();
     if (!supabase) return null;
+    state.error = null;
     const { status, data } = await invokeFunction('start-room', { room_id: state.roomId });
     if (status !== 200) {
       state.error = friendly(data?.error);
@@ -386,6 +390,10 @@ function friendly(message) {
   if (m.includes('room is full')) return 'That room is full.';
   if (m.includes('too late')) return 'Too late - that round is over.';
   if (m.includes('not signed in')) return 'Could not sign you in. Try again.';
+  if (m.includes('fit that vibe')) return m;
+  if (m.includes('not one the data knows')) return m;
+  if (m.includes('has nothing in it')) return m;
+  if (m.includes('is not something we can play')) return m;
   if (m.includes('unknown vibe')) return 'That vibe cannot be played in a room yet.';
   return 'Something went wrong. Try again.';
 }

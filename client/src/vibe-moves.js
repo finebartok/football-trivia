@@ -1,8 +1,9 @@
 import { el } from './ui.js';
 import { scopePool } from '/js/engine/index.js';
+import { MIN_POOL } from '/js/engine/planner.js';
 import { encodeScope } from '/lib/scope.js';
 
-export const MIN_POOL = 20;
+export { MIN_POOL };
 
 /** The named moves a player can make to a vibe. Each is one sentence, not a query. */
 export const MOVES = [
@@ -154,14 +155,14 @@ export function applyMove(vibe, move, value, players, registry) {
       // or a threshold the player typed ({metric, op, value}).
       const metric = value.metric ?? value.id;
       const op = value.op ?? '>=';
+      // A threshold refines the vibe - "La Liga, and 50+ goals" - the way
+      // the era refines it. It does not throw the competition away.
       const stats = clauses.flatMap((c) => c.stats ?? []);
       const same = stats.find((s) => s.metric === metric);
       if (same) { same.value = value.value; same.op = op; }
       else stats.push({ metric, op, value: value.value });
       for (const c of clauses) {
         c.stats = stats;
-        delete c.leagues;
-        delete c.tournaments;
       }
       return { ...vibe, clauses, label: value.label };
     }

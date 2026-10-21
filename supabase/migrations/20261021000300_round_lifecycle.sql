@@ -182,6 +182,7 @@ begin
     'current_round', v_room.current_round,
     'total_rounds', v_room.total_rounds,
     'scope_id', v_room.scope_id,
+    'scope_name', v_room.scope_name,
     'round', case when v_round.id is null then null else jsonb_build_object(
       'id', v_round.id,
       'round_number', v_round.round_number,

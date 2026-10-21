@@ -42,12 +42,22 @@ export function render(root) {
   // nearest threshold that still holds.
   const statMetric = vibe.clauses?.[0]?.stats?.[0]?.metric ?? STAT_METRICS[0].id;
   const thresholdValue = Number(vibe.clauses?.[0]?.stats?.[0]?.value ?? 50);
-  const typedCount = scopePool({
-    clauses: [{ stats: [{ metric: statMetric, op: '>=', value: thresholdValue }] }],
-  }, players).length;
+  // The count and the suggestion are about the vibe as it stands - the
+  // competition, the era and all. A suggestion that does not hold would
+  // be worse than no suggestion.
+  const withThreshold = (value) => ({
+    clauses: vibe.clauses.map((c) => ({
+      ...c,
+      stats: [
+        ...(c.stats ?? []).filter((s) => s.metric !== statMetric),
+        { metric: statMetric, op: '>=', value },
+      ],
+    })),
+  });
+  const typedCount = scopePool(withThreshold(thresholdValue), players).length;
   const suggestion = typedCount < MIN_POOL
     ? nearestThreshold({
-      scope: { clauses: [{ stats: [{ metric: statMetric, op: '>=', value: thresholdValue }] }] },
+      scope: withThreshold(thresholdValue),
       metric: statMetric,
       players,
       floor: MIN_POOL,
@@ -56,6 +66,30 @@ export function render(root) {
     : null;
 
   // The suggestion only exists when there is one.
+  const metricSelect = el('select', {
+    className: 'text-input',
+    attrs: { id: 'stat-metric' },
+    on: {
+      change: (e) => {
+        const metric = e.currentTarget.value;
+        const value = Number(thresholdInput.value);
+        onPick({ id: 'stat' }, { metric, op: '>=', value: Number.isFinite(value) ? value : 50 });
+      },
+    },
+  }, STAT_METRICS.map((m) => el('option', { text: m.label, attrs: { value: m.id } })));
+  metricSelect.value = statMetric;
+
+  const thresholdInput = el('input', {
+    className: 'text-input',
+    attrs: { type: 'number', id: 'stat-value', min: '0', placeholder: '50', value: String(thresholdValue) },
+    on: {
+      input: (e) => {
+        const value = Number(e.currentTarget.value);
+        if (Number.isFinite(value)) onPick({ id: 'stat' }, { metric: statMetric, op: '>=', value });
+      },
+    },
+  });
+
   const suggestionEl = suggestion
     ? el('p', { className: 'muted-note', attrs: { id: 'stat-suggestion' } }, [
       `Only ${suggestion.count} players hit ${thresholdValue}+ ${metricLabel(statMetric)} - try ${suggestion.value}+`,
@@ -83,6 +117,14 @@ export function render(root) {
   const nameInput = el('input', {
     className: 'input',
     attrs: { type: 'text', id: 'vibe-name', placeholder: 'Name this vibe', value: vibe.name ?? '' },
+    on: {
+      change: (e) => {
+        // The name the player gives the vibe is the name the room will
+        // announce.
+        vibe = { ...vibe, name: e.currentTarget.value.trim() || vibe.name };
+        store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
+      },
+    },
   });
 
   const save = el('button', {
@@ -136,18 +178,8 @@ export function render(root) {
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'A threshold' }),
       el('div', { className: 'threshold-row' }, [
-        el('select', { className: 'text-input', attrs: { id: 'stat-metric' } },
-          STAT_METRICS.map((m) => el('option', { text: m.label, attrs: { value: m.id } }))),
-        el('input', {
-          className: 'text-input',
-          attrs: { type: 'number', id: 'stat-value', min: '0', placeholder: '50', value: String(thresholdValue) },
-          on: {
-            input: (e) => {
-              const value = Number(e.currentTarget.value);
-              if (Number.isFinite(value)) onPick({ id: 'stat' }, { metric: statMetric, op: '>=', value });
-            },
-          },
-        }),
+        metricSelect,
+        thresholdInput,
       ]),
       suggestionEl,
     ]),

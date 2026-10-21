@@ -91,3 +91,46 @@ test('a scope with a number where a year should be is refused', () => {
   const result = validateScope({ clauses: [{ leagues: ['ES1'], seasonStart: 'last year', seasonEnd: 2019 }] }, { registry, players });
   assert.equal(result.ok, false);
 });
+
+// ---- the review's findings ----
+
+test('a clause that is not an object is refused, not crashed on', () => {
+  const result = validateScope({ clauses: [null] }, { registry, players });
+  assert.equal(result.ok, false);
+  assert.ok(result.reason.length > 0);
+});
+
+test('a scope with no clauses is refused', () => {
+  const result = validateScope({ clauses: [] }, { registry, players });
+  assert.equal(result.ok, false);
+});
+
+test('the operator has to be one the engine understands', () => {
+  // The engine knows >= > <= < ==. It does not know "=" or "!=".
+  assert.equal(validateScope({ clauses: [{ stats: [{ metric: 'international_caps', op: '=', value: 10 }] }] }, { registry, players }).ok, false);
+  assert.equal(validateScope({ clauses: [{ stats: [{ metric: 'international_caps', op: '!=', value: 10 }] }] }, { registry, players }).ok, false);
+  assert.equal(validateScope({ clauses: [{ stats: [{ metric: 'international_caps', op: '>=', value: 10 }] }] }, { registry, players }).ok, true);
+});
+
+test('a club is named by the key the engine reads', () => {
+  // The engine reads clause.teams, not clause.clubs. A scope naming a
+  // club under the wrong key would match everyone.
+  const result = validateScope({ clauses: [{ teams: ['not-a-club'] }] }, { registry, players });
+  assert.equal(result.ok, false);
+});
+
+test('a link carrying a clause that is not an object does not decode', () => {
+  const code = Buffer.from(JSON.stringify({ name: 'x', icon: '⚽', clauses: [null] }), 'utf8').toString('base64url');
+  assert.equal(decodeScope(code), null);
+});
+
+test('a link carrying no clauses does not decode', () => {
+  const code = Buffer.from(JSON.stringify({ name: 'x', icon: '⚽', clauses: [] }), 'utf8').toString('base64url');
+  assert.equal(decodeScope(code), null);
+});
+
+test('a scope that does not carry the metric has no suggestion', () => {
+  const scope = { clauses: [{ leagues: ['ES1'] }] };
+  const near = nearestThreshold({ scope, metric: 'goals_after_age_30', players, floor: 20, max: 400 });
+  assert.equal(near, null, 'a scope with no such stat has no threshold to suggest');
+});

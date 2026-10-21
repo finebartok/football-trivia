@@ -88,7 +88,7 @@ export function render(root) {
     el('section', { className: 'card vibe-summary' }, [
       el('span', { className: 'vibe-summary__icon', text: roomState.scopeIcon || '⚽' }),
       el('div', { className: 'vibe-summary__body' }, [
-        el('h1', { className: 'page-title', text: roomState.scopeName ?? 'Your vibe' }),
+        el('h1', { className: 'page-title', text: roomState.scopeName || 'Your vibe' }),
         el('p', { className: 'muted-note', text: 'A quiz is written around your vibe' }),
       ]),
     ]),
@@ -105,6 +105,11 @@ export function render(root) {
     ]),
 
     el('p', { className: 'fresh-quiz-note', text: 'A fresh quiz is written every time you play.' }),
+
+    // Why nothing happened, if something did.
+    roomState.error
+      ? el('p', { className: 'notice notice--warn', attrs: { id: 'room-error' } }, roomState.error)
+      : null,
 
     start,
 

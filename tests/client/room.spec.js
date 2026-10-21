@@ -209,3 +209,23 @@ test('a solo game is a solo game, even with a room open', async ({ browser }) =>
   expect(solo.rounds).toBe(10);
   await expect(host.locator('.option')).toHaveCount(4);
 });
+
+test('a room that cannot be played says so', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+
+  // Craft a vibe with too few players, then make a room from it.
+  await host.goto('#vibes');
+  await host.waitForSelector('#pool-count');
+  await host.locator('#stat-metric').selectOption('goals_after_age_30');
+  await host.locator('#stat-value').fill('300');
+  await host.waitForTimeout(500);
+  await host.locator('#btn-create-room').click();
+  await expect(host).toHaveURL(/#room-lobby/);
+
+  await host.locator('#btn-start').click();
+  await host.waitForTimeout(2000);
+
+  // The host is told, in a sentence, and the room is still a lobby.
+  await expect(host.locator('#room-error')).toContainText(/Only \d+ players?/);
+  await expect(host).toHaveURL(/#room-lobby/);
+});
