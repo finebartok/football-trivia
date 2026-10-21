@@ -11,7 +11,6 @@ function topbar() {
       text: '⚽ Football Trivia',
       attrs: { href: '#home' },
     }),
-    soundToggle(),
     el('button', {
       className: 'btn btn--icon',
       text: store.state.theme === 'retro' ? 'Editorial' : 'Retro',
@@ -22,6 +21,7 @@ function topbar() {
         },
       },
     }),
+    soundToggle(),
   ]);
 }
 

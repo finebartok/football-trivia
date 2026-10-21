@@ -166,7 +166,7 @@ test('the theme toggles and survives a reload', async ({ page }) => {
   await page.goto('./');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'retro');
 
-  await page.locator('.btn--icon').click();
+  await page.locator('[aria-label="Switch theme"]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'editorial');
 
   await page.reload();
