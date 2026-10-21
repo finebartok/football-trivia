@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stackIsUp, playerClient, serverClient, uniqueCode } from './helpers.js';
+import { stackIsUp, playerClient, serverClient, uniqueCode, callFunction } from './helpers.js';
 
 const up = await stackIsUp();
 const skip = up ? false : 'the local Supabase stack is not running';
@@ -325,4 +325,56 @@ test('a player who is not in the room gets nothing', { skip }, async () => {
   const stranger = await playerClient();
   const { error } = await stranger.client.rpc('current_round', { p_room_id: room.id });
   assert.ok(error, 'a stranger must not read a room');
+});
+
+test('the host starts the game and the first round appears', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+  const payload = started.body;
+  assert.equal(payload.round_number, 1);
+  assert.equal(payload.options.length, 4, 'four options');
+  assert.equal(JSON.stringify(payload).includes('"correct"'), false, 'no correct flag');
+
+  const server = serverClient();
+  const { data: plan } = await server.from('quiz_plans').select('*').eq('room_id', room.id).single();
+  assert.ok(plan, 'the plan exists');
+  assert.equal(plan.plan.length, 10, 'ten rounds planned');
+
+  const { data: secret } = await server
+    .from('round_secrets').select('*').eq('round_id', payload.id).single();
+  assert.ok(secret?.answer_value, 'the answer key exists');
+});
+
+test('a player who is not the host cannot start the game', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+
+  const started = await callFunction('start-room', { room_id: room.id }, guest.accessToken);
+  assert.equal(started.status, 403);
+});
+
+test('the game is played with the server preset, not the clauses the client sent', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022',
+    // A client that tries to smuggle a different scope in.
+    p_scope_clauses: [{ leagues: ['GB1'], seasonStart: 2010, seasonEnd: 2019 }],
+    p_display_name: 'Alex',
+  });
+
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  const { data: room2 } = await server.from('rooms').select('pool_size').eq('id', room.id).single();
+  assert.equal(room2.pool_size, 94, 'the World Cup 2022 pool, not the one the client asked for');
 });
