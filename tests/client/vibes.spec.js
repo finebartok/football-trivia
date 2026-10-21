@@ -102,3 +102,40 @@ test('a thin pool says why', async ({ page }) => {
   await expect(warning).toContainText('La Liga');
   await expect(warning).not.toContainText('ES1');
 });
+
+test('a thin scope cannot be saved, and says why', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+
+  // A threshold that leaves too few players.
+  await page.locator('#stat-metric').selectOption('goals_after_age_30');
+  await page.locator('#stat-value').fill('300');
+  await page.waitForTimeout(500);
+
+  const save = page.locator('#btn-make-ours');
+  await expect(save).toBeDisabled();
+  await expect(page.locator('#save-reason')).toContainText(/Only \d+ players?/);
+  await expect(page.locator('#save-reason')).toContainText('at least 20');
+});
+
+test('a scope over the floor can be saved', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+  await page.locator('#btn-make-ours').click();
+  await page.waitForTimeout(300);
+  await expect(page).toHaveURL(/#home/);
+});
+
+test('a vibe saved on one phone does not appear on another', async ({ page, context }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+  await page.locator('#vibe-name').fill('Mine');
+  await page.locator('#btn-make-ours').click();
+  await page.waitForTimeout(300);
+
+  // A different browser has its own storage.
+  const other = await (await context.browser().newContext()).newPage();
+  await other.goto('./');
+  await other.waitForTimeout(600);
+  await expect(other.locator('.vibe-card--saved')).toHaveCount(0);
+});

@@ -91,12 +91,16 @@ export function render(root) {
     attrs: { type: 'button', id: 'btn-make-ours' },
     on: {
       click: () => {
+        // A vibe with too few players cannot be played, so it is not
+        // saved. The reason is beside the button.
+        if (tooSmall) return;
         const name = nameInput.value.trim() || vibe.name || 'Our vibe';
         store.saveVibe({ id: vibe.id, name, icon: vibe.icon, clauses: vibe.clauses });
         location.hash = '#home';
       },
     },
   });
+  if (tooSmall) save.setAttribute('disabled', '');
 
   const children = [
     el('header', { className: 'topbar' }, [
@@ -151,6 +155,15 @@ export function render(root) {
       el('h2', { className: 'section-title', text: 'Save it' }),
       nameInput,
       save,
+      tooSmall
+        ? el('p', { className: 'muted-note', attrs: { id: 'save-reason' } },
+          `Not saved: ${describeCoverage({
+            scope: store.state.scope,
+            count,
+            floor: MIN_POOL,
+            registry: store.state.registry,
+          })}`)
+        : null,
       el('button', {
         className: 'btn btn--ghost',
         text: 'Share this vibe',
