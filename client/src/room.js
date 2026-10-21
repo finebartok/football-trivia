@@ -171,8 +171,15 @@ export const room = {
       notify();
       return null;
     }
+    // A preset room is named by its preset, so the server resolves the
+    // scope itself. A crafted scope travels with the room and is checked
+    // by the server before it is planned.
+    const preset = presetById(scope.id);
+    const isPreset = Boolean(preset)
+      && JSON.stringify(preset.clauses) === JSON.stringify(scope.clauses ?? []);
+
     const { data, error } = await supabase.rpc('create_room', {
-      p_scope_id: scope.id,
+      p_scope_id: isPreset ? preset.id : 'custom',
       p_scope_clauses: scope.clauses ?? [],
       p_display_name: scope.displayName ?? 'Host',
     });

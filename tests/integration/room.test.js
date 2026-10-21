@@ -762,3 +762,62 @@ test('two players polling at once do not deadlock', { skip }, async () => {
     assert.equal(b.error, null, `guest poll: ${b.error?.message}`);
   }
 });
+
+test('a room can play a crafted scope', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'custom',
+    p_scope_clauses: [{ leagues: ['ES1'], seasonStart: 2010, seasonEnd: 2019 }],
+    p_display_name: 'Alex',
+  });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  const { data: plan } = await server.from('quiz_plans').select('*').eq('room_id', room.id).single();
+  assert.equal(plan.plan.length, 10, 'the crafted scope produced a quiz');
+});
+
+test('a room refuses a scope that names a league that does not exist', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'custom',
+    p_scope_clauses: [{ leagues: ['NOPE1'] }],
+    p_display_name: 'Alex',
+  });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 422, JSON.stringify(started.body));
+  assert.match(started.body.error, /not one the data knows/i);
+});
+
+test('a room refuses a scope with too few players, and says how many', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'custom',
+    p_scope_clauses: [{ stats: [{ metric: 'goals_after_age_30', op: '>=', value: 300 }] }],
+    p_display_name: 'Alex',
+  });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 422, JSON.stringify(started.body));
+  assert.match(started.body.error, /\d+/, 'the count is in the message');
+
+  // And the room is still in the lobby.
+  const { data: after } = await serverClient().from('rooms').select('status').eq('id', room.id).single();
+  assert.equal(after.status, 'lobby');
+});
+
+test('a preset room still ignores the clauses the client sent', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022',
+    // A client that tries to smuggle a different scope in.
+    p_scope_clauses: [{ leagues: ['GB1'], seasonStart: 2010, seasonEnd: 2019 }],
+    p_display_name: 'Alex',
+  });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+
+  const server = serverClient();
+  const { data: room2 } = await server.from('rooms').select('pool_size').eq('id', room.id).single();
+  assert.equal(room2.pool_size, 94, 'the World Cup 2022 pool, not the one the client asked for');
+});

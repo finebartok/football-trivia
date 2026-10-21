@@ -5,7 +5,9 @@
  * client gets the first round's clues and options and nothing else.
  */
 import { planQuiz, scopePool } from '../../../js/engine/index.js';
+import { MIN_POOL } from '../../../js/engine/planner.js';
 import { presetById } from '../../../js/presets.js';
+import { validateScope } from '../../../lib/scope.js';
 import { makeClients } from '../_shared/supabase.js';
 import { loadPool } from '../_shared/pool.js';
 import { projectRound } from '../_shared/projection.js';
@@ -80,13 +82,6 @@ export async function handleStartRoom(req, { createClient, env }) {
       return json(roundPayload(existingRound));
     }
 
-    // The scope comes from the preset, never from the client.
-    const preset = presetById(room.scope_id);
-    if (!preset) {
-      return json({ error: 'unknown vibe' }, 400);
-    }
-    const scope = { clauses: preset.clauses };
-
     const { data: file, error: fileError } = await admin.storage
       .from('pool')
       .createSignedUrl('pool.json', 600);
@@ -94,6 +89,31 @@ export async function handleStartRoom(req, { createClient, env }) {
     const pool = await loadPool(file.signedUrl);
 
     const players = pool.players ?? [];
+
+    // A preset room uses the preset's own clauses - the client cannot
+    // change what a preset means. A crafted scope travels with the room
+    // and is checked before it is planned.
+    const preset = presetById(room.scope_id);
+    let scope;
+    if (preset) {
+      scope = { clauses: preset.clauses };
+    } else {
+      const crafted = { clauses: room.scope_clauses ?? [] };
+      const check = validateScope(crafted, { registry: pool.registry, players });
+      if (!check.ok) {
+        return json({ error: check.reason }, 422);
+      }
+      scope = crafted;
+    }
+
+    // A vibe with too few players cannot produce a quiz. Say so, with
+    // the count, rather than letting the engine's own floor throw.
+    const poolSize = scopePool(scope, players).length;
+    if (poolSize < MIN_POOL) {
+      return json({
+        error: `Only ${poolSize} ${poolSize === 1 ? 'player' : 'players'} fit that vibe. A vibe needs at least ${MIN_POOL}.`,
+      }, 422);
+    }
 
     // A retry must play the SAME quiz. If the room already has a plan,
     // that plan is the quiz - a second one would leave the room playing
