@@ -14,3 +14,7 @@ data/football.db
 
 # Stray output from the old ad-hoc test scripts
 console_dump.html
+
+# Playwright artifacts
+test-results/
+playwright-report/
