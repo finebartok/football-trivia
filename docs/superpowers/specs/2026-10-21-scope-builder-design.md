@@ -61,7 +61,7 @@ The browser and the server both need to reason about a scope. The engine already
 export function nearestThreshold({ scope, metric, op = '>=', players, floor = 20, min = 0, max = 5000 })
 
 /** The sentence a player reads when the pool is too thin. */
-export function describeCoverage({ scope, count, floor = 20 })
+export function describeCoverage({ scope, count, floor = 20, registry })
 
 /** The scope's clauses, name and icon, as a link payload. */
 export function encodeScope(scope)
@@ -189,6 +189,7 @@ client/src/vibe-moves.js                  new
 client/src/screens/vibes.js               edited - the shell
 client/src/main.js                        edited - the #vibe route
 client/src/screens/home.js                edited - the share button
+client/src/screens/shared-vibe.js          new - a shared link opens as a card
 supabase/functions/_shared/start-room.js  edited - resolve and check the scope
 supabase/migrations/…00200_room_functions.sql  edited - create_room takes a custom scope
 tests/shared/scope.test.js                new
