@@ -106,6 +106,18 @@ begin
     raise exception 'that room is full' using errcode = 'P0002';
   end if;
 
+  -- The lock keeps two players joining at the same moment from taking
+  -- the same join order, and from both squeezing past the cap.
+  perform 1 from public.rooms where id = v_room.id for update;
+
+  select count(*) into v_count
+  from public.room_memberships
+  where room_id = v_room.id;
+
+  if v_count >= v_room.max_players then
+    raise exception 'that room is full' using errcode = 'P0002';
+  end if;
+
   insert into public.room_memberships (room_id, user_id, display_name, joined_seq)
   values (
     v_room.id,
@@ -141,6 +153,10 @@ begin
   where room_id = p_room_id and user_id = auth.uid();
 
   if v_was_host then
+    update public.room_memberships
+    set is_host = false
+    where room_id = p_room_id and is_host;
+
     update public.room_memberships m
     set is_host = true
     where m.id = (

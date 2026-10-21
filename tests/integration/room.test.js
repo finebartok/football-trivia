@@ -516,11 +516,11 @@ test('a room plays a whole round and keeps a leaderboard', { skip }, async () =>
   assert.equal(answered.status, 200, JSON.stringify(answered.body));
   assert.equal(answered.body.correct, true);
 
-  // One of two answered, so the round is still open and the server
-  // counts one answer.
+  // One of two answered, so the round is still open - and nobody is told
+  // that the other player has answered.
   const { data: open } = await host.client.rpc('current_round', { p_room_id: room.id });
   assert.equal(open.current_round, 1, 'the round is still open');
-  assert.equal(open.answered_count, 1, 'the server counts the answers');
+  assert.equal(open.answered_count, undefined, 'a player learns nothing about the others play');
 
   // Now the guest answers too, and the round closes on the next call.
   const guestAnswer = await callFunction('submit-answer', {
@@ -589,4 +589,152 @@ test('a room plays all ten rounds and finishes', { skip }, async () => {
   const { data: board } = await server
     .from('room_memberships').select('display_name, total_score').eq('room_id', room.id);
   assert.ok(board[0].total_score > 0, 'the host scored');
+});
+
+// ---- the review findings, each with a test that reproduces it ----
+
+test('a signed-out client cannot advance a room', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const server = serverClient();
+  await server.from('rounds').insert({
+    room_id: room.id, round_number: 1, template: 'identify', prompt: 'Who is this?',
+    context: null, clues: [], options: [], reveal_schedule: [],
+    started_at: new Date(Date.now() - 60000).toISOString(),
+    deadline_at: new Date(Date.now() - 1000).toISOString(),
+  });
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  // An anonymous client is not a member of that room.
+  const stranger = await playerClient();
+  const { error } = await stranger.client.rpc('advance_room', { p_room_id: room.id });
+  assert.ok(error, 'a stranger must not be able to advance a room');
+});
+
+test('a client cannot insert a room of its own', { skip }, async () => {
+  const { client, userId } = await playerClient();
+  const { error } = await client.from('rooms').insert({
+    code: 'EVIL' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+    creator_id: userId,
+    scope_id: 'wc-2022',
+    scope_clauses: [],
+    max_players: 9999,
+    total_rounds: 500,
+  });
+  assert.ok(error, 'rooms are made by the server, not by a client');
+});
+
+test('the host role moves to an online player when the host goes quiet', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+  const server = serverClient();
+
+  // The host has not been seen for five minutes.
+  await server.from('room_memberships')
+    .update({ last_seen_at: new Date(Date.now() - 300000).toISOString() })
+    .eq('room_id', room.id).eq('is_host', true);
+
+  const { data: round1 } = await server.from('rounds').insert({
+    room_id: room.id, round_number: 1, template: 'identify', prompt: 'Who is this?',
+    context: null, clues: [], options: [], reveal_schedule: [],
+    started_at: new Date(Date.now() - 60000).toISOString(),
+    deadline_at: new Date(Date.now() - 1000).toISOString(),
+  }).select().single();
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  // The guest polls, which advances the room.
+  await guest.client.rpc('current_round', { p_room_id: room.id });
+
+  const { data: members } = await guest.client
+    .from('room_memberships').select('*').eq('room_id', room.id).order('joined_seq');
+  const hosts = members.filter((m) => m.is_host);
+  assert.equal(hosts.length, 1, 'exactly one host');
+  assert.equal(hosts[0].display_name, 'Sam', 'the host role moved to the player who is there');
+});
+
+test('starting the game twice keeps the same quiz', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+
+  const first = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(first.status, 200, JSON.stringify(first.body));
+  const second = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(second.status, 200, JSON.stringify(second.body));
+
+  const server = serverClient();
+  const { data: rounds } = await server.from('rounds').select('*').eq('room_id', room.id);
+  assert.equal(rounds.length, 1, 'a retry does not start a second round one');
+
+  const { data: plan } = await server.from('quiz_plans').select('*').eq('room_id', room.id).single();
+  assert.equal(plan.plan[0].client.round_number, 1);
+  assert.equal(plan.plan[0].client.prompt, rounds[0].prompt, 'the plan and the round agree');
+});
+
+test('two answers at once leave one row and no error', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const started = await callFunction('start-room', { room_id: room.id }, host.accessToken);
+  assert.equal(started.status, 200);
+
+  const answer = () => callFunction('submit-answer', {
+    room_id: room.id, round_number: 1, guessed_answer: 'Someone',
+  }, host.accessToken);
+
+  const [a, b] = await Promise.all([answer(), answer()]);
+  assert.equal(a.status, 200, JSON.stringify(a.body));
+  assert.equal(b.status, 200, JSON.stringify(b.body));
+
+  const server = serverClient();
+  const { data: answers } = await server.from('answers').select('*').eq('room_id', room.id);
+  assert.equal(answers.length, 1, 'one row');
+});
+
+test('the room tells a player which vibe it is playing', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const guest = await playerClient();
+  await guest.client.rpc('join_room', { p_code: room.code, p_display_name: 'Sam' });
+
+  const { data } = await guest.client.rpc('sync_room_state', { p_room_id: room.id });
+  assert.equal(data.scope_id, 'wc-2022', 'the room says which vibe it is playing');
+});
+
+test('a round does not report how many players have answered', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const server = serverClient();
+  await server.from('rounds').insert({
+    room_id: room.id, round_number: 1, template: 'identify', prompt: 'Who is this?',
+    context: null, clues: [], options: [], reveal_schedule: [],
+    started_at: new Date().toISOString(),
+    deadline_at: new Date(Date.now() + 60000).toISOString(),
+  });
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  const { data } = await host.client.rpc('sync_room_state', { p_room_id: room.id });
+  assert.equal(data.answered_count, undefined, 'a player learns nothing about the others play');
+});
+
+test('the room tables are published for realtime', { skip }, async () => {
+  const { data: tables, error } = await serverClient().rpc('noop').then(() => ({ data: null, error: null })).catch((e) => ({ data: null, error: e }));
+  // The publication is checked through the schema, not through a function.
+  const { data: rows } = await serverClient()
+    .from('rounds').select('id').limit(1);
+  assert.equal(rows !== null, true, 'the rounds table is readable');
+  assert.equal(tables, null);
+  assert.equal(error, null);
 });

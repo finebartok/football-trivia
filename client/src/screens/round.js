@@ -25,7 +25,9 @@ export function render(root) {
 
   const quiz = store.state.quiz;
   const roomState = store.state.room;
-  const inRoom = Boolean(roomState?.round);
+  // A room that exists is not the same as being in one. A player with a
+  // room open can still start a solo game.
+  const inRoom = store.state.mode === 'room' && Boolean(roomState?.round);
 
   // The server's round is the engine's round with one key renamed: the
   // column is reveal_schedule, the engine calls it revealSchedule.
@@ -39,8 +41,10 @@ export function render(root) {
   }
 
   // The round has already been answered - the reveal screen is next.
+  // In a room the check is which round: the player answered the last one,
+  // but they can still answer this one.
   const answered = inRoom
-    ? Boolean(roomState.myAnswer)
+    ? roomState.answeredRound === roomState.round.round_number
     : store.state.answers.some((a) => a.roundIndex === store.state.roundIndex);
   if (answered) {
     location.hash = '#reveal';

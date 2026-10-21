@@ -120,3 +120,86 @@ test('a player who refreshes mid-round keeps their score', async ({ browser }) =
   expect(answer.answeredRound).toBe(1);
   expect(answer.points).not.toBeNull();
 });
+
+test('a player who answered one round can answer the next', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+
+  await host.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+
+  // The room advances. The player must be able to play the next round,
+  // not be bounced back to the reveal of the last one.
+  await host.locator('#btn-next').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(host.locator('.option')).toHaveCount(4);
+});
+
+test('the home screen can create a room', async ({ browser }) => {
+  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  const errors = watchErrors(page);
+  await page.goto('./');
+
+  // The door on the home screen, not a preset card.
+  await page.locator('.vibe-card--door').first().click();
+  await expect(page).toHaveURL(/#vibes/);
+  await page.locator('#btn-create-room').click();
+  await expect(page).toHaveURL(/#room-lobby/);
+  expect(errors).toEqual([]);
+});
+
+test('the reveal does not hammer the server', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+  let calls = 0;
+  host.on('request', (req) => {
+    if (req.url().includes('round_result')) calls++;
+  });
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await host.waitForTimeout(3000);
+
+  // The round is still open, so the reveal waits for the answer. It must
+  // ask once or twice, not hundreds of times.
+  expect(calls).toBeLessThan(5);
+});
+
+test('a player who joins is told which vibe the room is playing', async ({ browser }) => {
+  const { guest } = await roomWithTwoPlayers(browser);
+  await expect(guest.locator('.vibe-summary__body')).toContainText('World Cup 2022');
+});
+
+test('a room can be left', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+  await expect(host.locator('#btn-leave')).toBeVisible();
+  await host.locator('#btn-leave').click();
+  await expect(host).toHaveURL(/#home/);
+});
+
+test('a solo game is a solo game, even with a room open', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+
+  // The player starts a solo game while the room is running.
+  await host.evaluate(async () => {
+    const { store } = await import('/client/src/store.js');
+    await store.startQuiz({
+      scope: { id: 'wc-2022', name: 'World Cup 2022', clauses: [{ tournaments: ['wc-2022'] }] },
+      seed: 1,
+    });
+  });
+  await expect(host).toHaveURL(/#round/);
+
+  // The solo quiz is being played, not the room's round.
+  const solo = await host.evaluate(async () => {
+    const { store } = await import('/client/src/store.js');
+    return { mode: store.state.mode, rounds: store.state.quiz?.rounds?.length ?? 0 };
+  });
+  expect(solo.mode).toBe('solo');
+  expect(solo.rounds).toBe(10);
+  await expect(host.locator('.option')).toHaveCount(4);
+});

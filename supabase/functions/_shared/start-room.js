@@ -11,6 +11,22 @@ import { loadPool } from '../_shared/pool.js';
 import { projectRound } from '../_shared/projection.js';
 import { json } from './pool-count.js';
 
+/** The client-visible shape of a round. */
+function roundPayload(round) {
+  return {
+    id: round.id,
+    round_number: round.round_number,
+    template: round.template,
+    prompt: round.prompt,
+    context: round.context,
+    clues: round.clues,
+    options: round.options,
+    reveal_schedule: round.reveal_schedule,
+    started_at: round.started_at,
+    deadline_at: round.deadline_at,
+  };
+}
+
 export async function handleStartRoom(req, { createClient, env }) {
   try {
     const auth = req.headers.get('Authorization') ?? '';
@@ -49,7 +65,19 @@ export async function handleStartRoom(req, { createClient, env }) {
       return json({ error: 'only the host starts the game' }, 403);
     }
     if (room.status !== 'lobby') {
-      return json({ error: 'the game has already started' }, 409);
+      // A retry of a start that already happened. Return the round that
+      // is already there rather than refusing - the caller wants to know
+      // what is being played.
+      const { data: existingRound } = await admin
+        .from('rounds')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', 1)
+        .maybeSingle();
+      if (!existingRound) {
+        return json({ error: 'the game has already started' }, 409);
+      }
+      return json(roundPayload(existingRound));
     }
 
     // The scope comes from the preset, never from the client.
@@ -66,73 +94,109 @@ export async function handleStartRoom(req, { createClient, env }) {
     const pool = await loadPool(file.signedUrl);
 
     const players = pool.players ?? [];
-    const seed = Number(crypto.getRandomValues(new BigUint64Array(1))[0] % 2147483647n);
 
-    const quiz = planQuiz({
-      scope,
-      pool: players,
-      registry: pool.registry,
-      seed,
-      rounds: room.total_rounds,
-      difficulty: room.difficulty,
-    });
+    // A retry must play the SAME quiz. If the room already has a plan,
+    // that plan is the quiz - a second one would leave the room playing
+    // round one of one quiz and rounds two to ten of another.
+    const { data: existing } = await admin
+      .from('quiz_plans')
+      .select('*')
+      .eq('room_id', roomId)
+      .maybeSingle();
 
-    // The plan is stored once. The projection runs once. The database
-    // copies jsonb from one round to the next.
-    const projected = quiz.rounds.map((round, i) => projectRound(round, i + 1));
+    let projected = existing?.plan ?? null;
+    let seed = existing?.seed ?? null;
 
-    await admin.from('quiz_plans').upsert({
-      room_id: roomId,
-      seed,
-      plan: projected,
-    });
+    if (!projected) {
+      seed = Number(crypto.getRandomValues(new BigUint64Array(1))[0] % 2147483647n);
+      const quiz = planQuiz({
+        scope,
+        pool: players,
+        registry: pool.registry,
+        seed,
+        rounds: room.total_rounds,
+        difficulty: room.difficulty,
+      });
+
+      // The plan is stored once. The projection runs once. The database
+      // copies jsonb from one round to the next.
+      projected = quiz.rounds.map((round, i) => projectRound(round, i + 1));
+
+      const { error: planError } = await admin.from('quiz_plans').insert({
+        room_id: roomId,
+        seed,
+        plan: projected,
+      });
+      if (planError) {
+        // Someone else got there first. Their plan is the quiz.
+        const { data: theirs } = await admin
+          .from('quiz_plans')
+          .select('*')
+          .eq('room_id', roomId)
+          .single();
+        projected = theirs.plan;
+        seed = theirs.seed;
+      }
+    }
 
     const first = projected[0];
     const startedAt = new Date().toISOString();
     const deadlineAt = new Date(Date.now() + 20000).toISOString();
 
-    const { data: inserted, error: roundError } = await admin
+    // If the round is already there, this is a retry: keep it.
+    const { data: alreadyThere } = await admin
       .from('rounds')
-      .insert({
-        room_id: roomId,
-        round_number: first.client.round_number,
-        template: first.client.template,
-        prompt: first.client.prompt,
-        context: first.client.context,
-        clues: first.client.clues,
-        options: first.client.options,
-        reveal_schedule: first.client.reveal_schedule,
-        started_at: startedAt,
-        deadline_at: deadlineAt,
-      })
-      .select()
-      .single();
-    if (roundError) throw roundError;
+      .select('*')
+      .eq('room_id', roomId)
+      .eq('round_number', first.client.round_number)
+      .maybeSingle();
 
-    await admin.from('round_secrets').insert({
+    let inserted = alreadyThere;
+    if (!inserted) {
+      const { data: created, error: roundError } = await admin
+        .from('rounds')
+        .insert({
+          room_id: roomId,
+          round_number: first.client.round_number,
+          template: first.client.template,
+          prompt: first.client.prompt,
+          context: first.client.context,
+          clues: first.client.clues,
+          options: first.client.options,
+          reveal_schedule: first.client.reveal_schedule,
+          started_at: startedAt,
+          deadline_at: deadlineAt,
+        })
+        .select()
+        .single();
+      if (roundError) {
+        // The other call won the race. Their round is the round.
+        const { data: theirs } = await admin
+          .from('rounds')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', first.client.round_number)
+          .single();
+        inserted = theirs;
+      } else {
+        inserted = created;
+      }
+    }
+
+    await admin.from('round_secrets').upsert({
       round_id: inserted.id,
       answer_value: first.secret.answer_value,
       target_player_id: first.secret.target_player_id,
+      unit: first.secret.unit,
     });
 
     await admin.from('rooms').update({
       status: 'round_active',
       current_round: 1,
       pool_size: scopePool(scope, players).length,
-    }).eq('id', roomId);
+    }).eq('id', roomId).eq('status', 'lobby');
 
-    return json({
-      id: inserted.id,
-      round_number: first.client.round_number,
-      template: first.client.template,
-      prompt: first.client.prompt,
-      context: first.client.context,
-      clues: first.client.clues,
-      options: first.client.options,
-      reveal_schedule: first.client.reveal_schedule,
-      started_at: startedAt,
-      deadline_at: deadlineAt,
-    });
+    return json(roundPayload(inserted));
   } catch (err) {
     return json({ error: String(err) }, 500);
   }

@@ -103,9 +103,12 @@ export function render(root) {
  */
 function renderRoom(root, roomState) {
   if (!roomState.lastResult && roomState.answeredRound) {
-    // The round may still be open. Ask again on the next poll.
-    if (!roomState.fetchingResult) {
-      roomState.fetchingResult = true;
+    // The answer only exists once the round has closed. Ask for it, and
+    // ask again no more often than the poll - asking on every render
+    // would fire hundreds of requests a second.
+    const now = Date.now();
+    if (!roomState.lastResultAskedAt || now - roomState.lastResultAskedAt > 2000) {
+      roomState.lastResultAskedAt = now;
       room.result(roomState.answeredRound);
     }
     return;

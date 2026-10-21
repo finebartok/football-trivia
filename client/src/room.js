@@ -5,6 +5,7 @@
  * Everything else asks this one for the room's state.
  */
 import { connect, myUserId, invokeFunction } from './supabase.js';
+import { presetById } from '/js/presets.js';
 import { applyRound, applyMembers, applyLeaderboard } from './room-state.js';
 
 const POLL_MS = 2000;
@@ -12,6 +13,7 @@ const POLL_MS = 2000;
 const state = {
   connected: false,
   me: null,
+  active: false,
   roomId: null,
   code: null,
   status: 'lobby',
@@ -125,6 +127,14 @@ async function sync() {
   state.error = null;
   applyPayload(data);
 
+  // The room knows which vibe it is playing. A player who joined is told.
+  if (data.scope_id && !state.scopeName) {
+    const preset = presetById(data.scope_id);
+    state.scopeId = data.scope_id;
+    state.scopeName = preset?.name ?? null;
+    state.scopeIcon = preset?.icon ?? null;
+  }
+
   // A player who reloaded does not remember what they answered. The
   // server does.
   if (data.my_answered_round) {
@@ -172,6 +182,7 @@ export const room = {
       return null;
     }
     state.roomId = data.id;
+    state.active = true;
     state.code = data.code;
     state.scopeId = scope.id;
     state.scopeName = scope.name;
@@ -203,6 +214,7 @@ export const room = {
       return null;
     }
     state.roomId = data.id;
+    state.active = true;
     state.code = data.code;
     state.status = data.status;
     state.error = null;
@@ -226,6 +238,7 @@ export const room = {
     if (!saved?.roomId) return null;
 
     state.roomId = saved.roomId;
+    state.active = true;
     state.code = saved.code ?? null;
     state.scopeId = saved.scopeId ?? null;
     state.scopeName = saved.scopeName ?? null;
@@ -267,7 +280,11 @@ export const room = {
       channel = null;
     }
     state.roomId = null;
+    state.active = false;
     state.code = null;
+    state.myAnswer = null;
+    state.answeredRound = null;
+    state.lastResult = null;
     try {
       localStorage.removeItem(ROOM_KEY);
     } catch (err) {
@@ -328,14 +345,15 @@ export const room = {
       p_round_number: roundNumber,
     });
     if (error) {
-      state.error = friendly(error.message);
-      // The round may still be open. Ask again on the next poll.
-      state.fetchingResult = false;
+      // The round may still be open. That is not a failure the player
+      // needs to hear about - the reveal is waiting for it.
+      if (!String(error.message ?? '').includes('still open')) {
+        state.error = friendly(error.message);
+      }
       notify();
       return null;
     }
     state.lastResult = data;
-    state.fetchingResult = false;
     applyLeaderboard(state, data.leaderboard);
     notify();
     return data;
@@ -356,5 +374,6 @@ function friendly(message) {
   if (m.includes('room is full')) return 'That room is full.';
   if (m.includes('too late')) return 'Too late - that round is over.';
   if (m.includes('not signed in')) return 'Could not sign you in. Try again.';
+  if (m.includes('unknown vibe')) return 'That vibe cannot be played in a room yet.';
   return 'Something went wrong. Try again.';
 }

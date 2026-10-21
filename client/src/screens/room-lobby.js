@@ -107,5 +107,17 @@ export function render(root) {
     el('p', { className: 'fresh-quiz-note', text: 'A fresh quiz is written every time you play.' }),
 
     start,
+
+    el('button', {
+      className: 'btn btn--ghost',
+      text: 'Leave this room',
+      attrs: { type: 'button', id: 'btn-leave' },
+      on: {
+        click: async () => {
+          await room.leave();
+          location.hash = '#home';
+        },
+      },
+    }),
   ]);
 }

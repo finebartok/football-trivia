@@ -88,6 +88,20 @@ insert into storage.buckets (id, name, public)
 values ('pool', 'pool', false)
 on conflict (id) do nothing;
 
+-- Realtime pushes the room's changes. Without this the subscription in
+-- the client is a wasted socket and every change arrives by poll.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'rooms'
+  ) then
+    alter publication supabase_realtime add table
+      public.rooms, public.room_memberships, public.rounds, public.answers;
+  end if;
+end;
+$$;
+
 alter table public.rooms enable row level security;
 alter table public.room_memberships enable row level security;
 alter table public.quiz_plans enable row level security;
@@ -110,11 +124,11 @@ as $$
   );
 $$;
 
--- rooms: a member may read it; only the state-machine functions may change it.
+-- rooms: a member may read it. There is no insert policy: a room is made
+-- by create_room, which generates the code and seats the host. A client
+-- that could insert its own room would choose its own invite code.
 create policy rooms_select on public.rooms for select
   using (creator_id = auth.uid() or public.is_room_member(id));
-create policy rooms_insert on public.rooms for insert
-  with check (creator_id = auth.uid());
 create policy rooms_delete on public.rooms for delete
   using (creator_id = auth.uid());
 

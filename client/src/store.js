@@ -7,6 +7,9 @@ const THEME_KEY = 'football-trivia-theme';
 
 const state = {
   booting: true,
+  // Which game the player is in: 'solo' or 'room'. A player is in one
+  // or the other, never both.
+  mode: 'solo',
   pool: null,
   registry: null,
   scope: null,
@@ -25,6 +28,10 @@ const listeners = new Set();
 // screens can read it the same way they read everything else.
 room.subscribe(() => {
   state.room = room.state;
+  // Which game the player is in follows the room: being in a room makes
+  // it a room game, and leaving it makes it a solo game again.
+  if (room.state.active) state.mode = 'room';
+  else if (state.mode === 'room') state.mode = 'solo';
   notify();
 });
 
@@ -93,6 +100,7 @@ export const store = {
     return state.theme;
   },
   async startQuiz({ scope, seed }) {
+    state.mode = 'solo';
     const pool = await this.ensurePool();
     const quiz = planQuiz({
       scope,
@@ -119,7 +127,7 @@ export const store = {
     notify();
   },
   currentRound() {
-    if (state.room?.round) return state.room.round;
+    if (state.mode === 'room' && state.room?.round) return state.room.round;
     if (!state.quiz) return null;
     return state.quiz.rounds[state.roundIndex] ?? null;
   },

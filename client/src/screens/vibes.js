@@ -184,6 +184,11 @@ export function render(root) {
 
   // Start from the saved scope, or the first preset.
   const base = store.state.scope ?? { ...PRESETS[0], clauses: PRESETS[0].clauses };
+  // A room is created from a vibe, and the vibe has to exist. The home
+  // screen's door arrives here with no scope chosen yet.
+  if (!store.state.scope) {
+    store.setScope({ id: base.id, name: base.name, icon: base.icon, clauses: base.clauses });
+  }
   let vibe = { id: base.id, name: base.name, icon: base.icon, clauses: base.clauses };
 
   const count = countFor({ clauses: vibe.clauses });
@@ -264,7 +269,7 @@ export function render(root) {
             const button = e.currentTarget;
             button.disabled = true;
             button.textContent = 'Creating…';
-            const created = await room.create({ scope: store.state.scope });
+            const created = await room.create({ scope: vibe });
             if (created) {
               location.hash = '#room-lobby';
             } else {

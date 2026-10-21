@@ -19,6 +19,14 @@ declare
   v_started timestamptz;
   v_next_round public.rounds;
 begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+
+  if not public.is_room_member(p_room_id) then
+    raise exception 'not a member of that room' using errcode = '42501';
+  end if;
+
   select * into v_room from public.rooms where id = p_room_id for update;
   if v_room.id is null or v_room.status <> 'round_active' then
     return;
@@ -62,16 +70,23 @@ begin
   ) t
   where m.room_id = p_room_id and m.user_id = t.user_id;
 
-  -- A host who has gone quiet does not hold the room hostage.
+  -- A host who has gone quiet does not hold the room hostage. The role
+  -- moves to the longest-tenured player who is still here, and the old
+  -- host gives it up - there is exactly one host.
   if not exists (
     select 1 from public.room_memberships
     where room_id = p_room_id and is_host and last_seen_at > now() - interval '30 seconds'
   ) then
+    update public.room_memberships
+    set is_host = false
+    where room_id = p_room_id and is_host;
+
     update public.room_memberships m
     set is_host = true
     where m.id = (
       select id from public.room_memberships
       where room_id = p_room_id
+        and last_seen_at > now() - interval '30 seconds'
       order by joined_seq
       limit 1
     );
@@ -135,7 +150,6 @@ as $$
 declare
   v_room public.rooms;
   v_round public.rounds;
-  v_answered int;
 begin
   if auth.uid() is null then
     raise exception 'not signed in' using errcode = '42501';
@@ -154,11 +168,6 @@ begin
 
   select * into v_room from public.rooms where id = p_room_id;
 
-  select count(*) into v_answered
-  from public.answers a
-  join public.rounds r on r.id = a.round_id
-  where r.room_id = p_room_id and r.round_number = v_room.current_round;
-
   select * into v_round
   from public.rounds
   where room_id = p_room_id and round_number = v_room.current_round;
@@ -167,7 +176,7 @@ begin
     'status', v_room.status,
     'current_round', v_room.current_round,
     'total_rounds', v_room.total_rounds,
-    'answered_count', v_answered,
+    'scope_id', v_room.scope_id,
     'round', case when v_round.id is null then null else jsonb_build_object(
       'id', v_round.id,
       'round_number', v_round.round_number,

@@ -64,3 +64,7 @@ export async function callFunction(name, body, accessToken) {
 export function uniqueCode(prefix) {
   return `${prefix}${Math.random().toString(36).slice(2, 8).toUpperCase()}`.slice(0, 12);
 }
+
+/** The local database, for the checks that are not about the API. */
+export const DB_URL = process.env.SUPABASE_DB_URL
+  ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';

@@ -107,7 +107,27 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
       points_earned: score.points,
       received_at: receivedAt.toISOString(),
     });
-    if (insertError) throw insertError;
+    if (insertError) {
+      // Two taps at once: one answer was written, and the other one is
+      // told what it was.
+      if (insertError.code === '23505') {
+        const { data: theirs } = await admin
+          .from('answers')
+          .select('*')
+          .eq('round_id', round.id)
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (theirs) {
+          return json({
+            correct: theirs.is_correct,
+            points: theirs.points_earned,
+            stage: theirs.stage_locked,
+            already: true,
+          });
+        }
+      }
+      throw insertError;
+    }
 
     return json({ correct: verdict.correct, points: score.points, stage });
   } catch (err) {
