@@ -27,11 +27,14 @@ function watchErrors(page) {
  *
  * The local stack has to be running: `npm run supabase:start`.
  */
-async function roomWithTwoPlayers(browser, { presetIndex = 3 } = {}) {
+async function roomWithTwoPlayers(browser, { presetIndex = 3, setup } = {}) {
   const hostContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const guestContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const host = await hostContext.newPage();
   const guest = await guestContext.newPage();
+  // Anything the test needs in the page has to be there before the first
+  // navigation, not after it.
+  if (setup) await host.addInitScript(setup);
 
   await host.goto('./');
   await host.locator('.vibe-card--preset').nth(presetIndex).click();
@@ -234,4 +237,34 @@ test('a room that cannot be played says so', async ({ browser }) => {
   // The host is told, in a sentence, and the room is still a lobby.
   await expect(host.locator('#room-error')).toContainText(/Only \d+ players?/);
   await expect(host).toHaveURL(/#room-lobby/);
+});
+
+test('a room reveal says the answer out loud, once', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser, {
+    setup: () => {
+      window.__oscillators = 0;
+      const Original = window.AudioContext;
+      window.AudioContext = class extends Original {
+        createOscillator() {
+          window.__oscillators += 1;
+          return super.createOscillator();
+        }
+      };
+    },
+  });
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await host.waitForTimeout(3000);
+
+  // The verdict made a sound...
+  const first = await host.evaluate(() => window.__oscillators);
+  expect(first).toBeGreaterThan(0);
+
+  // ...and it did not keep making it as the screen redrew.
+  await host.waitForTimeout(4000);
+  const second = await host.evaluate(() => window.__oscillators);
+  expect(second).toBe(first);
 });

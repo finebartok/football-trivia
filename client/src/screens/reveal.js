@@ -1,6 +1,10 @@
 import { el, mount, jerseyTile } from '../ui.js';
 import { store } from '../store.js';
 import { sounds, haptic } from '../sound.js';
+
+// What the screen has already said. The screen is rebuilt on every
+// redraw, and a player reading the answer should not hear it again.
+let saidFor = null;
 import { room } from '../room.js';
 
 function findPlayer(id) {
@@ -30,12 +34,18 @@ export function render(root) {
   const total = store.state.answers.reduce((sum, a) => sum + a.points, 0);
   const correct = store.state.answers.filter((a) => a.correct).length;
 
-  if (answer?.correct) {
-    sounds.right();
-    haptic(30);
-  } else {
-    sounds.wrong();
-    haptic(60);
+  const verdictKey = inRoom
+    ? `room-${roomState.answeredRound ?? roomState.currentRound}`
+    : `solo-${store.state.roundIndex}`;
+  if (saidFor !== verdictKey) {
+    saidFor = verdictKey;
+    if (answer?.correct) {
+      sounds.right();
+      haptic(30);
+    } else {
+      sounds.wrong();
+      haptic(60);
+    }
   }
 
   const next = el('button', {
@@ -147,6 +157,22 @@ function renderRoom(root, roomState) {
 
   const board = result?.leaderboard ?? [];
   const me = board.find((m) => m.user_id === roomState.me);
+
+  // The room's reveal says it out loud too - the chime and the thud are
+  // the cue, and the cue does not depend on who is playing.
+  const roomKey = `room-${roomState.answeredRound ?? roomState.currentRound}`;
+  if (saidFor !== roomKey) {
+    saidFor = roomKey;
+    if (answer?.correct) {
+      sounds.right();
+      haptic(30);
+    } else {
+      sounds.wrong();
+      haptic(60);
+    }
+  }
+
+
 
   mount(root, [
     el('header', { className: 'topbar' }, [

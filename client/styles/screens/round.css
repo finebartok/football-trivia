@@ -8,8 +8,9 @@
 .clue-card.is-revealed { background: var(--highlight); }
 .option__label { font-family: var(--font-body); font-weight: 600; }
 
-/* A clue arrives in place. The ladder does not jump. */
-.clue-card.is-revealed {
+/* A clue arrives in place. The ladder does not jump. Only a clue that
+   has just been revealed moves - a redraw does not replay it. */
+.clue-card.is-new {
   animation: clue-in 240ms ease both;
 }
 

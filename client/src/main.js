@@ -45,7 +45,11 @@ export function render() {
     const app = document.getElementById('app');
     if (!app) return;
     clear(app);
-    app.className = 'screen';
+    // The class is removed and put back so the animation starts again -
+    // a class that is already there does not replay.
+    app.classList.remove('screen');
+    void app.offsetWidth;
+    app.classList.add('screen');
 
     // A room screen needs the room, and the room is only known once the
     // session is back. Show nothing until then rather than bouncing the

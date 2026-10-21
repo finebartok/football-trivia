@@ -79,6 +79,8 @@ export function isMuted() {
     try {
       muted = localStorage.getItem(MUTE_KEY) === '1';
     } catch {
+      // No storage to read: the sound is on unless it was muted in
+      // memory.
       muted = false;
     }
   }
@@ -87,8 +89,13 @@ export function isMuted() {
 
 /** Read the stored choice again - another tab may have changed it. */
 function refresh() {
-  muted = null;
-  return isMuted();
+  try {
+    muted = localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    // No storage: keep what we have, rather than throwing the player's
+    // choice away.
+  }
+  return muted;
 }
 
 export function setMuted(value) {

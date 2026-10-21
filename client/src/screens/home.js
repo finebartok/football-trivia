@@ -135,9 +135,12 @@ export function render(root) {
           attrs: { type: 'button', id: 'pool-retry' },
           on: {
             click: async (e) => {
-              e.currentTarget.disabled = true;
+              // The button is held onto: by the time the retry is done
+              // the event is over and currentTarget is gone.
+              const button = e.currentTarget;
+              button.disabled = true;
               await store.retryPool();
-              e.currentTarget.disabled = false;
+              button.disabled = false;
             },
           },
         }),

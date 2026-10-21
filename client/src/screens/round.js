@@ -7,6 +7,13 @@ import { sounds, soundToggle, haptic } from '../sound.js';
 const ROUND_MS = 20000;
 const LETTERS = ['A', 'B', 'C', 'D'];
 
+// What the screen has already said. It lives outside the screen because
+// the screen is rebuilt on every redraw - and in a room that is every
+// two seconds.
+let revealedBefore = 0;
+let lastTick = null;
+let lastRoundKey = null;
+
 let timer = null;
 
 function stopTimer() {
@@ -123,22 +130,33 @@ export function render(root) {
   ]));
   const optionsHost = el('div', { attrs: { id: 'round-options' } }, optionEls);
 
-  let revealedBefore = 0;
-  let lastTick = null;
+  const roundKey = inRoom
+    ? `room-${roomState.round.round_number}`
+    : `solo-${store.state.roundIndex}`;
+  if (roundKey !== lastRoundKey) {
+    lastRoundKey = roundKey;
+    revealedBefore = 0;
+    lastTick = null;
+  }
 
   const paint = () => {
     const elapsed = Math.max(0, Date.now() - startedAt);
     const revealed = revealedStages(round, elapsed);
 
-    // One note per clue, not one per tick.
+    // One note per clue, not one per tick - and not one per redraw
+    // either. The room redraws every two seconds, and a player reading
+    // the clues should not watch them fade in again and again.
     if (revealed > revealedBefore) {
       for (let i = revealedBefore; i < revealed; i++) {
+        clueEls[i].cardEl.classList.add('is-new');
         sounds.reveal();
         haptic(10);
       }
       revealedBefore = revealed;
     }
-    const remaining = Math.max(0, deadline - elapsed);
+    // The deadline is a moment, not a length: what is left is the
+    // difference between it and now.
+    const remaining = Math.max(0, deadline - Date.now());
     const expired = remaining <= 0;
 
     // The clock is the only thing under pressure.

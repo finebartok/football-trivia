@@ -112,3 +112,70 @@ test('the page asks for the manifest and the worker', async ({ page }) => {
   const html = await page.content();
   expect(html).toContain('manifest.webmanifest');
 });
+
+// ---- the review's findings ----
+
+test('the round clock counts down in seconds', async ({ page }) => {
+  await page.goto('./');
+  await page.locator('.vibe-card--preset').first().click();
+  await page.locator('#btn-start').click();
+  await expect(page).toHaveURL(/#round/);
+  await page.waitForSelector('#round-timer');
+
+  const shown = await page.locator('#round-timer').innerText();
+  const seconds = Number(shown.replace(/\D/g, ''));
+  expect(seconds).toBeGreaterThan(0);
+  expect(seconds).toBeLessThanOrEqual(20);
+});
+
+test('the mute still works when the browser has no storage', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new Error('storage is not available');
+      },
+    });
+  });
+  await page.goto('./');
+  await page.waitForSelector('#btn-sound');
+
+  const button = page.locator('#btn-sound');
+  await expect(button).toHaveAttribute('aria-label', /Turn sound off/);
+  await button.click();
+  await expect(button).toHaveAttribute('aria-label', /Turn sound on/);
+  await expect(button).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('the screen moves when the screen changes', async ({ page }) => {
+  await page.goto('./');
+  await page.locator('.vibe-card--preset').first().click();
+  await expect(page).toHaveURL(/#lobby/);
+  const running = await page.evaluate(() => document.getAnimations().filter((a) => a.playState === 'running').length);
+  expect(running).toBeGreaterThan(0);
+});
+
+test('a clue does not play its note again on every redraw', async ({ page }) => {
+  // Count the oscillators the page makes.
+  await page.addInitScript(() => {
+    window.__oscillators = 0;
+    const Original = window.AudioContext;
+    window.AudioContext = class extends Original {
+      createOscillator() {
+        window.__oscillators += 1;
+        return super.createOscillator();
+      }
+    };
+  });
+
+  await page.goto('./');
+  await page.locator('.vibe-card--preset').first().click();
+  await page.locator('#btn-start').click();
+  await expect(page).toHaveURL(/#round/);
+  await page.waitForTimeout(6500);
+
+  // The clues are out by now. The count must not keep climbing.
+  const first = await page.evaluate(() => window.__oscillators);
+  await page.waitForTimeout(4000);
+  const second = await page.evaluate(() => window.__oscillators);
+  expect(second).toBe(first);
+});
