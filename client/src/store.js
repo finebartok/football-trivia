@@ -1,5 +1,6 @@
 import { planQuiz } from '/js/engine/index.js';
 import { loadPool, poolFor, countFor } from './pool.js';
+import { room } from './room.js';
 
 const VIBES_KEY = 'football-trivia-vibes';
 const THEME_KEY = 'football-trivia-theme';
@@ -14,9 +15,17 @@ const state = {
   answers: [],
   theme: 'retro',
   vibes: [],
+  room: null,
 };
 
 const listeners = new Set();
+
+// The room client owns the room's state; the store mirrors it so the
+// screens can read it the same way they read everything else.
+room.subscribe(() => {
+  state.room = room.state;
+  notify();
+});
 
 function notify() {
   for (const fn of listeners) fn();
@@ -99,6 +108,7 @@ export const store = {
     notify();
   },
   currentRound() {
+    if (state.room?.round) return state.room.round;
     if (!state.quiz) return null;
     return state.quiz.rounds[state.roundIndex] ?? null;
   },
