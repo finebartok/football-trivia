@@ -10,6 +10,12 @@ export function render(root) {
     return;
   }
 
+  // The game started: follow it.
+  if (roomState.round) {
+    location.hash = '#round';
+    return;
+  }
+
   const isHost = roomState.members.some((m) => m.user_id === roomState.me && m.is_host);
 
   const me = roomState.members.find((m) => m.user_id === roomState.me);

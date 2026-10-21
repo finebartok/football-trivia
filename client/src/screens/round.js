@@ -1,5 +1,6 @@
 import { el, mount } from '../ui.js';
 import { store } from '../store.js';
+import { room } from '../room.js';
 import { answerRound, STAGE_MULTIPLIERS, resolveWindow } from '/js/engine/index.js';
 
 const ROUND_MS = 20000;
@@ -23,19 +24,39 @@ export function render(root) {
   stopTimer();
 
   const quiz = store.state.quiz;
-  const round = store.currentRound();
-  if (!quiz || !round) {
+  const roomState = store.state.room;
+  const inRoom = Boolean(roomState?.round);
+
+  // The server's round is the engine's round with one key renamed: the
+  // column is reveal_schedule, the engine calls it revealSchedule.
+  const round = inRoom
+    ? { ...roomState.round, revealSchedule: roomState.round.reveal_schedule ?? [] }
+    : store.currentRound();
+
+  if (!round || (!inRoom && !quiz)) {
     location.hash = '#home';
     return;
   }
 
   // The round has already been answered - the reveal screen is next.
-  if (store.state.answers.some((a) => a.roundIndex === store.state.roundIndex)) {
+  const answered = inRoom
+    ? Boolean(roomState.myAnswer)
+    : store.state.answers.some((a) => a.roundIndex === store.state.roundIndex);
+  if (answered) {
     location.hash = '#reveal';
     return;
   }
 
-  const startedAt = store.state.roundStartedAt || Date.now();
+  // In a room the server decides when the round started. The client
+  // renders the same absolute schedule, so two phones reveal the same
+  // clue at the same moment.
+  const startedAt = inRoom
+    ? new Date(roomState.round.started_at).getTime()
+    : (store.state.roundStartedAt || Date.now());
+
+  const deadline = inRoom
+    ? new Date(roomState.round.deadline_at).getTime()
+    : startedAt + ROUND_MS;
 
   const timerEl = el('span', { className: 'round-timer', attrs: { id: 'round-timer' } });
 
@@ -67,9 +88,17 @@ export function render(root) {
     className: 'option',
     attrs: { type: 'button' },
     on: {
-      click: () => {
+      click: async () => {
         const elapsed = Math.max(0, Date.now() - startedAt);
         const stage = Math.max(1, revealedStages(round, elapsed));
+        if (inRoom) {
+          // The server decides whether the answer was right and what it
+          // is worth. The client never scores its own game.
+          const scored = await room.answer(opt.value ?? opt.label);
+          if (!scored) return;
+          location.hash = '#reveal';
+          return;
+        }
         const scored = answerRound(round, { answer: opt.value ?? opt.label, stage, elapsedMs: elapsed });
         store.recordAnswer({
           roundIndex: store.state.roundIndex,
@@ -91,7 +120,7 @@ export function render(root) {
   const paint = () => {
     const elapsed = Math.max(0, Date.now() - startedAt);
     const revealed = revealedStages(round, elapsed);
-    const remaining = Math.max(0, ROUND_MS - elapsed);
+    const remaining = Math.max(0, deadline - elapsed);
     const expired = remaining <= 0;
 
     timerEl.textContent = `${Math.ceil(remaining / 1000)}s`;
@@ -122,7 +151,11 @@ export function render(root) {
   // their own, so falling back to round.context alone would make the banner
   // change from round to round.
   const scopeWindow = resolveWindow(store.state.scope, store.state.registry);
-  const windowLabel = scopeWindow?.label ?? round.context ?? store.state.scope?.name ?? '';
+  const windowLabel = round.context
+    ?? scopeWindow?.label
+    ?? store.state.scope?.name
+    ?? roomState.scopeName
+    ?? '';
 
   mount(root, [
     el('header', { className: 'topbar' }, [
@@ -134,8 +167,19 @@ export function render(root) {
       el('span', { text: windowLabel.toUpperCase() }),
     ]),
 
+    // What is being asked. The clue ladder is how the answer is found;
+    // this is what says what the answer is.
+    round.prompt
+      ? el('p', { className: 'round-prompt', text: round.prompt })
+      : null,
+
     el('div', { className: 'round-meta' }, [
-      el('span', { className: 'muted-note', text: `Round ${round.stage} of ${quiz.rounds.length}` }),
+      el('span', {
+        className: 'muted-note',
+        text: inRoom
+          ? `Round ${roomState.round.round_number} of ${roomState.totalRounds}`
+          : `Round ${round.stage} of ${quiz.rounds.length}`,
+      }),
     ]),
 
     ladderEl,

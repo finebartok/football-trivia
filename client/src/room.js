@@ -95,7 +95,9 @@ async function sync() {
   }
   state.error = null;
   applyPayload(data);
-  if (data.status === 'round_active' && !pollTimer) startPolling();
+  // The poll is also the heartbeat: the server marks a member offline
+  // after thirty seconds without one, so it runs for as long as the
+  // player is in the room.
   if (data.status === 'final' && pollTimer) stopPolling();
   notify();
   return data;
@@ -141,6 +143,7 @@ export const room = {
     state.status = data.status;
     state.error = null;
     await subscribe(data.id);
+    startPolling();
     await sync();
     notify();
     return data;
@@ -167,6 +170,7 @@ export const room = {
     state.status = data.status;
     state.error = null;
     await subscribe(data.id);
+    startPolling();
     await sync();
     notify();
     return data;

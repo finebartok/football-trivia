@@ -14,5 +14,5 @@ export const config = {
   // which is the hosted setup. Locally the functions are served by the
   // Node runner, because this host's SELinux policy keeps the Supabase
   // edge runtime from reading the function sources.
-  functionsUrl: null,
+  functionsUrl: 'http://127.0.0.1:54399',
 };

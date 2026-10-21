@@ -32,7 +32,7 @@ begin
   end if;
 
   -- Still time, and somebody has not answered: the round goes on.
-  if now() <= v_round.deadline_at and not exists (
+  if now() <= v_round.deadline_at and exists (
     select 1 from public.room_memberships m
     where m.room_id = p_room_id
       and not exists (

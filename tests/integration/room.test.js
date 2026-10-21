@@ -469,3 +469,27 @@ test('a wrong answer scores nothing', { skip }, async () => {
   assert.equal(res.body.points, 0);
   assert.notEqual(secret.answer_value, 'Definitely Not The Answer');
 });
+
+test('a round with time left is not closed early', { skip }, async () => {
+  const host = await playerClient();
+  const { data: room } = await host.client.rpc('create_room', {
+    p_scope_id: 'wc-2022', p_scope_clauses: [], p_display_name: 'Alex',
+  });
+  const server = serverClient();
+  const { data: round1 } = await server.from('rounds').insert({
+    room_id: room.id, round_number: 1, template: 'identify', prompt: 'Who is this?',
+    context: null, clues: [], options: [], reveal_schedule: [],
+    started_at: new Date().toISOString(),
+    deadline_at: new Date(Date.now() + 60000).toISOString(),
+  }).select().single();
+  await server.from('round_secrets').insert({ round_id: round1.id, answer_value: 'Lionel Messi' });
+  await server.from('rooms').update({ status: 'round_active', current_round: 1 }).eq('id', room.id);
+
+  // Nobody has answered, and there is time left: the round goes on.
+  const { data } = await host.client.rpc('current_round', { p_room_id: room.id });
+  assert.equal(data.current_round, 1, 'the round must not advance');
+  assert.equal(data.round.round_number, 1);
+
+  const { data: stillOpen } = await server.from('rounds').select('closed_at').eq('id', round1.id).single();
+  assert.equal(stillOpen.closed_at, null, 'the round must not be closed');
+});

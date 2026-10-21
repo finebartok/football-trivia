@@ -203,3 +203,38 @@ a { color: var(--gold); }
   font-size: 14px;
   pointer-events: none;
 }
+
+.vibe-card--door {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.text-input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.vibe-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.round-prompt {
+  margin: 12px 0 4px;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  text-align: center;
+}
