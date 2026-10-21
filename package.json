@@ -1,0 +1,22 @@
+{
+  "name": "football-trivia",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Personalized football trivia game",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "db:apply": "node scripts/ingest/lib/db.js --apply",
+    "ingest:all": "node scripts/ingest/fetch.js && node scripts/ingest/load.js && node scripts/ingest/derive.js && node scripts/ingest/validate.js",
+    "validate": "node scripts/ingest/validate.js --strict",
+    "fixtures": "node scripts/ingest/export-pool.js"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "csv-parse": "^5.6.0",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}
