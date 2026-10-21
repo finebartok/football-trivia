@@ -68,7 +68,6 @@ test('photo resolution matches players by name and skips players that already ha
     {
       db,
       search: async (term) => { terms.push(term); return [{ id: 'Q615', label: term, description: 'Argentine footballer' }]; },
-      // wbgetentities for a real player carries the P18 claim
       entities: async () => ({ Q615: { claims: { P18: [{ mainsnak: { datavalue: { value: 'Lionel Messi 20180626.jpg' } } }] } } }),
     },
   );
@@ -102,18 +101,53 @@ test('a player with no Wikidata match, or no P18 image, is reported unresolved',
   ]);
 });
 
-test('the licence for a Commons file is read from extmetadata, not guessed from the filename', () => {
-  // Fixture is the real imageinfo response for Commons File:Example.jpg, trimmed.
-  // fetchLicence is exercised against the live API separately; keeping it out of
-  // the suite means the tests never need the network.
-  const got = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'))['Example.jpg'];
-  assert.equal(got.licence, 'Public domain');
-  assert.ok(got.attribution, 'a licence still records the author for the credits screen');
-  assert.ok(got.width > 0 && got.height > 0, 'source dimensions are recorded');
-  assert.ok(got.sourceUrl.startsWith('https://commons.wikimedia.org/'), 'source_url is a Commons description page');
+test('fetchLicence maps raw Commons imageinfo responses into the licence map', async () => {
+  const raw = {
+    query: {
+      pages: {
+        '12345': {
+          title: 'File:Example.jpg',
+          imageinfo: [{
+            descriptionurl: 'https://commons.wikimedia.org/wiki/File:Example.jpg',
+            width: 172,
+            height: 178,
+            extmetadata: {
+              LicenseShortName: { value: 'Public domain' },
+              Artist: { value: '<span>bdk</span>' },
+              Credit: { value: '<span>Own work</span>' },
+            },
+          }],
+        },
+      },
+    },
+  };
+  const got = await fetchLicence(['Example.jpg'], { fetchImpl: async () => ({ ok: true, json: async () => raw }) });
+  assert.equal(got.get('Example.jpg').licence, 'Public domain');
+  assert.equal(got.get('Example.jpg').attribution, 'bdk');
+  assert.equal(got.get('Example.jpg').width, 172);
+  assert.equal(got.get('Example.jpg').height, 178);
+  assert.equal(got.get('Example.jpg').sourceUrl, 'https://commons.wikimedia.org/wiki/File:Example.jpg');
 });
 
-test('ingest downloads, stores the resized webp and writes a shippable photos row', async () => {
+test('fetchLicence splits batches of more than fifty titles', async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    const titles = url.searchParams.get('titles').split('|');
+    calls.push(titles.length);
+    const pages = {};
+    for (const t of titles) {
+      const name = t.replace(/^File:/, '');
+      pages[name] = { title: t, imageinfo: [{ descriptionurl: `https://commons.wikimedia.org/wiki/File:${name}`, extmetadata: { LicenseShortName: { value: 'CC0' } } }] };
+    }
+    return { ok: true, json: async () => ({ query: { pages } }) };
+  };
+  const names = Array.from({ length: 75 }, (_, i) => `File${i}.jpg`);
+  const got = await fetchLicence(names, { fetchImpl });
+  assert.deepEqual(calls, [50, 25]);
+  assert.equal(got.size, 75);
+});
+
+test('ingest downloads the image url and stores the file page url from licence info', async () => {
   const db = await openDb();
   await applyMigrations(db);
   await db.query(`insert into players (slug,name,date_of_birth,citizenship,position,quality,active)
@@ -121,23 +155,25 @@ test('ingest downloads, stores the resized webp and writes a shippable photos ro
   const { rows: [{ id: playerId }] } = await db.query(`select id from players where slug='messi'`);
 
   const uploaded = new Map();
+  const downloaded = [];
   const res = await ingestPhotos(db, {
-    plan: [{ playerId, wikidataId: 'Q615', fileName: 'Example.jpg' }],
-    download: async () => new Uint8Array([1, 2, 3, 4]),
+    plan: [{ playerId, wikidataId: 'Q615', fileName: 'Example.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg' }],
+    download: async (url) => { downloaded.push(url); return new Uint8Array([1, 2, 3, 4]); },
     resize: async () => ({ buffer: new Uint8Array([9, 9]), width: 512, height: 640 }),
     storage: { async upload(path, buffer) { uploaded.set(path, buffer); return path; } },
     licences: await licences(),
   });
 
-  assert.deepEqual(res, { stored: 1, skipped: 0, fallback: 0 });
+  assert.deepEqual(res, { stored: 1, skipped: 0, fallback: 0, failures: [] });
+  assert.equal(downloaded[0], 'https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg');
   const row = (await db.query('select * from photos')).rows[0];
   assert.equal(row.player_id, playerId);
   assert.equal(row.is_primary, true);
   assert.equal(row.width, 512);
   assert.equal(row.height, 640);
   assert.equal(row.licence, 'Public domain');
-  assert.ok(row.attribution, 'attribution is stored for the credits screen');
-  assert.ok(row.source_url.startsWith('https://commons.wikimedia.org/'), `source_url is a Commons url, got ${row.source_url}`);
+  assert.equal(row.attribution, null);
+  assert.equal(row.source_url, 'https://commons.wikimedia.org/wiki/File:Example.jpg');
   assert.deepEqual([...uploaded.keys()], [`photos/${playerId}/${row.id}.webp`]);
   assert.equal(row.storage_path, `photos/${playerId}/${row.id}.webp`);
   assert.equal(row.id, sha256(new Uint8Array([9, 9])));
@@ -152,14 +188,34 @@ test('a non-shippable licence is skipped and never written to photos', async () 
   const { rows: [{ id: playerId }] } = await db.query(`select id from players where slug='x'`);
 
   const res = await ingestPhotos(db, {
-    plan: [{ playerId, wikidataId: 'Q1', fileName: 'Example.jpg' }],
+    plan: [{ playerId, wikidataId: 'Q1', fileName: 'Example.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg' }],
     download: async () => new Uint8Array([1]),
     resize: async () => ({ buffer: new Uint8Array([2]), width: 512, height: 512 }),
     storage: { async upload() { throw new Error('must not upload a non-shippable image'); } },
-    licences: new Map([['Example.jpg', { licence: 'Fair use', attribution: 'Someone', sourceUrl: 'https://commons.wikimedia.org/x' }]]),
+    licences: new Map([['Example.jpg', { licence: 'Fair use', attribution: 'Someone', sourceUrl: 'https://commons.wikimedia.org/wiki/File:Example.jpg' }]]),
   });
 
-  assert.deepEqual(res, { stored: 0, skipped: 1, fallback: 0 });
+  assert.deepEqual(res, { stored: 0, skipped: 1, fallback: 0, failures: [] });
+  assert.equal((await db.query('select count(*)::int c from photos')).rows[0].c, 0);
+  await db.close();
+});
+
+test('CC BY-SA without surviving attribution is skipped and never written to photos', async () => {
+  const db = await openDb();
+  await applyMigrations(db);
+  await db.query(`insert into players (slug,name,date_of_birth,citizenship,position,quality,active)
+    values ('z','Z Player','1990-01-01','{France}','Forward','{"status":"pass"}',true)`);
+  const { rows: [{ id: playerId }] } = await db.query(`select id from players where slug='z'`);
+
+  const res = await ingestPhotos(db, {
+    plan: [{ playerId, wikidataId: 'Q3', fileName: 'Example.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg' }],
+    download: async () => new Uint8Array([1]),
+    resize: async () => ({ buffer: new Uint8Array([2]), width: 512, height: 512 }),
+    storage: { async upload() { throw new Error('must not upload cc-by-sa without attribution'); } },
+    licences: new Map([['Example.jpg', { licence: 'CC BY-SA 4.0', attribution: null, sourceUrl: 'https://commons.wikimedia.org/wiki/File:Example.jpg' }]]),
+  });
+
+  assert.deepEqual(res, { stored: 0, skipped: 1, fallback: 0, failures: [] });
   assert.equal((await db.query('select count(*)::int c from photos')).rows[0].c, 0);
   await db.close();
 });
@@ -172,13 +228,35 @@ test('a player whose download fails falls back to the jersey tile instead of a b
   const { rows: [{ id: playerId }] } = await db.query(`select id from players where slug='y'`);
 
   const res = await ingestPhotos(db, {
-    plan: [{ playerId, wikidataId: 'Q2', fileName: 'Example.jpg' }],
+    plan: [{ playerId, wikidataId: 'Q2', fileName: 'Example.jpg', sourceUrl: 'https://commons.wikimedia.org/wiki/Special:FilePath/Example.jpg' }],
     download: async () => { throw new Error('404'); },
     storage: { async upload() { throw new Error('must not upload'); } },
     licences: await licences(),
   });
 
-  assert.deepEqual(res, { stored: 0, skipped: 0, fallback: 1 });
+  assert.deepEqual(res, { stored: 0, skipped: 0, fallback: 1, failures: [{ playerId, stage: 'download/resize', message: '404' }] });
+  assert.equal((await db.query('select count(*)::int c from photos')).rows[0].c, 0);
+  await db.close();
+});
+
+test('downloading a non-Commons host is refused', async () => {
+  const db = await openDb();
+  await applyMigrations(db);
+  await db.query(`insert into players (slug,name,date_of_birth,citizenship,position,quality,active)
+    values ('tm','TM Player','1990-01-01','{Spain}','Forward','{"status":"pass"}',true)`);
+  const { rows: [{ id: playerId }] } = await db.query(`select id from players where slug='tm'`);
+
+  const res = await ingestPhotos(db, {
+    plan: [{ playerId, wikidataId: 'Q4', fileName: 'bad.jpg', sourceUrl: 'https://cdn.transfermarkt.com/bad.jpg' }],
+    download: async () => new Uint8Array([1]),
+    resize: async () => ({ buffer: new Uint8Array([2]), width: 512, height: 512 }),
+    storage: { async upload() { throw new Error('must not upload'); } },
+    licences: new Map([['bad.jpg', { licence: 'Public domain', attribution: 'x', sourceUrl: 'https://commons.wikimedia.org/wiki/File:bad.jpg' }]]),
+  });
+
+  assert.deepEqual(res.fallback, 1);
+  assert.deepEqual(res.stored, 0);
+  assert.deepEqual(res.failures.length, 1);
   assert.equal((await db.query('select count(*)::int c from photos')).rows[0].c, 0);
   await db.close();
 });

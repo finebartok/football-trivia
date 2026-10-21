@@ -22,7 +22,8 @@
     <!-- Home View -->
     <div id="home-view" class="view active">
       <section class="hero flex-col flex-center text-center mb-4">
-        <h1 class="text-primary mt-4 mb-2">Your Football Trivia, Your Rules</h1>
+        <div class="hero-bg-text">TRIVIA</div>
+        <h1 class="text-primary mt-4 mb-2">Your Football Trivia, <span class="text-accent">Your Rules</span></h1>
         <p class="text-secondary mb-4">Build custom Scopes or play quick games from top leagues.</p>
         <div class="flex gap-3">
           <button id="btn-quick-play" class="btn btn-primary">Quick Play</button>
@@ -30,6 +31,13 @@
         </div>
       </section>
       
+      <section class="featured-scopes mt-4">
+        <h2 class="text-primary mb-3">Featured Scopes ⚡</h2>
+        <div id="featured-scopes-list" class="grid-2">
+          <!-- Dynamically populated preset scopes -->
+        </div>
+      </section>
+
       <section class="saved-scopes mt-4">
         <h2 class="text-primary mb-3">Your Scopes</h2>
         <div id="saved-scopes-list" class="grid-3">
@@ -54,11 +62,11 @@
 
         <h3 class="text-secondary mb-2">Era</h3>
         <div class="era-slider">
-          <input type="range" class="range-slider" id="era-start" min="2020" max="2025" value="2020">
-          <input type="range" class="range-slider" id="era-end" min="2020" max="2025" value="2025">
+          <input type="range" class="range-slider" id="era-start">
+          <input type="range" class="range-slider" id="era-end">
           <div class="flex-between text-muted mt-2">
-            <span id="era-start-label">2020</span>
-            <span id="era-end-label">2025</span>
+            <span id="era-start-label"></span>
+            <span id="era-end-label"></span>
           </div>
         </div>
 
@@ -96,20 +104,34 @@
 
     <!-- Game Format Picker -->
     <div id="format-picker-view" class="view">
-      <div class="flex-between mb-4">
+      <div class="flex-between mb-3">
         <h2 class="text-primary">Select Game Format</h2>
         <button id="btn-back-formats" class="btn btn-icon">← Back</button>
       </div>
-      <div class="grid-2">
+      
+      <div class="difficulty-selector mb-4">
+        <span class="text-secondary font-semibold mr-3">Trivia Difficulty:</span>
+        <div class="difficulty-toggle" id="difficulty-toggle">
+          <button class="difficulty-btn" data-difficulty="easy">Easy 🟢</button>
+          <button class="difficulty-btn active" data-difficulty="medium">Medium 🟡</button>
+          <button class="difficulty-btn" data-difficulty="hard">Hard 🔥</button>
+        </div>
+      </div>
+      <div class="grid-3">
         <div class="card game-card" id="format-guess-player">
           <div class="icon">🎭</div>
           <h3>Guess the Player</h3>
-          <p class="text-secondary mt-2">Identify the player from 6 clues revealed one by one.</p>
+          <p class="text-secondary mt-2">Identify player with MCQ & 6 gradual clues.</p>
+        </div>
+        <div class="card game-card" id="format-higher-lower">
+          <div class="icon">⚖️</div>
+          <h3>Higher or Lower</h3>
+          <p class="text-secondary mt-2">Stat battle! Compare player stats in a rapid-fire streak.</p>
         </div>
         <div class="card game-card" id="format-criteria-grid">
           <div class="icon">⊞</div>
           <h3>Criteria Grid</h3>
-          <p class="text-secondary mt-2">Fill the 3x3 grid with players matching intersecting criteria.</p>
+          <p class="text-secondary mt-2">Fill the 3x3 grid with players matching criteria.</p>
         </div>
       </div>
     </div>
@@ -143,6 +165,49 @@
       </div>
     </div>
 
+    <!-- Higher or Lower Game -->
+    <div id="higher-lower-view" class="view">
+      <div class="hl-container">
+        <div class="flex-between mb-3">
+          <div class="hl-metric-badge" id="hl-metric-label">Comparing Stat</div>
+          <div class="score-display" id="hl-streak-display">Streak: 0</div>
+        </div>
+
+        <div class="hl-cards-wrapper">
+          <!-- Left Player (Revealed) -->
+          <div class="hl-card" id="hl-left-card">
+            <div class="hl-player-name" id="hl-left-name">Player A</div>
+            <div class="hl-player-meta" id="hl-left-meta">Forward</div>
+            <div class="hl-stat-box">
+              <span class="hl-stat-value" id="hl-left-val">0</span>
+              <span class="hl-stat-unit" id="hl-left-unit">units</span>
+            </div>
+          </div>
+
+          <div class="hl-vs-badge">VS</div>
+
+          <!-- Right Player (To Guess) -->
+          <div class="hl-card" id="hl-right-card">
+            <div class="hl-player-name" id="hl-right-name">Player B</div>
+            <div class="hl-player-meta" id="hl-right-meta">Midfielder</div>
+            <div class="hl-guess-box" id="hl-guess-box">
+              <p class="text-sm text-secondary mb-3">has a stat that is</p>
+              <button id="btn-hl-higher" class="btn btn-hl btn-hl-higher">Higher ⬆️</button>
+              <button id="btn-hl-lower" class="btn btn-hl btn-hl-lower">Lower ⬇️</button>
+            </div>
+            <div class="hl-stat-box hidden" id="hl-right-stat-box">
+              <span class="hl-stat-value" id="hl-right-val">?</span>
+              <span class="hl-stat-unit" id="hl-right-unit">units</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-center gap-3 mt-4">
+          <button id="btn-hl-next" class="btn btn-primary hidden">Next Battle →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Criteria Grid Game -->
     <div id="criteria-grid-view" class="view">
       <div class="grid-container">
@@ -171,8 +236,10 @@
         </div>
 
         <div class="guess-input-area hidden" id="grid-input-area">
+          <p class="text-sm text-secondary mb-2">Select a matching player:</p>
+          <div id="grid-mcq-options" class="mcq-options-grid mb-3"></div>
           <div class="autocomplete-wrapper">
-            <input type="text" id="grid-player-input" class="autocomplete-input" placeholder="Enter player name...">
+            <input type="text" id="grid-player-input" class="autocomplete-input" placeholder="Or search player name...">
             <div id="grid-autocomplete-list" class="autocomplete-list"></div>
           </div>
         </div>
@@ -184,18 +251,36 @@
       </div>
     </div>
 
+    <!-- Game Overlays -->
+    <div id="game-overlay" class="game-overlay">
+      <div class="overlay-content">
+        <h2 class="overlay-title" id="overlay-title">Get Ready</h2>
+        <p class="overlay-subtitle" id="overlay-subtitle">Loading the pitch...</p>
+        <button id="btn-overlay-close" class="btn btn-primary">Let's Play!</button>
+      </div>
+    </div>
+
     <!-- Results Screen -->
     <div id="results-view" class="view">
       <div class="results-screen">
         <h2 id="results-title" class="text-primary mb-2">Game Over!</h2>
         <div class="score-big" id="final-score">0</div>
         
-        <div class="score-breakdown">
+        <div class="score-breakdown mb-4">
           <h3 class="text-secondary mb-3">Performance</h3>
           <div class="progress-bar mb-3">
             <div class="progress-bar-fill" id="results-progress" style="width: 0%;"></div>
           </div>
-          <p id="results-summary" class="text-muted">You correctly answered 0 out of 10 rounds.</p>
+          <p id="results-summary" class="text-muted">You finished the round.</p>
+        </div>
+
+        <div class="identity-card mb-4" id="identity-card">
+          <div class="identity-card-header">
+            <span class="identity-card-icon">⚡</span>
+            <span class="identity-card-title">Scope Identity</span>
+          </div>
+          <p id="identity-summary" class="identity-card-text">Custom Scope</p>
+          <button id="btn-share-scope" class="btn btn-secondary btn-sm mt-3">🔗 Share This Scope Link</button>
         </div>
 
         <div class="flex-center gap-3">

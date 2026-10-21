@@ -23,8 +23,14 @@ export function saveScope(scope) {
 }
 
 export function loadScopes() {
-  const data = localStorage.getItem('football-trivia-scopes');
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem('football-trivia-scopes');
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error("Corrupted scopes in localStorage, clearing...", e);
+    localStorage.removeItem('football-trivia-scopes');
+    return [];
+  }
 }
 
 export function deleteScope(scopeId) {
@@ -67,6 +73,75 @@ export function getScopeSummary(scope) {
   }
   
   return result;
+}
+
+export const PRESET_SCOPES = [
+  {
+    id: 'preset-clasico',
+    name: 'El Clásico Rivals',
+    description: 'Barcelona & Real Madrid stars',
+    icon: '🇪🇸',
+    filters: [{ league: 'La Liga', seasonStart: 2020, seasonEnd: 2025 }],
+    teams: ['FC Barcelona', 'Real Madrid'],
+    nationalities: []
+  },
+  {
+    id: 'preset-prem',
+    name: 'Premier League Stars',
+    description: 'All top England Premier League players',
+    icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    filters: [{ league: 'Premier League', seasonStart: 2020, seasonEnd: 2025 }],
+    teams: [],
+    nationalities: []
+  },
+  {
+    id: 'preset-latam',
+    name: 'South American Stars',
+    description: 'Argentine, Brazilian & Uruguayan superstars in Europe',
+    icon: '🌎',
+    filters: [],
+    teams: [],
+    nationalities: ['Argentina', 'Brazil', 'Uruguay', 'Colombia']
+  },
+  {
+    id: 'preset-buli-seriea',
+    name: 'Bundesliga & Serie A Mix',
+    description: 'German and Italian top league mashup',
+    icon: '⚽',
+    filters: [
+      { league: 'Bundesliga', seasonStart: 2020, seasonEnd: 2025 },
+      { league: 'Serie A', seasonStart: 2020, seasonEnd: 2025 }
+    ],
+    teams: [],
+    nationalities: []
+  }
+
+];
+
+export function encodeScopeToHash(scope) {
+  try {
+    const jsonStr = JSON.stringify({
+      n: scope.name,
+      f: scope.filters,
+      t: scope.teams,
+      nat: scope.nationalities
+    });
+    return 'scope=' + encodeURIComponent(btoa(jsonStr));
+  } catch (e) {
+    return '';
+  }
+}
+
+export function decodeScopeFromHash(hash) {
+  try {
+    if (!hash || !hash.includes('scope=')) return null;
+    const param = hash.split('scope=')[1].split('&')[0];
+    const jsonStr = atob(decodeURIComponent(param));
+    const data = JSON.parse(jsonStr);
+    return createScope(data.n || 'Shared Scope', data.f || [], data.t || [], data.nat || []);
+  } catch (e) {
+    return null;
+  }
 }
 
 export function validateScope(scope, playerPool) {

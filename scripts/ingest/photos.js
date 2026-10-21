@@ -17,6 +17,8 @@ const TITLE_BATCH = 50;
 const SHIPPABLE = new Set(['cc by-sa 4.0', 'cc by-sa 3.0', 'cc by-sa 2.0', 'cc by 4.0', 'cc by 3.0',
   'cc by 2.0', 'cc0', 'public domain', 'no restrictions', 'pd-self']);
 
+const COMMONS_HOSTS = new Set(['commons.wikimedia.org', 'upload.wikimedia.org']);
+
 export function licenceIsShippable({ licence }) {
   return SHIPPABLE.has(String(licence ?? '').trim().toLowerCase());
 }
@@ -87,7 +89,7 @@ export async function fetchLicence(fileNames, { fetchImpl = fetch } = {}) {
       out.set(title, {
         licence: stripHtml(meta.licence) ?? 'Unknown',
         attribution: stripHtml(meta.attribution),
-        sourceUrl: info.descriptionurl ?? photoPlanFromEntities({})[0]?.sourceUrl ?? null,
+        sourceUrl: info.descriptionurl ?? null,
         width: info.width ?? null,
         height: info.height ?? null,
       });
@@ -147,6 +149,13 @@ export async function resolvePhotoPlan(playerRows, { db, search = searchEntity, 
   return { plan, unresolved, skipped };
 }
 
+function assertCommonsHost(url) {
+  let parsed;
+  try { parsed = new URL(url); } catch { throw new Error(`invalid url: ${url}`); }
+  if (!COMMONS_HOSTS.has(parsed.hostname)) throw new Error(`refusing non-Commons host ${parsed.hostname}`);
+  return parsed;
+}
+
 /**
  * Download each planned image, resize to 512px-wide WebP, store it under
  * `photos/{playerId}/{sha256}.webp` and write the photos row with licence,
@@ -167,8 +176,9 @@ export async function ingestPhotos(db, {
   await upsertSource(db);
 
   let stored = 0, skipped = 0, fallback = 0;
+  const failures = [];
   for (const item of plan) {
-    let sourceUrl = item.sourceUrl;
+    const downloadUrl = item.sourceUrl;
     let info = licenceMap.get(item.fileName) ?? licenceMap.get(String(item.fileName).replace(/^File:/, ''));
     if (!info) {
       for (const [k, v] of licenceMap) {
@@ -176,17 +186,27 @@ export async function ingestPhotos(db, {
       }
     }
     if (!info) info = licenceFromExtMetadata(null);
-    if (info.sourceUrl) sourceUrl = info.sourceUrl;
+
+    const filePageUrl = info.sourceUrl ?? null;
+    const licenceKey = String(info.licence ?? '').trim().toLowerCase();
+    const isCcBySa = licenceKey.startsWith('cc by-sa');
 
     // Disjoint outcomes: skipped = we refuse to ship this image at all,
     // fallback = we wanted it but could not get it, so the jersey tile shows.
-    if (!licenceIsShippable(info) || !sourceUrl) { skipped += 1; continue; }
+    if (!licenceIsShippable(info) || !filePageUrl) { skipped += 1; continue; }
+    if (isCcBySa && !(info.attribution && String(info.attribution).trim())) {
+      skipped += 1;
+      continue;
+    }
 
     let original, resized;
     try {
-      original = await download(sourceUrl);
+      if (!downloadUrl) throw new Error('missing download url');
+      assertCommonsHost(downloadUrl);
+      original = await download(downloadUrl);
       resized = await resize(original);
-    } catch {
+    } catch (err) {
+      failures.push({ playerId: item.playerId, stage: 'download/resize', message: err?.message ?? String(err) });
       fallback += 1;
       continue;
     }
@@ -195,23 +215,33 @@ export async function ingestPhotos(db, {
     const storagePath = `photos/${item.playerId}/${id}.webp`;
     try {
       await storage.upload(storagePath, resized.buffer);
-    } catch {
+    } catch (err) {
+      failures.push({ playerId: item.playerId, stage: 'upload', message: err?.message ?? String(err) });
       fallback += 1;
       continue;
     }
 
-    await db.query(
-      `insert into photos (id, player_id, storage_path, width, height, licence, attribution, source_url, source_id, is_primary)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       on conflict (id) do nothing`,
-      [id, item.playerId, storagePath,
-        resized.width ?? info.width ?? null, resized.height ?? info.height ?? null,
-        info.licence, info.attribution, sourceUrl, PHOTO_SOURCE_ID, true],
-    );
-    stored += 1;
+    try {
+      await db.query(
+        `insert into photos (id, player_id, storage_path, width, height, licence, attribution, source_url, source_id, is_primary)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         on conflict (id) do nothing`,
+        [id, item.playerId, storagePath,
+          resized.width ?? info.width ?? null, resized.height ?? info.height ?? null,
+          info.licence, info.attribution, filePageUrl, PHOTO_SOURCE_ID, true],
+      );
+      stored += 1;
+    } catch (err) {
+      failures.push({ playerId: item.playerId, stage: 'insert', message: err?.message ?? String(err) });
+      fallback += 1;
+      continue;
+    }
   }
 
-  return { stored, skipped, fallback };
+  if (failures.length) {
+    for (const f of failures) console.error(`[photos] ${f.playerId} ${f.stage}: ${f.message}`);
+  }
+  return { stored, skipped, fallback, failures };
 }
 
 async function defaultDownload(url) {

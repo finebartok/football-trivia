@@ -1,0 +1,95 @@
+[
+  {
+    "id": "gold_1",
+    "name": "Lionel Messi",
+    "nationality": "Argentina",
+    "position": "Forward",
+    "dateOfBirth": "1987-06-24",
+    "shirtNumber": 10,
+    "marketValue": 30,
+    "caps": 191,
+    "careerGoals": 850,
+    "trophies": ["World Cup", "Copa America", "Champions League", "Ballon d'Or (8)"],
+    "preferredFoot": "Left",
+    "teams": [
+      { "team": "FC Barcelona", "league": "La Liga", "seasons": [2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021] },
+      { "team": "Paris Saint-Germain", "league": "Ligue 1", "seasons": [2021, 2022, 2023] },
+      { "team": "Inter Miami", "league": "MLS", "seasons": [2023, 2024, 2025, 2026] }
+    ]
+  },
+  {
+    "id": "gold_2",
+    "name": "Cristiano Ronaldo",
+    "nationality": "Portugal",
+    "position": "Forward",
+    "dateOfBirth": "1985-02-05",
+    "shirtNumber": 7,
+    "marketValue": 15,
+    "caps": 217,
+    "careerGoals": 920,
+    "trophies": ["Euros", "Champions League (5)", "Ballon d'Or (5)"],
+    "preferredFoot": "Right",
+    "teams": [
+      { "team": "Sporting CP", "league": "Primeira Liga", "seasons": [2002, 2003] },
+      { "team": "Manchester United", "league": "Premier League", "seasons": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2021, 2022] },
+      { "team": "Real Madrid", "league": "La Liga", "seasons": [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018] },
+      { "team": "Juventus", "league": "Serie A", "seasons": [2018, 2019, 2020, 2021] },
+      { "team": "Al Nassr", "league": "Saudi Pro League", "seasons": [2023, 2024, 2025, 2026] }
+    ]
+  },
+  {
+    "id": "gold_3",
+    "name": "Zinedine Zidane",
+    "nationality": "France",
+    "position": "Midfielder",
+    "dateOfBirth": "1972-06-23",
+    "shirtNumber": 5,
+    "marketValue": 0,
+    "caps": 108,
+    "careerGoals": 156,
+    "trophies": ["World Cup", "Euros", "Champions League", "Ballon d'Or"],
+    "preferredFoot": "Right",
+    "teams": [
+      { "team": "Cannes", "league": "Ligue 1", "seasons": [1989, 1990, 1991, 1992] },
+      { "team": "Bordeaux", "league": "Ligue 1", "seasons": [1992, 1993, 1994, 1995, 1996] },
+      { "team": "Juventus", "league": "Serie A", "seasons": [1996, 1997, 1998, 1999, 2000, 2001] },
+      { "team": "Real Madrid", "league": "La Liga", "seasons": [2001, 2002, 2003, 2004, 2005, 2006] }
+    ]
+  },
+  {
+    "id": "gold_4",
+    "name": "Ronaldinho",
+    "nationality": "Brazil",
+    "position": "Midfielder",
+    "dateOfBirth": "1980-03-21",
+    "shirtNumber": 10,
+    "marketValue": 0,
+    "caps": 97,
+    "careerGoals": 206,
+    "trophies": ["World Cup", "Champions League", "Ballon d'Or"],
+    "preferredFoot": "Right",
+    "teams": [
+      { "team": "Gremio", "league": "Série A", "seasons": [1998, 1999, 2000, 2001] },
+      { "team": "Paris Saint-Germain", "league": "Ligue 1", "seasons": [2001, 2002, 2003] },
+      { "team": "FC Barcelona", "league": "La Liga", "seasons": [2003, 2004, 2005, 2006, 2007, 2008] },
+      { "team": "AC Milan", "league": "Serie A", "seasons": [2008, 2009, 2010, 2011] }
+    ]
+  },
+  {
+    "id": "gold_5",
+    "name": "Pelé",
+    "nationality": "Brazil",
+    "position": "Forward",
+    "dateOfBirth": "1940-10-23",
+    "shirtNumber": 10,
+    "marketValue": 0,
+    "caps": 92,
+    "careerGoals": 767,
+    "trophies": ["World Cup (3)", "Intercontinental Cup (2)"],
+    "preferredFoot": "Right",
+    "teams": [
+      { "team": "Santos", "league": "Série A", "seasons": [1956, 1957, 1958, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1967, 1968, 1969, 1970, 1971, 1972, 1973, 1974] },
+      { "team": "New York Cosmos", "league": "NASL", "seasons": [1975, 1976, 1977] }
+    ]
+  }
+]

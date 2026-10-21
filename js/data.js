@@ -2,15 +2,23 @@ let playersData = [];
 
 export async function loadData() {
   try {
-    const response = await fetch('./data/players.json');
+    // Try live SQLite REST API endpoint first
+    let response = await fetch('/api/players');
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      response = await fetch('./data/players.json');
     }
     playersData = await response.json();
+    console.log(`Loaded ${playersData.length} official real players from database.`);
     return playersData;
   } catch (error) {
     console.error("Could not load players data:", error);
-    return [];
+    try {
+      const fallback = await fetch('./data/players.json');
+      playersData = await fallback.json();
+      return playersData;
+    } catch (e) {
+      return [];
+    }
   }
 }
 
@@ -100,8 +108,8 @@ export function getSeasonRange() {
     });
   });
   
-  if (min === Infinity) return { min: 2020, max: 2025 };
-  return { min, max };
+  if (min === Infinity) return { start: 2020, end: 2025 };
+  return { start: min, end: max };
 }
 
 export function searchPlayers(query, playerPool) {
