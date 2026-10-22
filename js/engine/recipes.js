@@ -72,6 +72,9 @@ export const RECIPES = Object.freeze([
     family: 'scarcity',
     template: 'identify',
     metric: 'scarcity_peers',
+    // The pipeline does not derive scarcity_peers yet, so this round can
+    // never be planned. It waits for the phase that brings the data.
+    phase: 'v1.1',
     windowKinds: ['career', 'season', 'season_range', 'tournament', 'age_band'],
     speak: ({ subject, value }) => ({
       prompt: `One of only **${value}** players did this — who?`,
