@@ -10,7 +10,7 @@
 // There is no build: the browser loads the same files the repository
 // holds. This only chooses which of them are public.
 
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -33,5 +33,16 @@ for (const [from, to] of FILES) {
   await mkdir(dirname(target), { recursive: true });
   await cp(join(root, from), target, { recursive: true });
 }
+
+// The game lives at /client/. The root of the site sends you there, so the
+// address that gets shared does not have to end in /client/.
+await writeFile(join(out, 'index.html'), [
+  '<!doctype html>',
+  '<meta charset="utf-8">',
+  '<title>Football Trivia</title>',
+  '<meta http-equiv="refresh" content="0; url=/client/">',
+  '<a href="/client/">Football Trivia</a>',
+  '',
+].join('\n'));
 
 console.log(`published ${FILES.length} paths into dist/`);
