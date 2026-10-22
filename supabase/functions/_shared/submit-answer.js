@@ -6,7 +6,7 @@
  * answered at, and a client that sends the winning answer twice does not
  * get two answers.
  */
-import { answerRound, scoreRound } from '../../../js/engine/index.js';
+import { answerRound, scoreRound } from './vendor/js/engine/index.js';
 import { makeClients } from '../_shared/supabase.js';
 import { json } from './pool-count.js';
 

@@ -15,11 +15,12 @@
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset",
-    "supabase:serve": "node scripts/serve-functions.js",
+    "supabase:serve": "node scripts/prepare-functions.mjs && node scripts/serve-functions.js",
     "supabase:sync": "node scripts/supabase-sync.js",
     "supabase:serve:edge": "supabase functions serve --env-file supabase/.env.local",
     "supabase:upload": "node scripts/upload-pool.js",
-    "publish": "node scripts/publish-static.mjs"
+    "publish": "node scripts/publish-static.mjs",
+    "supabase:deploy": "node scripts/prepare-functions.mjs && supabase functions deploy"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",

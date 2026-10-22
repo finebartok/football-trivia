@@ -18,6 +18,9 @@ console_dump.html
 # What the deploy guide publishes
 dist/
 
+# The engine, copied into the functions' own tree for the deploy bundler
+supabase/functions/_shared/vendor/
+
 # Playwright artifacts
 test-results/
 playwright-report/

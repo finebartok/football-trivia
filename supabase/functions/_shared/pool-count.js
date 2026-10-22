@@ -4,8 +4,8 @@
  * This function exists to prove the engine runs on the server before the
  * room is built on top of it. It answers with a number and nothing else.
  */
-import { scopePool } from '../../../js/engine/index.js';
-import { presetById } from '../../../js/presets.js';
+import { scopePool } from './vendor/js/engine/index.js';
+import { presetById } from './vendor/js/presets.js';
 import { makeClients } from '../_shared/supabase.js';
 import { loadPool } from '../_shared/pool.js';
 

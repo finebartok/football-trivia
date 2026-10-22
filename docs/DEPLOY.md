@@ -54,13 +54,19 @@ npx supabase login
 npx supabase link --project-ref <your-ref>
 
 npx supabase db push                       # the migrations
-npx supabase functions deploy start-room
-npx supabase functions deploy submit-answer
+npm run supabase:deploy                    # the functions
 
 SUPABASE_URL=https://<your-ref>.supabase.co \
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key> \
   npm run supabase:upload                 # the player pool into Storage
 ```
+
+`npm run supabase:deploy` copies the engine and the shared library into
+`supabase/functions/_shared/vendor/` before it deploys. The deploy
+bundler only includes what is inside `supabase/`, so an import that
+points out of it is skipped and the deploy fails with "module not found"
+on a file that is right there. The copy is generated, never edited and
+never committed.
 
 **Then point the client at the project:**
 

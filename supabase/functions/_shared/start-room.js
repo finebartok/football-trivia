@@ -4,10 +4,10 @@
  * The plan is generated here, on the server, and never leaves it. The
  * client gets the first round's clues and options and nothing else.
  */
-import { planQuiz, scopePool } from '../../../js/engine/index.js';
-import { MIN_POOL } from '../../../js/engine/planner.js';
-import { presetById } from '../../../js/presets.js';
-import { validateScope } from '../../../lib/scope.js';
+import { planQuiz, scopePool } from './vendor/js/engine/index.js';
+import { MIN_POOL } from './vendor/js/engine/planner.js';
+import { presetById } from './vendor/js/presets.js';
+import { validateScope } from './vendor/lib/scope.js';
 import { makeClients } from '../_shared/supabase.js';
 import { loadPool } from '../_shared/pool.js';
 import { projectRound } from '../_shared/projection.js';
