@@ -12,15 +12,16 @@
     "ingest:all": "node scripts/ingest/fetch.js && node scripts/ingest/load.js && node scripts/ingest/derive.js && node scripts/ingest/validate.js",
     "validate": "node scripts/ingest/validate.js --strict",
     "fixtures": "node scripts/ingest/export-pool.js",
-    "supabase:start": "supabase start",
-    "supabase:stop": "supabase stop",
-    "supabase:reset": "supabase db reset",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:reset": "npx supabase db reset",
     "supabase:serve": "node scripts/prepare-functions.mjs && node scripts/serve-functions.js",
     "supabase:sync": "node scripts/supabase-sync.js",
-    "supabase:serve:edge": "supabase functions serve --env-file supabase/.env.local",
+    "supabase:serve:edge": "npx supabase functions serve --env-file supabase/.env.local",
     "supabase:upload": "node scripts/upload-pool.js",
     "publish": "node scripts/publish-static.mjs",
-    "supabase:deploy": "node scripts/prepare-functions.mjs && supabase functions deploy"
+    "deploy:hosted": "bash scripts/deploy-hosted.sh",
+    "supabase:deploy": "node scripts/prepare-functions.mjs && npx supabase functions deploy --use-api"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",

@@ -24,3 +24,6 @@ supabase/functions/_shared/vendor/
 # Playwright artifacts
 test-results/
 playwright-report/
+
+# The Netlify CLI links a site in this directory
+.netlify/

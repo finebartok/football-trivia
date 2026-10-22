@@ -36,6 +36,22 @@ npm run publish          # writes dist/
 same files the repository holds. Nothing else goes out — not `supabase/`,
 not `.env.local`, not `data/raw/`.
 
+## The quick path
+
+Fill `.env.local` (the template lists every value, and the file is
+gitignored), then:
+
+```bash
+npm run deploy:hosted
+```
+
+That links the project, pushes the migrations, deploys the functions,
+uploads the pool, writes `client/src/config.js`, publishes `dist/`, and
+deploys it to Netlify under `NETLIFY_SITE_NAME`. It is safe to re-run.
+
+The sections below are the same work by hand, and the reference for what
+each step needs.
+
 ## 1. The Supabase project
 
 Create a free project at supabase.com.
