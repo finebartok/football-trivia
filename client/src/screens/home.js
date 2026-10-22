@@ -37,16 +37,19 @@ function topbar() {
 
 function presetCard(preset) {
   const live = countFor({ clauses: preset.clauses });
-  const count = store.state.pool ? `${live} players` : '…';
+  // Without the pool a preset has no count and no quiz to start. The
+  // error above the list offers the retry.
+  const ready = Boolean(store.state.pool);
+  const count = ready ? `${live} players` : '…';
   return el('button', {
     className: 'vibe-card vibe-card--preset',
-    attrs: { type: 'button' },
-    on: {
+    attrs: ready ? { type: 'button' } : { type: 'button', disabled: '' },
+    on: ready ? {
       click: () => {
         store.setScope({ id: preset.id, name: preset.name, icon: preset.icon, clauses: preset.clauses });
         location.hash = '#lobby';
       },
-    },
+    } : {},
   }, [
     el('span', { className: 'vibe-card__icon', text: preset.icon }),
     el('span', { className: 'vibe-card__body' }, [
@@ -68,13 +71,15 @@ function savedCard(vibe) {
       el('button', {
         className: 'btn btn--primary btn--tiny',
         text: 'Play',
-        attrs: { type: 'button' },
-        on: {
+        attrs: store.state.pool
+          ? { type: 'button' }
+          : { type: 'button', disabled: '' },
+        on: store.state.pool ? {
           click: () => {
             store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
             location.hash = '#lobby';
           },
-        },
+        } : {},
       }),
       el('button', {
         className: 'btn btn--tiny',

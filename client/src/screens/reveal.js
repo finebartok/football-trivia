@@ -1,4 +1,4 @@
-import { el, mount, jerseyTile } from '../ui.js';
+import { el, mount, jerseyTile, pointsLabel } from '../ui.js';
 import { store } from '../store.js';
 import { sounds, haptic } from '../sound.js';
 
@@ -98,14 +98,14 @@ export function render(root) {
       answer?.correct
         ? el('strong', { text: 'You got it' })
         : el('strong', { text: `It was ${answerText}` }),
-      el('span', { className: 'verdict__points', text: `+${answer?.points ?? 0}` }),
+      el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
     ]),
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),
       el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: 'You' }),
-        el('span', { className: 'rank-row__points', text: `${total}` }),
+        el('span', { className: 'rank-row__points', text: pointsLabel(total) }),
       ]),
       el('p', { className: 'muted-note', text: `${correct} of ${store.state.answers.length} so far` }),
     ]),
@@ -201,16 +201,16 @@ function renderRoom(root, roomState) {
       answer?.correct
         ? el('strong', { text: 'You got it' })
         : el('strong', { text: `It was ${answerText}` }),
-      el('span', { className: 'verdict__points', text: `+${answer?.points ?? 0}` }),
+      el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
     ]),
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),
       ...board.map((m, i) => el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: `${i + 1}. ${labelFor(roomState, m.user_id)}` }),
-        el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
+        el('span', { className: 'rank-row__points', text: pointsLabel(m.total_score) }),
       ])),
-      el('p', { className: 'muted-note', text: me ? `You have ${me.total_score} points` : '' }),
+      el('p', { className: 'muted-note', text: me ? `You have ${pointsLabel(me.total_score)} points` : '' }),
     ]),
 
     next,

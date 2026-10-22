@@ -22,6 +22,14 @@ body {
 
 #app { max-width: 520px; margin: 0 auto; padding-bottom: 32px; }
 
+/* A button at the top level gets the same inset as the cards beside it. */
+#app > .btn,
+#app > .vibe-actions {
+  width: calc(100% - 24px);
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
 h1, h2, h3 { margin: 0; }
 
 a { color: var(--gold); }
@@ -120,7 +128,8 @@ a { color: var(--gold); }
 
 .option {
   display: block;
-  width: 100%;
+  /* The margins are part of the width, or the option runs off the screen. */
+  width: calc(100% - 24px);
   box-sizing: border-box;
   background: var(--surface);
   border: var(--border);

@@ -176,6 +176,16 @@ export const room = {
     return state;
   },
 
+  /**
+   * An error belongs to the screen that asked. Leaving that screen drops
+   * it, so "Something went wrong" never follows the player around.
+   */
+  clearError() {
+    if (state.error === null) return;
+    state.error = null;
+    notify();
+  },
+
   async create({ scope }) {
     const supabase = await ensure();
     if (!supabase) {

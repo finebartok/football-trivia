@@ -46,18 +46,18 @@ export function render(root) {
     ]),
 
     el('section', { className: 'card' }, [
-      el('h2', { className: 'section-title', text: 'In the room' }),
-      el('div', { className: 'rank-row' }, [
-        el('span', { className: 'rank-row__name', text: 'You' }),
-        el('span', { className: 'muted-note', text: 'host' }),
-      ]),
+      el('h2', { className: 'section-title', text: 'On your own' }),
       el('p', {
         className: 'muted-note',
-        text: 'Playing on your own. Create a room and your friends can join the same quiz.',
+        text: 'Ten questions, one clock. You can invite friends instead and play the same quiz in a room.',
       }),
     ]),
 
-    el('p', { className: 'muted-note', attrs: { id: 'lobby-error' } }, room.state.error ?? ''),
+    el(
+      'p',
+      { className: 'muted-note', attrs: { id: 'lobby-error' } },
+      room.state.error ?? store.state.poolError ?? '',
+    ),
 
     el('p', { className: 'fresh-quiz-note', text: 'A fresh quiz is written every time you play.' }),
 

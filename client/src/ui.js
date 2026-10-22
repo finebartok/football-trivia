@@ -53,11 +53,18 @@ export function jerseyTile(player, { size = 56 } = {}) {
   });
 }
 
+/** 30000 -> "30,000". Points won read "+4,500"; nothing reads "+0". */
+export function pointsLabel(value, { signed = false } = {}) {
+  const n = Math.round(Number(value) || 0);
+  const text = n.toLocaleString('en-US');
+  return signed && n > 0 ? `+${text}` : text;
+}
+
 /** A short, shareable summary of a finished quiz. */
 export function shareText({ scopeName, score, rounds, recap }) {
   const lines = [
     `Football Trivia — ${scopeName}`,
-    `${score} points over ${rounds} rounds`,
+    `${pointsLabel(score)} points over ${rounds} rounds`,
   ];
   if (recap) lines.push(recap);
   return lines.join('\n');

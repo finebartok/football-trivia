@@ -237,7 +237,7 @@ test('the age band sums goals scored after the player turned 30', () => {
   const w = windows.find(x => x.kind === 'age_band');
   assert.ok(w, 'an age-band window must exist');
   assert.equal(w.id, 'age-30');
-  assert.equal(w.label, 'aged 30+');
+  assert.equal(w.label, 'players aged 30+');
   assert.equal(w.ageFrom, 30);
   assert.equal(w.ageTo, null);
 

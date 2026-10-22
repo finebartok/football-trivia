@@ -1,4 +1,4 @@
-import { el, mount, shareText } from '../ui.js';
+import { el, mount, pointsLabel, shareText } from '../ui.js';
 import { store } from '../store.js';
 import { labelFor } from '../room-state.js';
 
@@ -37,13 +37,14 @@ export function render(root) {
   const summary = quiz.summary ?? {};
 
   const recapBits = [];
-  if (summary.metricFamilies) {
-    recapBits.push(summary.metricFamilies === 1
-      ? '1 kind of question'
-      : `${summary.metricFamilies} different kinds of question`);
+  // In v1 every round is "Who is this?", so one kind of question is not
+  // worth a line.
+  if (summary.metricFamilies > 1) {
+    recapBits.push(`${summary.metricFamilies} different kinds of question`);
   }
   if (summary.hardestRound) recapBits.push(`hardest round: ${summary.hardestRound}`);
   const recap = recapBits.join(' · ');
+  const recapText = recap ? recap[0].toUpperCase() + recap.slice(1) : '';
 
   const share = el('button', {
     className: 'btn',
@@ -55,7 +56,7 @@ export function render(root) {
           scopeName: store.state.scope?.name ?? 'Football Trivia',
           score,
           rounds: answers.length,
-          recap: recap ? `This quiz had ${recap}` : '',
+          recap: recapText,
         });
         navigator.clipboard?.writeText(text).then(() => {
           e.target.textContent = 'Copied';
@@ -71,16 +72,16 @@ export function render(root) {
 
     el('section', { className: 'results-hero' }, [
       el('p', { className: 'results-hero__label', text: 'FINAL SCORE' }),
-      el('p', { className: 'results-hero__score', text: String(score), attrs: { id: 'final-score' } }),
+      el('p', { className: 'results-hero__score', text: pointsLabel(score), attrs: { id: 'final-score' } }),
       el('p', { className: 'muted-note', text: `${correct} of ${answers.length} correct` }),
     ]),
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Your quiz' }),
-      el('p', { className: 'muted-note', text: recap || 'A fresh quiz is written every time you play.' }),
+      el('p', { className: 'muted-note', text: recapText || 'A fresh quiz is written every time you play.' }),
       el('div', { className: 'rank-row' }, [
-        el('span', { className: 'rank-row__name', text: 'Score' }),
-        el('span', { className: 'rank-row__points', text: `${score} / ${max}` }),
+        el('span', { className: 'rank-row__name', text: 'Points possible' }),
+        el('span', { className: 'rank-row__points', text: pointsLabel(max) }),
       ]),
     ]),
 
@@ -88,7 +89,7 @@ export function render(root) {
       el('h2', { className: 'section-title', text: 'Round by round' }),
       ...answers.map((a, i) => el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: `Round ${i + 1}` }),
-        el('span', { className: `rank-row__points ${a.correct ? 'is-good' : 'is-bad'}`, text: `+${a.points}` }),
+        el('span', { className: `rank-row__points ${a.correct ? 'is-good' : 'is-bad'}`, text: pointsLabel(a.points, { signed: true }) }),
       ])),
     ]),
 
@@ -115,15 +116,15 @@ function renderRoom(root, roomState) {
 
     el('section', { className: 'results-hero' }, [
       el('p', { className: 'results-hero__label', text: 'FINAL SCORE' }),
-      el('p', { className: 'results-hero__score', text: String(score), attrs: { id: 'final-score' } }),
-      el('p', { className: 'muted-note', text: `You scored ${score} of ${max}` }),
+      el('p', { className: 'results-hero__score', text: pointsLabel(score), attrs: { id: 'final-score' } }),
+      el('p', { className: 'muted-note', text: `of ${pointsLabel(max)} possible` }),
     ]),
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'The room' }),
       ...board.map((m, i) => el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: `${i + 1}. ${labelFor(roomState, m.user_id)}` }),
-        el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
+        el('span', { className: 'rank-row__points', text: pointsLabel(m.total_score) }),
       ])),
       el('p', { className: 'muted-note', text: 'A fresh quiz is written every time you play.' }),
     ]),

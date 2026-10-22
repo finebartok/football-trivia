@@ -1,4 +1,5 @@
 import { store } from './store.js';
+import { room } from './room.js';
 import { clear, el } from './ui.js';
 import * as home from './screens/home.js';
 import * as vibes from './screens/vibes.js';
@@ -61,6 +62,8 @@ export function render() {
     // seconds was the flicker.
     if (hash !== lastHash) {
       lastHash = hash;
+      // The error from the last screen does not travel with the player.
+      room.clearError();
       app.classList.remove('screen');
       void app.offsetWidth;
       app.classList.add('screen');

@@ -41,7 +41,7 @@ export function resolveWindow(scope, registry) {
       if (s.metric?.startsWith('goals_after_age_')) {
         const age = Number(s.metric.replace('goals_after_age_', ''));
         return {
-          id: `age-${age}`, kind: 'age_band', label: `aged ${age}+`, detail: 'the age band',
+          id: `age-${age}`, kind: 'age_band', label: `players aged ${age}+`, detail: 'the age band',
           seasonStart: null, seasonEnd: null, tournamentId: null, clubId: null, teamName: null,
           ageFrom: age, ageTo: null,
         };

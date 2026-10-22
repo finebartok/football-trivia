@@ -160,7 +160,7 @@ export function deriveWindows({ goals = [], appearances = [], games = [], clubsB
     if (!(a.goals > 0)) continue;
     const id = addWindow({
       id: `age-${AGE_BAND}`, kind: 'age_band',
-      label: `aged ${AGE_BAND}+`, detail: `goals scored from ${AGE_WINDOW_START} on`,
+      label: `players aged ${AGE_BAND}+`, detail: `goals scored from ${AGE_WINDOW_START} on`,
       seasonStart: AGE_WINDOW_START, seasonEnd: null,
       tournamentId: null, clubId: null, teamName: null,
       ageFrom: AGE_BAND, ageTo: null,
