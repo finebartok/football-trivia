@@ -7,6 +7,7 @@
  * null and multiplayer is unavailable while solo play carries on.
  */
 import { config } from './config.js';
+import { fetchWithTimeout } from './fetch.js';
 
 const SDK_URL = 'https://esm.sh/@supabase/supabase-js@2.49.8';
 
@@ -34,6 +35,9 @@ export async function connect() {
 
     const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
       auth: { persistSession: true, autoRefreshToken: true },
+      // A request that hangs must not hold the player's button down
+      // forever.
+      global: { fetch: (url, init) => fetchWithTimeout(url, init) },
     });
 
     const { data } = await supabase.auth.getSession();

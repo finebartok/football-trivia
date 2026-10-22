@@ -57,6 +57,8 @@ export function render(root) {
       }),
     ]),
 
+    el('p', { className: 'muted-note', attrs: { id: 'lobby-error' } }, room.state.error ?? ''),
+
     el('p', { className: 'fresh-quiz-note', text: 'A fresh quiz is written every time you play.' }),
 
     start,

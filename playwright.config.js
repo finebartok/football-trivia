@@ -12,6 +12,9 @@ export default defineConfig({
     reuseExistingServer: false,
   },
   testDir: 'tests/client',
+  // One worker. The room tests all talk to the same local database, and
+  // two suites fighting over it makes the slow one fail for no reason.
+  workers: 1,
   use: {
     baseURL: `http://localhost:${PORT}/client/`,
     viewport: { width: 390, height: 844 },

@@ -259,6 +259,9 @@ export function render(root) {
         text: 'Play solo',
         attrs: { href: '#lobby' },
       }),
+      // The room's own state, so the reason a room did not come is shown
+      // rather than swallowed.
+      el('p', { className: 'muted-note', attrs: { id: 'vibe-error' } }, room.state.error ?? ''),
     ]),
   ];
 

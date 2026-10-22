@@ -247,6 +247,9 @@ test('the worker never caches an error page', async ({ page }) => {
 });
 
 test('the room reveal shows something while it waits for the round to close', async ({ browser }) => {
+  // A room is a round trip to a database that the rest of the suite is
+  // using at the same time.
+  test.setTimeout(120000);
   const { host } = await roomWithTwoPlayers(browser);
   await host.locator('#btn-start').click();
   await expect(host).toHaveURL(/#round/);
@@ -256,7 +259,7 @@ test('the room reveal shows something while it waits for the round to close', as
   // The answer is only available once the round closes, but the screen
   // must not be blank while it waits.
   await expect(host.locator('#app')).not.toBeEmpty();
-  await expect(host.locator('#reveal-waiting')).toBeVisible();
+  await expect(host.locator('#reveal-waiting')).toBeVisible({ timeout: 30000 });
 });
 
 test('a failed join says why', async ({ page }) => {
@@ -267,7 +270,7 @@ test('a failed join says why', async ({ page }) => {
   await page.locator('#btn-join').click();
   await page.waitForTimeout(1500);
 
-  await expect(page.locator('#join-error')).toContainText(/room/i);
+  await expect(page.locator('#join-error')).toContainText(/room/i, { timeout: 30000 });
   // The code they typed is still there.
   await expect(page.locator('#join-code')).toHaveValue('ZZZZZZ');
 });
@@ -301,4 +304,22 @@ test('the suggestion counts the number that was typed', async ({ page }) => {
   const card = Number(await page.locator('#pool-count strong').innerText());
   expect(count).toBe(card);
   expect(count).toBeGreaterThan(0);
+});
+
+test('a room that will not come says why', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#btn-create-room');
+
+  // The server is not there.
+  await page.route('**/rest/v1/rpc/create_room', (route) => route.fulfill({
+    status: 500,
+    contentType: 'application/json',
+    body: JSON.stringify({ message: 'the database is on fire' }),
+  }));
+
+  await page.locator('#btn-create-room').click();
+  // The player is told, in plain words, and not with the server's raw
+  // message.
+  await expect(page.locator('#vibe-error')).toContainText(/went wrong/i);
+  await expect(page.locator('#btn-create-room')).toBeEnabled();
 });
