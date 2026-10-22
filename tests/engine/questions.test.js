@@ -186,10 +186,12 @@ test('metricsFor with a window never leaks a career total', () => {
   const messi = players.find(p => p.name === 'Lionel Messi');
   assert.ok(messi.stats?.goals_after_age_30 !== undefined, 'fixture player must have a career goals_after_age_30');
 
-  // With a window, a metric that only exists in the career block must not be
-  // reported as a windowed value.
+  // A metric that carries its own window says so, whatever the scope's
+  // window is: "235+ (since 2012)" is not a World Cup figure.
   const withWindow = metricsFor(messi, registry.windows['wc-2022']);
-  assert.ok(!withWindow.some(m => m.id === 'goals_after_age_30'), 'windowed metricsFor must not dress a career total as windowed');
+  const aged = withWindow.find(m => m.id === 'goals_after_age_30');
+  assert.ok(aged, 'the metric with its own window is still a clue');
+  assert.deepEqual(aged.window, { kind: 'since', seasonStart: 2012 });
 
   // Without a window, the career total is a valid answer.
   const withoutWindow = metricsFor(messi, undefined);

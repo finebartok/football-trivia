@@ -8,7 +8,7 @@ step: the browser loads the same files the repository holds.
 | Piece | Where it goes |
 |---|---|
 | `client/` | the web root, at `/client/` |
-| `js/engine/`, `lib/` | the web root — the client imports them by absolute path |
+| `js/engine/`, `js/presets.js`, `lib/` | the web root — the client imports them by absolute path |
 | `data/fixtures/pool.sample.json` | the web root — the browser fetches the player pool |
 | `client/fonts/` | the web root — the fonts are ours, not a third party's |
 | `supabase/migrations/` | the Supabase database |
@@ -19,7 +19,22 @@ absolute: `/client/index.html` imports `/js/engine/index.js`, which imports
 `/lib/scope.js`. If you host the game somewhere else, those paths have to
 change too.
 
-Do not publish `supabase/`, `.env.local`, or anything under `data/raw/`.
+### Publish the game, not the repository
+
+The repository also holds the pre-v1 game: an `index.html` at the root, its
+own scripts under `js/`, and the raw data under `data/raw/`. Publishing the
+repository as it stands would publish that older game too, on the same
+address, with made-up players in it.
+
+So publish a copy that holds only the game:
+
+```bash
+npm run publish          # writes dist/
+```
+
+`dist/` is the web root. It is a copy, not a build: the browser loads the
+same files the repository holds. Nothing else goes out — not `supabase/`,
+not `.env.local`, not `data/raw/`.
 
 ## 1. The Supabase project
 
@@ -78,6 +93,13 @@ URLs**.
 SUPABASE_URL=https://<your-ref>.supabase.co SUPABASE_ANON_KEY=<key> \
   npm run supabase:sync
 npm run dev
+```
+
+Or check exactly what you are about to publish:
+
+```bash
+npm run publish
+npx serve dist          # or any static server
 ```
 
 The game now talks to the hosted project, and the local server only

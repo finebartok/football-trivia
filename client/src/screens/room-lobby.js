@@ -1,6 +1,7 @@
 import { el, mount } from '../ui.js';
 import { store } from '../store.js';
 import { room } from '../room.js';
+import { labelFor } from '../room-state.js';
 
 export function render(root) {
   const roomState = store.state.room;
@@ -96,7 +97,7 @@ export function render(root) {
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'In the room' }),
       el('div', { attrs: { id: 'room-players' } }, roomState.members.map((m) => el('div', { className: 'rank-row' }, [
-        el('span', { className: 'rank-row__name', text: m.display_name }),
+        el('span', { className: 'rank-row__name', text: labelFor(roomState, m.user_id) }),
         el('span', { className: 'muted-note', text: m.is_host ? 'host' : '' }),
       ]))),
       el('p', { className: 'muted-note', text: 'The game starts when the host is ready.' }),

@@ -6,6 +6,7 @@ import { sounds, haptic } from '../sound.js';
 // redraw, and a player reading the answer should not hear it again.
 let saidFor = null;
 import { room } from '../room.js';
+import { labelFor } from '../room-state.js';
 
 function findPlayer(id) {
   return (store.state.pool?.players ?? []).find((p) => p.id === id) ?? null;
@@ -130,6 +131,17 @@ function renderRoom(root, roomState) {
       roomState.lastResultAskedAt = now;
       room.result(roomState.answeredRound);
     }
+    // The screen must never be blank. A player who has answered is
+    // waiting for the round to close, and a blank page reads as a crash.
+    mount(root, [
+      el('header', { className: 'topbar' }, [
+        el('span', { className: 'wordmark', text: '⚽ Football Trivia' }),
+      ]),
+      el('section', { className: 'card', attrs: { id: 'reveal-waiting' } }, [
+        el('h1', { className: 'page-title', text: 'Waiting for the round to close' }),
+        el('p', { className: 'muted-note', text: 'The answer is shown once everyone has answered or the time is up.' }),
+      ]),
+    ]);
     return;
   }
 
@@ -195,7 +207,7 @@ function renderRoom(root, roomState) {
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),
       ...board.map((m, i) => el('div', { className: 'rank-row' }, [
-        el('span', { className: 'rank-row__name', text: `${i + 1}. ${m.display_name}` }),
+        el('span', { className: 'rank-row__name', text: `${i + 1}. ${labelFor(roomState, m.user_id)}` }),
         el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
       ])),
       el('p', { className: 'muted-note', text: me ? `You have ${me.total_score} points` : '' }),

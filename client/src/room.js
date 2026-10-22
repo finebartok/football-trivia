@@ -20,6 +20,8 @@ const state = {
   scopeId: null,
   scopeName: null,
   scopeIcon: null,
+  // How far this device's clock is from the server's, in milliseconds.
+  clockOffset: 0,
   members: [],
   leaderboard: [],
   round: null,
@@ -133,7 +135,16 @@ async function sync() {
     const preset = presetById(data.scope_id);
     state.scopeId = data.scope_id;
     state.scopeName = data.scope_name || preset?.name || null;
-    state.scopeIcon = preset?.icon ?? null;
+    // A crafted vibe has no preset to look the icon up from, so the
+    // room carries it.
+    state.scopeIcon = data.scope_icon ?? preset?.icon ?? null;
+  }
+
+  // The server's clock travels with the state: a phone whose own clock
+  // has drifted must still see the clues at the same moment as everybody
+  // else.
+  if (data.server_now) {
+    state.clockOffset = Date.parse(data.server_now) - Date.now();
   }
 
   // A player who reloaded does not remember what they answered. The
@@ -184,6 +195,7 @@ export const room = {
       p_scope_clauses: scope.clauses ?? [],
       p_display_name: scope.displayName ?? 'Host',
       p_scope_name: scope.name ?? null,
+      p_scope_icon: scope.icon ?? null,
     });
     if (error) {
       state.error = friendly(error.message);

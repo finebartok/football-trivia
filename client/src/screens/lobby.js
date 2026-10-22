@@ -3,13 +3,6 @@ import { store } from '../store.js';
 import { countFor } from '../pool.js';
 import { room } from '../room.js';
 
-function roomCode() {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/0/1
-  const bytes = new Uint8Array(6);
-  crypto.getRandomValues(bytes);
-  return [...bytes].map((b) => alphabet[b % alphabet.length]).join(' ');
-}
-
 export function render(root) {
   const scope = store.state.scope;
   if (!scope) {
@@ -18,7 +11,6 @@ export function render(root) {
   }
 
   const count = countFor({ clauses: scope.clauses });
-  const code = roomCode();
 
   const start = el('button', {
     className: 'btn btn--primary',
@@ -45,23 +37,6 @@ export function render(root) {
       el('a', { className: 'wordmark', text: '← Back', attrs: { href: '#home' } }),
     ]),
 
-    el('section', { className: 'card room-code' }, [
-      el('p', { className: 'muted-note', text: 'Share this code so your friends can join' }),
-      el('p', { className: 'room-code__value', text: code, attrs: { id: 'room-code' } }),
-      el('button', {
-        className: 'btn btn--tiny',
-        text: 'Copy code',
-        attrs: { type: 'button' },
-        on: {
-          click: (e) => {
-            navigator.clipboard?.writeText(code.replace(/ /g, '')).then(() => {
-              e.target.textContent = 'Copied';
-            }).catch(() => {});
-          },
-        },
-      }),
-    ]),
-
     el('section', { className: 'card vibe-summary' }, [
       el('span', { className: 'vibe-summary__icon', text: scope.icon || '⚽' }),
       el('div', { className: 'vibe-summary__body' }, [
@@ -78,7 +53,7 @@ export function render(root) {
       ]),
       el('p', {
         className: 'muted-note',
-        text: 'Friends join with the code above. Multiplayer arrives with the room phase.',
+        text: 'Playing on your own. Create a room and your friends can join the same quiz.',
       }),
     ]),
 

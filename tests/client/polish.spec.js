@@ -1,4 +1,5 @@
 import test, { expect } from '@playwright/test';
+import { roomWithTwoPlayers } from './helpers.js';
 
 function watchErrors(page) {
   const errors = [];
@@ -243,4 +244,61 @@ test('the worker never caches an error page', async ({ page }) => {
     return urls;
   });
   expect(cached.filter((u) => u.includes('no-such-file'))).toEqual([]);
+});
+
+test('the room reveal shows something while it waits for the round to close', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+
+  // The answer is only available once the round closes, but the screen
+  // must not be blank while it waits.
+  await expect(host.locator('#app')).not.toBeEmpty();
+  await expect(host.locator('#reveal-waiting')).toBeVisible();
+});
+
+test('a failed join says why', async ({ page }) => {
+  await page.goto('#join');
+  await page.waitForSelector('#join-code');
+  await page.locator('#join-code').fill('ZZZZZZ');
+  await page.locator('#join-name').fill('Sam');
+  await page.locator('#btn-join').click();
+  await page.waitForTimeout(1500);
+
+  await expect(page.locator('#join-error')).toContainText(/room/i);
+  // The code they typed is still there.
+  await expect(page.locator('#join-code')).toHaveValue('ZZZZZZ');
+});
+
+test('the threshold field keeps the caret while the count updates', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#stat-value');
+
+  await page.locator('#stat-value').click();
+  await page.locator('#stat-value').press('Control+a');
+  await page.locator('#stat-value').type('250', { delay: 60 });
+
+  await expect(page.locator('#stat-value')).toHaveValue('250');
+  // The field still has the focus, so the next digit would land in it.
+  const focused = await page.evaluate(() => document.activeElement?.id);
+  expect(focused).toBe('stat-value');
+});
+
+test('the suggestion counts the number that was typed', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#stat-value');
+  await page.locator('#stat-metric').selectOption('goals_after_age_30');
+  await page.locator('#stat-value').fill('200');
+  await page.waitForTimeout(500);
+
+  // The count in the sentence is the count for the number that was
+  // typed - the same count the card above shows - not the count for the
+  // suggestion.
+  const sentence = await page.locator('#stat-suggestion').innerText();
+  const count = Number(sentence.match(/Only (\d+)/)?.[1]);
+  const card = Number(await page.locator('#pool-count strong').innerText());
+  expect(count).toBe(card);
+  expect(count).toBeGreaterThan(0);
 });

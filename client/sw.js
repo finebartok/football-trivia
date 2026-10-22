@@ -59,7 +59,16 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith((async () => {
     try {
-      const fresh = await fetch(request);
+      // A network that hangs is worse than one that fails: the browser
+      // waits forever and the player watches a spinner.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      let fresh;
+      try {
+        fresh = await fetch(request, { signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
       // Only a good response is worth keeping. An error page stored as
       // the shell would be served to everybody afterwards.
       if (fresh.ok) {

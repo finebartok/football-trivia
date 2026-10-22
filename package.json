@@ -18,7 +18,8 @@
     "supabase:serve": "node scripts/serve-functions.js",
     "supabase:sync": "node scripts/supabase-sync.js",
     "supabase:serve:edge": "supabase functions serve --env-file supabase/.env.local",
-    "supabase:upload": "node scripts/upload-pool.js"
+    "supabase:upload": "node scripts/upload-pool.js",
+    "publish": "node scripts/publish-static.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.2.17",

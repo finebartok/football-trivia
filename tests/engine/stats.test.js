@@ -31,11 +31,27 @@ test('metric families are assigned for the planner', () => {
 
 test('metricsFor only returns metrics the player has a value for', () => {
   const player = { windows: { 'wc-2022': { goals: 7 } }, stats: { international_caps: 204 } };
-  const m = metricsFor(player, { id: 'wc-2022' });
+  const m = metricsFor(player, { id: 'wc-2022', kind: 'tournament' });
   const ids = m.map(x => x.id);
   assert.ok(ids.includes('tournament_goals'));
   assert.ok(!ids.includes('club_appearances'));
   assert.equal(metricDescriptor('nope'), null);
+});
+
+test('a tournament metric does not answer for a club window', () => {
+  const player = { windows: { 'rm-2014': { goals: 61 } }, stats: {} };
+  const ids = metricsFor(player, { id: 'rm-2014', kind: 'season' }).map((m) => m.id);
+  assert.ok(!ids.includes('tournament_goals'), 'a club season is not a tournament');
+});
+
+test('the stat a scope is about is a clue, with its own window', () => {
+  // "50+ goals aged 30+" is the same fact whatever era the scope is
+  // about, so it resolves without a window - and it says where the data
+  // starts.
+  const player = { stats: { goals_after_age_30: 50, international_caps: 12 } };
+  const ids = metricsFor(player, null).map((m) => m.id);
+  assert.ok(ids.includes('goals_after_age_30'), 'the stat is a clue');
+  assert.equal(formatMetric('goals_after_age_30', 50, null), '50+ (since 2012)');
 });
 
 test('every metric declares a family and an exactness', () => {

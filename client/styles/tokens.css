@@ -1,7 +1,7 @@
 :root, [data-theme="retro"] {
   --bg: #f6ecd6;
   --ink: #2b2119;
-  --gold: #b8860b;
+  --gold: #8a6408;
   --red: #c0392b;
   --win: #1f5d3a;
   --surface: #fff8e6;
@@ -29,7 +29,7 @@
   --surface: #ffffff;
   --highlight: #f3efe7;
   --line: #e4ded2;
-  --muted: #8a8175;
+  --muted: #6f675c;
   --radius: 2px;
   --radius-sm: 2px;
   --radius-lg: 3px;

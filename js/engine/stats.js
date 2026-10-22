@@ -6,6 +6,9 @@ function millions(v) {
 
 function withWindow(text, window) {
   if (!window) return text;
+  if (window.kind === 'since') {
+    return `${text} (since ${window.seasonStart})`;
+  }
   if (window.kind === 'season_range') {
     return `${text} (${window.seasonStart ?? ''}–${window.seasonEnd ?? ''})`;
   }
@@ -31,14 +34,21 @@ export const METRICS = Object.freeze({
   },
   club_goals: {
     id: 'club_goals', label: 'Goals', unit: 'goals', exact: false, family: 'window',
+    // The dataset's club windows start at 2012/13, so the total in the
+    // career slot is a "since 2012" figure and not a full career.
+    window: { kind: 'since', seasonStart: 2012 },
     format: v => String(v),
   },
   club_appearances: {
     id: 'club_appearances', label: 'Appearances', unit: 'apps', exact: false, family: 'window',
+    window: { kind: 'since', seasonStart: 2012 },
     format: v => String(v),
   },
   goals_after_age_30: {
     id: 'goals_after_age_30', label: 'Goals aged 30+', unit: 'goals', exact: false, family: 'window',
+    // The data for this one only exists from 2012 onwards, whatever the
+    // scope's window is. It carries its own window so the clue can say so.
+    window: { kind: 'since', seasonStart: 2012 },
     format: v => `${v}+`,
   },
   tournament_goals: {
@@ -59,7 +69,10 @@ export function formatMetric(id, value, window) {
   const m = METRICS[id];
   if (!m) return String(value);
   const text = m.format(value);
-  return m.exact ? text : withWindow(text, window);
+  if (m.exact) return text;
+  // The window that came with the reading wins over the metric's own: a
+  // season's goals are that season's, whatever the metric's window is.
+  return withWindow(text, window ?? m.window);
 }
 
 // For these metrics a 0 means "the source recorded nothing", not "the value
@@ -72,12 +85,13 @@ export function metricsFor(player, window) {
   const out = [];
   for (const m of Object.values(METRICS)) {
     let value;
+    // Whether the value came from the player's own figures rather than
+    // from the scope's window.
+    let own = false;
     if (m.id === 'international_caps') value = player.internationalCaps;
     else if (m.id === 'international_goals') value = player.internationalGoals;
     else if (m.id === 'highest_market_value_eur') value = player.highestMarketValueEur;
-    else if (m.id === 'tournament_goals') {
-      value = window?.id ? (player.windows?.[window.id]?.goals) : undefined;
-    } else if (m.id === 'scarcity_peers') {
+    else if (m.id === 'scarcity_peers') {
       value = player.stats?.scarcity_peers;
     } else if (m.id === 'tournament_goals') {
       // A tournament window holds tournament goals. It is not a club season,
@@ -88,22 +102,33 @@ export function metricsFor(player, window) {
         : undefined;
     } else if (m.id === 'club_goals' || m.id === 'club_appearances') {
       if (window?.kind === 'tournament') {
+        // A tournament window holds tournament goals. It is not a club
+        // season, so club_goals must not read it - otherwise one number
+        // produces two identical clues, one of them mislabelled.
         value = undefined;
       } else if (window?.id) {
         const w = player.windows?.[window.id] ?? {};
         value = m.id === 'club_goals' ? (w.goals ?? w.club_goals) : (w.appearances ?? w.club_appearances);
+      } else {
+        // No window in play: the dataset's own total, which is the sum of
+        // the windows the dataset holds - 2012/13 onwards.
+        value = player.stats?.[m.id];
+        own = true;
       }
+    } else if (m.window) {
+      // The metric carries its own window, so its value is the player's
+      // own figure and not the scope's. "50+ goals aged 30+" is the same
+      // fact whatever era the scope is about.
+      value = player.stats?.[m.id];
+      own = true;
     } else if (window?.id && player.windows?.[window.id]?.[m.id] !== undefined) {
       value = player.windows[window.id][m.id];
-    } else if (!window && player.stats?.[m.id] !== undefined) {
-      // A career total is only a valid answer when no window is in play. With
-      // a window, the window IS the scope of the claim - a career figure
-      // dressed as a windowed one is the "199 goals since 2012" mistake again.
-      value = player.stats[m.id];
     }
     if (value === undefined || value === null) continue;
     if (value === 0 && ZERO_MEANS_ABSENT.has(m.id)) continue;
-    out.push({ ...m, value });
+    // The reading's window: the scope's, or the metric's own when the
+    // value came from the player's own figures.
+    out.push({ ...m, value, window: own ? m.window : window });
   }
   return out;
 }

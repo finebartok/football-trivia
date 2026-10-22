@@ -92,7 +92,17 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
   // impossible with real biographical hints, but possible with synthetic
   // data), keep the round usable and non-crashing instead of emitting zero
   // clues and an empty revealSchedule.
-  const clues = (safeHints.length ? safeHints : allHints).slice(0, Math.max(1, stages));
+  // The surface facts (nationality, position, born) are held back for the
+  // low-multiplier stages, so the last clue is one of them when there is
+  // one. Holding them back and then never showing them is no holding
+  // back at all.
+  const ladder = safeHints.length ? safeHints : allHints;
+  const n = Math.max(1, stages);
+  const hard = ladder.filter(h => !h.surface);
+  const soft = ladder.filter(h => h.surface);
+  const clues = soft.length && hard.length >= n - 1
+    ? [...hard.slice(0, n - 1), soft[0]]
+    : [...hard, ...soft].slice(0, n);
 
   const isNumeric = recipe.template === 'stat_value';
   const distractors = isNumeric

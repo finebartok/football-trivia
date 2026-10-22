@@ -15,6 +15,9 @@ data/football.db
 # Stray output from the old ad-hoc test scripts
 console_dump.html
 
+# What the deploy guide publishes
+dist/
+
 # Playwright artifacts
 test-results/
 playwright-report/

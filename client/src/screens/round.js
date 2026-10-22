@@ -70,14 +70,25 @@ export function render(root) {
     ? new Date(roomState.round.deadline_at).getTime()
     : startedAt + ROUND_MS;
 
+  // The server's clock, not this device's. A phone whose clock has
+  // drifted would otherwise reveal the clues at its own moment, and
+  // every player would see a different round.
+  const clockOffset = inRoom ? (roomState.clockOffset ?? 0) : 0;
+  const now = () => Date.now() + clockOffset;
+
   const timerEl = el('span', { className: 'round-timer', attrs: { id: 'round-timer' } });
 
   // The clue ladder is built once and only its classes change.
-  const stepEls = [1, 2, 3, 4].map((n) => el('div', {
-    className: 'step',
-    text: `×${STAGE_MULTIPLIERS[n]}`,
-    attrs: { 'aria-label': `Stage ${n}, multiplier ${STAGE_MULTIPLIERS[n]}` },
-  }));
+  // One step per clue. A ladder with a step the round never reaches
+  // promises a clue that never comes.
+  const stepEls = round.clues.map((_, i) => {
+    const n = i + 1;
+    return el('div', {
+      className: 'step',
+      text: `×${STAGE_MULTIPLIERS[n]}`,
+      attrs: { 'aria-label': `Stage ${n}, multiplier ${STAGE_MULTIPLIERS[n]}` },
+    });
+  });
   const ladderEl = el('div', { className: 'clue-ladder', attrs: { id: 'clue-ladder' } }, stepEls);
 
   // The clue cards are built once; only their value text changes. Rebuilding
@@ -102,7 +113,7 @@ export function render(root) {
     on: {
       click: async () => {
         sounds.click();
-        const elapsed = Math.max(0, Date.now() - startedAt);
+        const elapsed = Math.max(0, now() - startedAt);
         const stage = Math.max(1, revealedStages(round, elapsed));
         if (inRoom) {
           // The server decides whether the answer was right and what it
@@ -125,7 +136,7 @@ export function render(root) {
       },
     },
   }, [
-    el('span', { className: 'option__letter', text: LETTERS[i] }),
+    el('span', { className: 'option__letter', text: LETTERS[i], attrs: { 'aria-hidden': 'true' } }),
     el('span', { className: 'option__label', text: opt.label }),
   ]));
   const optionsHost = el('div', { attrs: { id: 'round-options' } }, optionEls);
@@ -140,7 +151,7 @@ export function render(root) {
   }
 
   const paint = () => {
-    const elapsed = Math.max(0, Date.now() - startedAt);
+    const elapsed = Math.max(0, now() - startedAt);
     const revealed = revealedStages(round, elapsed);
 
     // One note per clue, not one per tick - and not one per redraw
@@ -156,7 +167,7 @@ export function render(root) {
     }
     // The deadline is a moment, not a length: what is left is the
     // difference between it and now.
-    const remaining = Math.max(0, deadline - Date.now());
+    const remaining = Math.max(0, deadline - now());
     const expired = remaining <= 0;
 
     // The clock is the only thing under pressure.

@@ -45,6 +45,15 @@ export function render() {
     const screen = screenFor(hash);
     const app = document.getElementById('app');
     if (!app) return;
+
+    // Remember what the player was typing in. A redraw replaces the
+    // whole screen, and without this a field that is being typed into
+    // loses the focus after one character.
+    const active = document.activeElement;
+    const focusId = active && active.id ? active.id : null;
+    let caret = null;
+    if (focusId && typeof active.selectionStart === 'number') caret = active.selectionStart;
+
     clear(app);
 
     // The fade belongs to a change of screen, not to a redraw. The room
@@ -66,6 +75,21 @@ export function render() {
     }
 
     screen.render(app);
+
+    if (focusId) {
+      const next = document.getElementById(focusId);
+      if (next && typeof next.focus === 'function') {
+        next.focus();
+        if (caret !== null && typeof next.setSelectionRange === 'function') {
+          try {
+            next.setSelectionRange(caret, caret);
+          } catch {
+            // Not every kind of field has a caret - a number input does
+            // not, and it keeps the focus anyway.
+          }
+        }
+      }
+    }
   } finally {
     rendering = false;
   }

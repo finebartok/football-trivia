@@ -91,7 +91,22 @@ export async function invokeFunction(name, body) {
   const supabase = await connect();
   if (!supabase) return { status: 0, data: { error: 'multiplayer is unavailable' } };
   const { data, error } = await supabase.functions.invoke(name, { body });
-  if (error) return { status: error.status ?? 500, data: { error: error.message } };
+  if (error) {
+    // The hosted path throws the server's answer away unless the body is
+    // read out of the error's context. "Something went wrong" is not
+    // something a player can act on.
+    let message = error.message;
+    const context = error.context;
+    if (context && typeof context.text === 'function') {
+      try {
+        const parsed = JSON.parse(await context.text());
+        if (parsed?.error) message = parsed.error;
+      } catch {
+        // The body was not JSON. The message stands.
+      }
+    }
+    return { status: error.status ?? 500, data: { error: message } };
+  }
   return { status: 200, data };
 }
 

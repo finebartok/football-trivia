@@ -221,8 +221,30 @@ a { color: var(--gold); }
   background: transparent;
   color: inherit;
   font: inherit;
-  text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+/* A code is shouted. A name is not. */
+.text-input--code {
+  text-transform: uppercase;
+}
+
+/* A name or a number is written the way it is typed. */
+.text-input--plain {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.threshold-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.threshold-label {
+  font-size: .85rem;
+  opacity: .8;
+  white-space: nowrap;
 }
 
 .vibe-actions {

@@ -34,7 +34,9 @@ export function buildHints(subject, window, registry, { limit } = {}) {
     hints.push({
       id: m.id,
       label: m.label,
-      value: formatMetric(m.id, m.value, window),
+      // The reading's window, so the clue says which window the number
+      // belongs to.
+      value: formatMetric(m.id, m.value, m.window ?? window),
       iconKey: m.family === 'roster' ? ICONS.honors : m.id === 'highest_market_value_eur' ? ICONS.value : ICONS.honors,
       family: m.family,
       surface: false,

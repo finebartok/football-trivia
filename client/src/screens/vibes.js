@@ -27,6 +27,9 @@ export function render(root) {
   const count = countFor({ clauses: vibe.clauses });
   const tooSmall = count < MIN_POOL;
 
+  // The screen is rebuilt whenever the scope changes, which happens on
+  // every keystroke in the threshold field. The field the player is typing
+  // in keeps its focus and caret: main.js restores them after a redraw.
   const rerender = () => render(root);
 
   const options = {
@@ -80,8 +83,18 @@ export function render(root) {
   metricSelect.value = statMetric;
 
   const thresholdInput = el('input', {
-    className: 'text-input',
-    attrs: { type: 'number', id: 'stat-value', min: '0', placeholder: '50', value: String(thresholdValue) },
+    className: 'text-input text-input--plain',
+    // A text field with a numeric keyboard, not a number field: a number
+    // field has no caret position, so the player's cursor cannot be put
+    // back where it was after a redraw.
+    attrs: {
+      type: 'text',
+      inputmode: 'numeric',
+      pattern: '[0-9]*',
+      id: 'stat-value',
+      placeholder: '50',
+      value: String(thresholdValue),
+    },
     on: {
       input: (e) => {
         const value = Number(e.currentTarget.value);
@@ -92,7 +105,7 @@ export function render(root) {
 
   const suggestionEl = suggestion
     ? el('p', { className: 'muted-note', attrs: { id: 'stat-suggestion' } }, [
-      `Only ${suggestion.count} players hit ${thresholdValue}+ ${metricLabel(statMetric)} - try ${suggestion.value}+`,
+      `Only ${typedCount} players hit ${thresholdValue}+ ${metricLabel(statMetric)} - try ${suggestion.value}+`,
       el('button', {
         className: 'btn btn--tiny',
         text: `Use ${suggestion.value}+`,
@@ -110,12 +123,13 @@ export function render(root) {
   const onPick = (move, value) => {
     const next = applyMove(vibe, move.id, value, players, registry);
     vibe = { ...vibe, clauses: next.clauses };
+    // Setting the scope redraws the screen. Redrawing it here as well
+    // would take the focus away from the field the player is typing in.
     store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
-    rerender();
   };
 
   const nameInput = el('input', {
-    className: 'input',
+    className: 'input input--plain',
     attrs: { type: 'text', id: 'vibe-name', placeholder: 'Name this vibe', value: vibe.name ?? '' },
     on: {
       change: (e) => {
@@ -179,6 +193,11 @@ export function render(root) {
       el('h2', { className: 'section-title', text: 'A threshold' }),
       el('div', { className: 'threshold-row' }, [
         metricSelect,
+        el('label', {
+          className: 'threshold-label',
+          text: 'At least',
+          attrs: { for: 'stat-value' },
+        }),
         thresholdInput,
       ]),
       suggestionEl,

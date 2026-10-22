@@ -1,5 +1,6 @@
 import { el, mount, shareText } from '../ui.js';
 import { store } from '../store.js';
+import { labelFor } from '../room-state.js';
 
 export function render(root) {
   const roomState = store.state.room;
@@ -36,7 +37,11 @@ export function render(root) {
   const summary = quiz.summary ?? {};
 
   const recapBits = [];
-  if (summary.metricFamilies) recapBits.push(`${summary.metricFamilies} different kinds of question`);
+  if (summary.metricFamilies) {
+    recapBits.push(summary.metricFamilies === 1
+      ? '1 kind of question'
+      : `${summary.metricFamilies} different kinds of question`);
+  }
   if (summary.hardestRound) recapBits.push(`hardest round: ${summary.hardestRound}`);
   const recap = recapBits.join(' · ');
 
@@ -117,7 +122,7 @@ function renderRoom(root, roomState) {
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'The room' }),
       ...board.map((m, i) => el('div', { className: 'rank-row' }, [
-        el('span', { className: 'rank-row__name', text: `${i + 1}. ${m.display_name}` }),
+        el('span', { className: 'rank-row__name', text: `${i + 1}. ${labelFor(roomState, m.user_id)}` }),
         el('span', { className: 'rank-row__points', text: `${m.total_score}` }),
       ])),
       el('p', { className: 'muted-note', text: 'A fresh quiz is written every time you play.' }),

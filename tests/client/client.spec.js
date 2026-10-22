@@ -61,8 +61,10 @@ test('a quiz round shows the window banner, the ladder, clues and four options',
   await startQuiz(page);
 
   await expect(page.locator('#window-banner')).not.toBeEmpty();
-  await expect(page.locator('#clue-ladder .step')).toHaveCount(4);
   await expect(page.locator('.clue-card')).toHaveCount(3);
+  // One step per clue. A step the round never reaches promises a clue
+  // that never comes.
+  await expect(page.locator('#clue-ladder .step')).toHaveCount(3);
   await expect(page.locator('.option')).toHaveCount(4);
 
   // the clue ladder must not show every clue at once
