@@ -1,0 +1,49 @@
+/*
+ * The web fonts.
+ *
+ * Fetched once by scripts/fetch-fonts.mjs and kept in the repository, so
+ * the game does not ask a third party for them and the text does not
+ * reflow when they arrive. Licensed under the SIL Open Font License.
+ */
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: optional;
+  src: url('/client/fonts/fredoka-latin-ext.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: optional;
+  src: url('/client/fonts/fredoka-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: optional;
+  src: url('/client/fonts/inter-latin-ext.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: optional;
+  src: url('/client/fonts/inter-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: optional;
+  src: url('/client/fonts/playfair-display-latin-ext.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600 900;
+  font-display: optional;
+  src: url('/client/fonts/playfair-display-latin.woff2') format('woff2');
+}

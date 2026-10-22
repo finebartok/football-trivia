@@ -24,7 +24,12 @@ test('a stat recipe speaks a sentence with the subject named', () => {
 
 test('recipesFor returns only recipes available for the pool', () => {
   const { players, registry } = loadFixture();
-  const recipes = recipesFor({ template: 'stat_value', window: registry.windows['wc-2022'], pool: players });
+  const recipes = recipesFor({
+    template: 'stat_value',
+    window: registry.windows['wc-2022'],
+    pool: players,
+    phases: ['v1.1'],
+  });
   assert.ok(recipes.length >= 1);
   assert.ok(recipes.every(r => r.template === 'stat_value'));
 });

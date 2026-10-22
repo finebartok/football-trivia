@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Football Trivia</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Inter:wght@400;600;800&family=Playfair+Display:wght@600;900&display=swap" rel="stylesheet">
+  <!-- The fonts are ours, not a third party's. Asking Google for them
+       meant the text reflowed when they arrived. -->
+  <link rel="preload" href="/client/fonts/fredoka-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/client/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/client/fonts/playfair-display-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/client/styles/fonts.css">
   <link rel="stylesheet" href="/client/styles/tokens.css">
   <link rel="stylesheet" href="/client/styles/app.css">
   <link rel="manifest" href="/client/manifest.webmanifest">

@@ -16,6 +16,7 @@ export const RECIPES = Object.freeze([
   },
   {
     id: 'goals_in_season',
+    phase: 'v1.1',
     family: 'window',
     template: 'stat_value',
     metric: 'club_goals',
@@ -40,6 +41,7 @@ export const RECIPES = Object.freeze([
   },
   {
     id: 'goals_in_tournament',
+    phase: 'v1.1',
     family: 'roster',
     template: 'stat_value',
     metric: 'tournament_goals',
@@ -53,6 +55,7 @@ export const RECIPES = Object.freeze([
   },
   {
     id: 'caps_total',
+    phase: 'v1.1',
     family: 'career',
     template: 'stat_value',
     metric: 'international_caps',
@@ -79,10 +82,19 @@ export const RECIPES = Object.freeze([
   },
 ]);
 
-export function recipesFor({ template, window, pool }) {
+/**
+ * The recipes a game may use.
+ *
+ * A recipe that belongs to a later phase is not offered until that phase
+ * asks for it. v1 is guess-the-player only - the v1 spec's D4 - so the
+ * numeric templates wait rather than turning half the rounds into a
+ * different game.
+ */
+export function recipesFor({ template, window, pool, phases = [] }) {
   const kind = window?.kind ?? 'career';
   const subjects = pool ?? [];
   return RECIPES.filter(r => {
+    if (r.phase && !phases.includes(r.phase)) return false;
     if (template && r.template !== template) return false;
     if (!r.windowKinds.includes(kind)) return false;
     if (r.metric === 'identity') return true;

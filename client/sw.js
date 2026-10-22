@@ -12,7 +12,9 @@
  * network, not what it serves from.
  */
 
-const VERSION = 'football-trivia-v1';
+// Bumped so every browser that has the old worker drops its old cache.
+// With the network first, later deploys do not need a bump.
+const VERSION = 'football-trivia-v2';
 const SHELL = `${VERSION}-shell`;
 
 self.addEventListener('install', (event) => {

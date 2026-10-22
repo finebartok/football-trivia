@@ -27,6 +27,7 @@ const SCREENS = {
 const ROOM_SCREENS = new Set(['#join', '#room-lobby', '#round', '#reveal', '#results']);
 
 let rendering = false;
+let lastHash = null;
 
 function screenFor(hash) {
   const screen = SCREENS[hash];
@@ -45,11 +46,16 @@ export function render() {
     const app = document.getElementById('app');
     if (!app) return;
     clear(app);
-    // The class is removed and put back so the animation starts again -
-    // a class that is already there does not replay.
-    app.classList.remove('screen');
-    void app.offsetWidth;
-    app.classList.add('screen');
+
+    // The fade belongs to a change of screen, not to a redraw. The room
+    // redraws every two seconds, and a screen that faded in every two
+    // seconds was the flicker.
+    if (hash !== lastHash) {
+      lastHash = hash;
+      app.classList.remove('screen');
+      void app.offsetWidth;
+      app.classList.add('screen');
+    }
 
     // A room screen needs the room, and the room is only known once the
     // session is back. Show nothing until then rather than bouncing the

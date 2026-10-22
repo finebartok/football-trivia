@@ -7,7 +7,7 @@ export const MIN_POOL = 20;
 
 const DIFFICULTY_DEPTH = { easy: 1, medium: 2, hard: 3 };
 
-export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium' }) {
+export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [] }) {
   const rng = makeRng(seed);
   const players = scopePool(scope, pool);
 
@@ -16,7 +16,7 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
   }
 
   const window = resolveWindow(scope, registry);
-  const recipes = recipesFor({ template: null, window, pool: players });
+  const recipes = recipesFor({ template: null, window, pool: players, phases });
   if (recipes.length === 0) {
     throw new Error('no question recipe is available for this scope');
   }
@@ -29,8 +29,10 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
     const candidates = [];
 
     for (const recipe of recipes) {
-      // No metric repeats consecutively.
-      if (plan.length && plan[plan.length - 1].metric === recipe.metric) continue;
+      // No metric repeats consecutively - but only when there is another
+      // recipe to pick instead. With one recipe a repeat is the only
+      // option, and the quiz must not be one round long.
+      if (recipes.length > 1 && plan.length && plan[plan.length - 1].metric === recipe.metric) continue;
       const cands = candidateSubjects({ scope, pool: players, registry, window, metric: recipe.metric });
       for (const c of cands) {
         // No subject repeats.

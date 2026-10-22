@@ -179,3 +179,68 @@ test('a clue does not play its note again on every redraw', async ({ page }) => 
   const second = await page.evaluate(() => window.__oscillators);
   expect(second).toBe(first);
 });
+
+test('the content does not move while the screen is redrawn', async ({ page }) => {
+  // The pool arrives, the store says so, and the screen is redrawn. The
+  // content must not move under the reader.
+  await page.addInitScript(() => {
+    window.__tops = [];
+    const sample = () => {
+      const h = document.querySelector('.hero__title');
+      if (h) {
+        const top = Math.round(h.getBoundingClientRect().top);
+        const last = window.__tops[window.__tops.length - 1];
+        if (!last || last.top !== top) window.__tops.push({ top, t: Math.round(performance.now()) });
+      }
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
+
+  await page.goto('./');
+  await page.waitForTimeout(3000);
+
+  const tops = await page.evaluate(() => window.__tops);
+  expect(tops.length).toBe(1);
+});
+
+test('the worker never caches the player pool', async ({ page }) => {
+  await page.goto('./');
+  await page.waitForSelector('.vibe-card--preset');
+  // The pool is fetched for the counts.
+  await page.waitForFunction(() =>
+    document.querySelector('.vibe-card__count')?.textContent?.includes('players'));
+  await page.waitForTimeout(1500);
+
+  const cached = await page.evaluate(async () => {
+    const names = await caches.keys();
+    const urls = [];
+    for (const name of names) {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) urls.push(request.url);
+    }
+    return urls;
+  });
+  expect(cached.filter((u) => u.includes('/data/fixtures/'))).toEqual([]);
+});
+
+test('the worker never caches an error page', async ({ page }) => {
+  await page.goto('./');
+  await page.waitForSelector('.vibe-card--preset');
+  await page.waitForTimeout(1200);
+
+  // A file that is not there.
+  await page.goto('./client/no-such-file');
+  await page.waitForTimeout(800);
+
+  const cached = await page.evaluate(async () => {
+    const names = await caches.keys();
+    const urls = [];
+    for (const name of names) {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) urls.push(request.url);
+    }
+    return urls;
+  });
+  expect(cached.filter((u) => u.includes('no-such-file'))).toEqual([]);
+});
