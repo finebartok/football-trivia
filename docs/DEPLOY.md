@@ -3,21 +3,31 @@
 The game is a static site plus a Supabase project. Nothing needs a build
 step: the browser loads the same files the repository holds.
 
+## Where it runs now
+
+The live game is **https://football-trivia-xi.vercel.app/**. Vercel runs
+`npm run publish` and serves `dist/` (see `vercel.json`). Once the Vercel
+project is connected to `finebartok/football-trivia` on GitHub, every push
+to `main` deploys.
+
+Netlify also holds a working copy, but `*.netlify.app` is unreachable from
+this network, so it is not the primary host.
+
 ## What goes where
 
 | Piece | Where it goes |
 |---|---|
-| `client/` | the web root, at `/client/` |
+| `client/` contents | the web root, via `npm run publish` |
 | `js/engine/`, `js/presets.js`, `lib/` | the web root — the client imports them by absolute path |
 | `data/fixtures/pool.sample.json` | the web root — the browser fetches the player pool |
 | `client/fonts/` | the web root — the fonts are ours, not a third party's |
 | `supabase/migrations/` | the Supabase database |
 | `supabase/functions/` | the Supabase edge functions |
 
-**The web root is the repository root**, because the client's paths are
-absolute: `/client/index.html` imports `/js/engine/index.js`, which imports
-`/lib/scope.js`. If you host the game somewhere else, those paths have to
-change too.
+**The web root is `dist/`**, not the repository root. `npm run publish`
+copies the game files there, and the client's absolute paths
+(`/src/main.js`, `/js/engine/index.js`, `/lib/scope.js`) resolve from that
+root. Publishing the repository root would serve the old pre-v1 game.
 
 ### Publish the game, not the repository
 

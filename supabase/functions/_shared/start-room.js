@@ -11,7 +11,7 @@ import { validateScope } from './vendor/lib/scope.js';
 import { makeClients } from '../_shared/supabase.js';
 import { loadPool } from '../_shared/pool.js';
 import { projectRound } from '../_shared/projection.js';
-import { json } from './pool-count.js';
+import { json, preflight } from './pool-count.js';
 
 /** The client-visible shape of a round. */
 function roundPayload(round) {
@@ -30,6 +30,8 @@ function roundPayload(round) {
 }
 
 export async function handleStartRoom(req, { createClient, env }) {
+  const pre = preflight(req);
+  if (pre) return pre;
   try {
     const auth = req.headers.get('Authorization') ?? '';
     const caller = makeClients({ createClient, env }).callerClient(req);
