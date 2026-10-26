@@ -56,6 +56,35 @@ test('a pool-aware record only says what the pool proves', () => {
   assert.equal(small.value, '125 international goals — the most in this vibe.');
 });
 
+test('a record skips a metric the vibe mostly does not know', () => {
+  const subject = { id: 1, name: 'Synthetic', stats: { goals_after_age_30: 120 } };
+  const known = (id, value) => ({ id, name: `Known ${id}`, stats: { goals_after_age_30: value } });
+  const unknown = (id) => ({ id, name: `Unknown ${id}`, stats: {} });
+
+  // 7 of 10 players know the metric: too sparse to say what the vibe proves.
+  const sparse = [
+    subject,
+    ...[50, 40, 30, 20, 10, 2].map((value, i) => known(2 + i, value)),
+    ...[0, 1, 2].map((i) => unknown(20 + i)),
+  ];
+  assert.equal(sparse.length, 10);
+  const sparseHints = buildHints(subject, null, {}, { pool: sparse });
+  assert.equal(sparseHints.find((h) => h.role === 'record'), undefined);
+
+  // 8 of 10 players know it: enough to prove the record.
+  const full = [
+    subject,
+    ...[50, 40, 30, 20, 10, 5, 2].map((value, i) => known(2 + i, value)),
+    ...[0, 1].map((i) => unknown(30 + i)),
+  ];
+  assert.equal(full.length, 10);
+  const fullHints = buildHints(subject, null, {}, { pool: full });
+  assert.equal(
+    fullHints.find((h) => h.role === 'record')?.value,
+    'Since 2012, 120 goals after turning 30 — the most in this vibe.',
+  );
+});
+
 test('the hook is true, rare, and never repeats a clue’s metric', () => {
   const subject = {
     id: 1, name: 'Synthetic', internationalCaps: 120, internationalGoals: 40,

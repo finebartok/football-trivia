@@ -262,6 +262,10 @@ function tournamentGoals(player, window) {
   return player.windows?.[window.id]?.goals;
 }
 
+// A record only claims what the vibe's data can prove. Below this share of
+// known values, the comparison is too thin to state.
+const MIN_RECORD_COVERAGE = 0.8;
+
 const RECORD_DEFS = [
   {
     id: 'international_goals', priority: 0, family: 'career',
@@ -341,9 +345,13 @@ function recordHint(subject, pool, stage, window) {
     const value = def.value(subject, window);
     if (value === undefined || value === null || value <= 0) continue;
 
-    const values = pool
+    // A zero is a known value; only the comparison itself needs positives.
+    const known = pool
       .map((player) => def.value(player, window))
-      .filter((v) => v !== undefined && v !== null && v > 0);
+      .filter((v) => v !== undefined && v !== null);
+    if (known.length / pool.length < MIN_RECORD_COVERAGE) continue;
+
+    const values = known.filter((v) => v > 0);
     if (values.length < 2) continue;
 
     const rank = 1 + values.filter((v) => v > value).length;

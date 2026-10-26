@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PRESETS, presetById, presetMatchesScope } from '../../js/presets.js';
+import { scopePool } from '../../js/engine/index.js';
+import { loadFixture } from '../../js/engine/fixture.js';
 
 test('every preset has an id, a name and clauses', () => {
   assert.ok(PRESETS.length >= 7, 'there are at least seven vibes');
@@ -18,6 +20,21 @@ test('a preset can be found by its id', () => {
   const first = PRESETS[0];
   assert.equal(presetById(first.id)?.name, first.name);
   assert.equal(presetById('no-such-vibe'), null);
+});
+
+test('the 2024/25 vibe is one season, not two', () => {
+  const preset = presetById('premier-2425');
+  const { players } = loadFixture();
+  const pool = scopePool({ clauses: preset.clauses }, players);
+
+  assert.ok(pool.length > 0, 'the vibe has players');
+  for (const player of pool) {
+    assert.ok(
+      (player.teams ?? []).some((team) =>
+        team.leagueId === 'GB1' && (team.seasons ?? []).includes(2024)),
+      `${player.name} played in the 2024/25 Premier League season`,
+    );
+  }
 });
 
 test('only the untouched preset can use the preset player slice', () => {
