@@ -36,11 +36,17 @@ function topbar() {
 }
 
 function presetCard(preset) {
-  const live = countFor({ clauses: preset.clauses });
-  // Without the pool a preset has no count and no quiz to start. The
-  // error above the list offers the retry.
-  const ready = Boolean(store.state.pool);
-  const count = ready ? `${live} players` : '…';
+  // The published counts arrive in a tiny file. The full pool arrives only
+  // if the metadata did not - local development, or an older deploy.
+  const metaCount = store.state.poolCounts?.[preset.id];
+  const live = store.state.poolKey === 'full'
+    ? countFor({ clauses: preset.clauses })
+    : null;
+  const count = metaCount ?? live;
+  // Without a count a preset has no quiz to start. The error above the
+  // list offers the retry.
+  const ready = count != null || Boolean(store.state.pool);
+  const countLabel = count != null ? `${count} players` : ready ? 'Players ready' : '…';
   return el('button', {
     className: 'vibe-card vibe-card--preset',
     attrs: ready ? { type: 'button' } : { type: 'button', disabled: '' },
@@ -56,11 +62,14 @@ function presetCard(preset) {
       el('strong', { className: 'vibe-card__name', text: preset.name }),
       el('span', { className: 'vibe-card__desc', text: preset.desc }),
     ]),
-    el('span', { className: 'vibe-card__count', text: count }),
+    el('span', { className: 'vibe-card__count', text: countLabel }),
   ]);
 }
 
 function savedCard(vibe) {
+  // A saved vibe may have been edited, so its players cannot be assumed
+  // to be a preset's slice. The lobby fetches what it needs.
+  const ready = Boolean(store.state.poolCounts || store.state.pool);
   return el('div', { className: 'vibe-card vibe-card--saved' }, [
     el('span', { className: 'vibe-card__icon', text: vibe.icon || '⚽' }),
     el('span', { className: 'vibe-card__body' }, [
@@ -71,10 +80,10 @@ function savedCard(vibe) {
       el('button', {
         className: 'btn btn--primary btn--tiny',
         text: 'Play',
-        attrs: store.state.pool
+        attrs: ready
           ? { type: 'button' }
           : { type: 'button', disabled: '' },
-        on: store.state.pool ? {
+        on: ready ? {
           click: () => {
             store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
             location.hash = '#lobby';
@@ -96,9 +105,9 @@ function savedCard(vibe) {
 }
 
 export function render(root) {
-  // The vibe cards show how many players each scope resolves to, which
-  // needs the pool. It arrives in the background.
-  store.ensurePool().catch(() => {});
+  // The counts arrive from a tiny file. The players themselves are not
+  // fetched until the player picks a vibe and reaches the lobby.
+  store.ensureCounts().catch(() => {});
   const vibes = store.state.vibes;
   const children = [
     topbar(),

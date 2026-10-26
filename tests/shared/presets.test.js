@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PRESETS, presetById } from '../../js/presets.js';
+import { PRESETS, presetById, presetMatchesScope } from '../../js/presets.js';
 
 test('every preset has an id, a name and clauses', () => {
   assert.ok(PRESETS.length >= 7, 'there are at least seven vibes');
@@ -18,6 +18,21 @@ test('a preset can be found by its id', () => {
   const first = PRESETS[0];
   assert.equal(presetById(first.id)?.name, first.name);
   assert.equal(presetById('no-such-vibe'), null);
+});
+
+test('only the untouched preset can use the preset player slice', () => {
+  const preset = PRESETS[0];
+  assert.equal(presetMatchesScope({ id: preset.id, clauses: preset.clauses }), true);
+  assert.equal(
+    presetMatchesScope({
+      id: preset.id,
+      clauses: [...preset.clauses, { nationalities: ['Spain'] }],
+    }),
+    false,
+    'a saved vibe that was edited keeps the id but needs the full pool',
+  );
+  assert.equal(presetMatchesScope({ id: 'no-such-vibe', clauses: preset.clauses }), false);
+  assert.equal(presetMatchesScope(null), false);
 });
 
 test('the client re-exports the same presets', async () => {

@@ -1,5 +1,5 @@
 import { planQuiz } from '/js/engine/index.js';
-import { loadPool, poolFor, countFor } from './pool.js';
+import { loadPool, loadPoolMeta, poolFor, countFor, presetMatchesScope } from './pool.js';
 import { room } from './room.js';
 
 const VIBES_KEY = 'football-trivia-vibes';
@@ -9,10 +9,15 @@ const state = {
   booting: true,
   poolError: null,
   poolLoading: null,
+  // The counts from the published metadata, before any players arrive.
+  poolCounts: null,
+  countsTried: false,
+  countsLoading: null,
   // Which game the player is in: 'solo' or 'room'. A player is in one
   // or the other, never both.
   mode: 'solo',
   pool: null,
+  poolKey: null,
   registry: null,
   scope: null,
   quiz: null,
@@ -65,25 +70,59 @@ export const store = {
   async init() {
     this.loadVibes();
     this.loadTheme();
-    // The pool is 3.7MB. It is fetched when a screen needs it - the
-    // vibe cards, the pool count, a solo game - and not before, so a
-    // player who only joins a room never downloads it.
+    // The players are fetched when a game needs them - a preset's lobby,
+    // a hand-built vibe - and not on the home screen, so a player who
+    // only joins a room never downloads the pool.
     await room.restore().catch(() => {});
     state.booting = false;
     notify();
   },
-  /** Fetch the player pool, once. */
-  async ensurePool() {
-    if (state.pool) return state.pool;
-    if (state.poolLoading) return state.poolLoading;
-    state.poolLoading = loadPool()
-      .then((pool) => {
-        state.pool = pool;
-        state.registry = pool.registry;
-        state.poolError = null;
-        notify();
-        return pool;
-      })
+  /** The pool key that can serve this scope. */
+  poolKeyFor(scope) {
+    return presetMatchesScope(scope) ? scope.id : 'full';
+  },
+
+  /**
+   * Fetch the players this scope needs.
+   *
+   * A preset gets a small slice. A hand-built vibe gets the full pool, and
+   * the full pool can serve any scope once it is here.
+   */
+  async ensurePool(scope) {
+    const key = this.poolKeyFor(scope);
+    const ready = () => Boolean(state.pool)
+      && (state.poolKey === key || state.poolKey === 'full');
+
+    if (ready()) return state.pool;
+
+    // Another screen may be loading a different key. Let it finish, then
+    // decide again rather than returning a pool this scope cannot use.
+    if (state.poolLoading) {
+      try {
+        await state.poolLoading;
+      } catch {
+        // The retry below reports the failure.
+      }
+      if (ready()) return state.pool;
+    }
+
+    state.poolLoading = (async () => {
+      let pool;
+      try {
+        pool = await loadPool(key);
+      } catch (err) {
+        if (key === 'full') throw err;
+        // Local development has no generated slices. The fixture still
+        // holds every player.
+        pool = await loadPool('full');
+      }
+      state.pool = pool;
+      state.poolKey = pool.key;
+      state.registry = pool.registry;
+      state.poolError = null;
+      notify();
+      return pool;
+    })()
       .catch((err) => {
         // The failure is kept, not swallowed: the screen says so and
         // offers a way to try again.
@@ -95,6 +134,35 @@ export const store = {
         state.poolLoading = null;
       });
     return state.poolLoading;
+  },
+
+  /**
+   * Fetch the preset counts before the players arrive.
+   *
+   * The home screen only needs a number, not the whole pool. Without the
+   * generated metadata - local development - it falls back to the pool.
+   */
+  async ensureCounts() {
+    if (state.countsTried) return state.poolCounts;
+    if (state.countsLoading) return state.countsLoading;
+    state.countsTried = true;
+    state.countsLoading = loadPoolMeta()
+      .then((meta) => {
+        state.poolCounts = meta?.counts ?? null;
+        if (state.poolCounts) {
+          notify();
+          return state.poolCounts;
+        }
+        return this.ensurePool().then(() => state.poolCounts);
+      })
+      .catch(() => {
+        state.poolCounts = null;
+        return null;
+      })
+      .finally(() => {
+        state.countsLoading = null;
+      });
+    return state.countsLoading;
   },
 
   /** Try the pool again, after it failed. */
@@ -135,7 +203,7 @@ export const store = {
   },
   async startQuiz({ scope, seed }) {
     state.mode = 'solo';
-    const pool = await this.ensurePool();
+    const pool = await this.ensurePool(scope);
     const quiz = planQuiz({
       scope,
       pool: pool.players,

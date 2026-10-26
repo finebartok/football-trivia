@@ -19,7 +19,8 @@ this network, so it is not the primary host.
 |---|---|
 | `client/` contents | the web root, via `npm run publish` |
 | `js/engine/`, `js/presets.js`, `lib/` | the web root — the client imports them by absolute path |
-| `data/fixtures/pool.sample.json` | the web root — the browser fetches the player pool |
+| `data/fixtures/pool.sample.json` | generated into the web root — the lean full pool for hand-built vibes |
+| `data/pools/*.json` | generated into the web root — one small pool per preset, plus `meta.json` |
 | `client/fonts/` | the web root — the fonts are ours, not a third party's |
 | `supabase/migrations/` | the Supabase database |
 | `supabase/functions/` | the Supabase edge functions |
@@ -28,6 +29,12 @@ this network, so it is not the primary host.
 copies the game files there, and the client's absolute paths
 (`/src/main.js`, `/js/engine/index.js`, `/lib/scope.js`) resolve from that
 root. Publishing the repository root would serve the old pre-v1 game.
+
+The fixture is not copied as-is. `npm run publish` also writes the lean
+full pool and one `data/pools/<preset>.json` per preset, with a
+`meta.json` holding the real counts. The home screen fetches only
+`meta.json`; a preset game fetches only its slice. If those generated
+files are missing, the client falls back to the full pool.
 
 ### Publish the game, not the repository
 
@@ -140,7 +147,7 @@ should go to `<your-ref>.supabase.co`, not to `127.0.0.1`.
 
 ## 3. What to check after it is live
 
-- [ ] The home screen shows the vibe cards with real counts (the pool loads).
+- [ ] The home screen shows the vibe cards with real counts (the counts load).
 - [ ] A room can be created and the code is six characters.
 - [ ] A second browser can join with that code and sees the same round.
 - [ ] The clues reveal on the same clock for both players.

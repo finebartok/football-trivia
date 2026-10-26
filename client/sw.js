@@ -3,8 +3,9 @@
  *
  * The app's own files are cached as they are fetched - there is no list
  * to keep in step, and nothing goes stale when a file is renamed. The
- * player pool is never cached: it is 3.7MB and it changes when the data
- * is rebuilt, and a stale pool is worse than no pool.
+ * full player pool is never cached: it is megabytes and it changes when
+ * the data is rebuilt, and a stale pool is worse than no pool. The small
+ * published preset slices are cached like any other app file.
  *
  * The network comes first. A cached file that is never checked again
  * means a deploy is invisible to every player who has been here before,

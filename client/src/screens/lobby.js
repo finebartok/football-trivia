@@ -10,7 +10,15 @@ export function render(root) {
     return;
   }
 
-  const count = countFor({ clauses: scope.clauses });
+  const poolKey = store.poolKeyFor(scope);
+  const poolReady = Boolean(store.state.pool)
+    && (store.state.poolKey === poolKey || store.state.poolKey === 'full');
+  // A preset needs only its own players; a hand-built vibe needs them all.
+  if (!poolReady) store.ensurePool(scope).catch(() => {});
+  const count = poolReady
+    ? countFor({ clauses: scope.clauses })
+    : store.state.poolCounts?.[poolKey];
+  const countLabel = count != null ? `${count} players in the pool` : 'Loading players…';
 
   const start = el('button', {
     className: 'btn btn--primary',
@@ -41,7 +49,7 @@ export function render(root) {
       el('span', { className: 'vibe-summary__icon', text: scope.icon || '⚽' }),
       el('div', { className: 'vibe-summary__body' }, [
         el('h1', { className: 'page-title', text: scope.name }),
-        el('p', { className: 'muted-note', text: `${count} players in the pool` }),
+        el('p', { className: 'muted-note', text: countLabel }),
       ]),
     ]),
 
