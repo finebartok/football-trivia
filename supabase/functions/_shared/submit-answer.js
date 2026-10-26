@@ -10,6 +10,17 @@ import { answerRound, scoreRound } from './vendor/js/engine/index.js';
 import { makeClients } from '../_shared/supabase.js';
 import { json, preflight } from './pool-count.js';
 
+async function hasSteal(admin, roundId, userId) {
+  const { data } = await admin
+    .from('room_effects')
+    .select('id')
+    .eq('round_id', roundId)
+    .eq('actor_id', userId)
+    .eq('kind', 'steal')
+    .maybeSingle();
+  return Boolean(data);
+}
+
 export async function handleSubmitAnswer(req, { createClient, env }) {
   const pre = preflight(req);
   if (pre) return pre;
@@ -69,6 +80,12 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
       return json({ error: 'too late - that round is over' }, 409);
     }
 
+    // A player who is copying somebody has no answer of their own. This
+    // is a refusal, not a retry: the placeholder is not their answer.
+    if (await hasSteal(admin, round.id, userId)) {
+      return json({ error: 'you are copying a player this round' }, 409);
+    }
+
     // A retry returns the first answer rather than writing a second row.
     const { data: existing } = await admin
       .from('answers')
@@ -113,6 +130,9 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
       // Two taps at once: one answer was written, and the other one is
       // told what it was.
       if (insertError.code === '23505') {
+        if (await hasSteal(admin, round.id, userId)) {
+          return json({ error: 'you are copying a player this round' }, 409);
+        }
         const { data: theirs } = await admin
           .from('answers')
           .select('*')

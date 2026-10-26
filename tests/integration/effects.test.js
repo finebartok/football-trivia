@@ -524,3 +524,18 @@ test('two thieves on one victim both appear, and a side bet stays with its betto
   assert.equal(bettorState.my_effects.filter((e) => e.kind === 'steal').length, 1, 'the actor sees their own steal');
   assert.equal(bettorState.my_effects.filter((e) => e.kind === 'side_bet').length, 1);
 });
+
+test('a thief cannot submit an answer', { skip }, async () => {
+  const { room, players } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+
+  const res = await callFunction('submit-answer', {
+    room_id: room.id,
+    round_number: 1,
+    guessed_answer: 'Lionel Messi',
+  }, sam.accessToken);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.error, 'you are copying a player this round');
+});
