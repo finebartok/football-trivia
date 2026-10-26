@@ -190,3 +190,370 @@ begin
   );
 end;
 $$;
+
+create or replace function public.advance_room(p_room_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_room public.rooms;
+  v_round public.rounds;
+  v_next jsonb;
+  v_started timestamptz;
+  v_next_round public.rounds;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+
+  if not public.is_room_member(p_room_id) then
+    raise exception 'not a member of that room' using errcode = '42501';
+  end if;
+
+  select * into v_room from public.rooms where id = p_room_id for no key update;
+  if v_room.id is null or v_room.status <> 'round_active' then
+    return;
+  end if;
+
+  select * into v_round
+  from public.rounds
+  where room_id = p_room_id and round_number = v_room.current_round;
+  if v_round.id is null then
+    return;
+  end if;
+
+  if now() <= v_round.deadline_at and exists (
+    select 1 from public.room_memberships m
+    where m.room_id = p_room_id
+      and not exists (
+        select 1 from public.answers a
+        where a.round_id = v_round.id and a.user_id = m.user_id
+      )
+  ) then
+    return;
+  end if;
+
+  update public.rounds set closed_at = now() where id = v_round.id;
+
+  update public.answers a
+  set guessed_answer = t.guessed_answer,
+      is_correct = t.is_correct,
+      stage_locked = t.stage_locked,
+      response_time_ms = t.response_time_ms,
+      points_earned = case when t.is_correct then t.points_earned / 2 else 0 end
+  from public.room_effects e
+  join public.answers t
+    on t.round_id = e.round_id and t.user_id = e.target_id
+  where e.round_id = v_round.id
+    and e.kind = 'steal'
+    and a.round_id = e.round_id
+    and a.user_id = e.actor_id
+    and not exists (
+      select 1 from public.room_effects x
+      where x.round_id = e.round_id
+        and x.actor_id = e.target_id
+        and x.kind = 'steal'
+    );
+
+  update public.room_effects e
+  set resolved_at = now()
+  where e.round_id = v_round.id
+    and e.kind = 'steal'
+    and e.resolved_at is null;
+
+  update public.room_effects e
+  set bonus_points = case
+        when exists (
+          select 1 from public.answers a
+          where a.round_id = e.round_id and a.user_id = e.actor_id
+        )
+        and exists (
+          select 1 from public.answers t
+          where t.round_id = e.round_id
+            and t.user_id = e.target_id
+            and t.is_correct
+        )
+      then 500
+      else 0
+      end,
+      resolved_at = now()
+  where e.round_id = v_round.id
+    and e.kind = 'side_bet'
+    and e.resolved_at is null;
+
+  update public.room_memberships m
+  set total_score = m.total_score + coalesce(t.points, 0),
+      correct_count = m.correct_count + coalesce(t.corrects, 0),
+      total_response_ms = m.total_response_ms + coalesce(t.elapsed, 0)
+  from (
+    select user_id,
+           sum(points_earned) as points,
+           sum(case when is_correct then 1 else 0 end) as corrects,
+           sum(response_time_ms) as elapsed
+    from public.answers
+    where round_id = v_round.id
+    group by user_id
+  ) t
+  where m.room_id = p_room_id and m.user_id = t.user_id;
+
+  update public.room_memberships m
+  set total_score = m.total_score + b.bonus
+  from (
+    select actor_id, sum(bonus_points) as bonus
+    from public.room_effects
+    where round_id = v_round.id
+      and kind = 'side_bet'
+      and resolved_at is not null
+    group by actor_id
+  ) b
+  where m.room_id = p_room_id and m.user_id = b.actor_id and b.bonus > 0;
+
+  if not exists (
+    select 1 from public.room_memberships
+    where room_id = p_room_id and is_host and last_seen_at > now() - interval '30 seconds'
+  ) then
+    update public.room_memberships
+    set is_host = false
+    where room_id = p_room_id and is_host;
+
+    update public.room_memberships m
+    set is_host = true
+    where m.id = (
+      select id from public.room_memberships
+      where room_id = p_room_id
+        and last_seen_at > now() - interval '30 seconds'
+      order by joined_seq
+      limit 1
+    );
+  end if;
+
+  if v_room.current_round >= v_room.total_rounds then
+    update public.rooms set status = 'final', finished_at = now() where id = p_room_id;
+    return;
+  end if;
+
+  select e into v_next
+  from public.quiz_plans q, jsonb_array_elements(q.plan) e
+  where q.room_id = p_room_id
+    and (e->'client'->>'round_number')::int = v_room.current_round + 1;
+
+  if v_next is null then
+    update public.rooms set status = 'abandoned' where id = p_room_id;
+    return;
+  end if;
+
+  v_started := now();
+
+  insert into public.rounds (
+    room_id, round_number, template, prompt, context,
+    clues, options, reveal_schedule, started_at, deadline_at
+  )
+  values (
+    p_room_id,
+    (v_next->'client'->>'round_number')::int,
+    v_next->'client'->>'template',
+    v_next->'client'->>'prompt',
+    v_next->'client'->>'context',
+    v_next->'client'->'clues',
+    v_next->'client'->'options',
+    v_next->'client'->'reveal_schedule',
+    v_started,
+    v_started + interval '20 seconds'
+  )
+  returning * into v_next_round;
+
+  insert into public.round_secrets (round_id, answer_value, target_player_id, unit)
+  values (
+    v_next_round.id,
+    v_next->'secret'->>'answer_value',
+    nullif(v_next->'secret'->>'target_player_id', '')::bigint,
+    nullif(v_next->'secret'->>'unit', '')
+  );
+
+  update public.rooms
+  set current_round = current_round + 1, status = 'round_active'
+  where id = p_room_id;
+end;
+$$;
+
+create or replace function public.round_result(p_room_id uuid, p_round_number int)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_round public.rounds;
+  v_secret public.round_secrets;
+  v_leaderboard jsonb;
+  v_mine jsonb;
+  v_effects jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+
+  if not public.is_room_member(p_room_id) then
+    raise exception 'not a member of that room' using errcode = '42501';
+  end if;
+
+  perform public.advance_room(p_room_id);
+
+  select * into v_round
+  from public.rounds
+  where room_id = p_room_id and round_number = p_round_number;
+  if v_round.id is null then
+    raise exception 'no such round' using errcode = 'P0002';
+  end if;
+
+  if v_round.closed_at is null and now() <= v_round.deadline_at then
+    return jsonb_build_object('pending', true, 'round_number', p_round_number);
+  end if;
+
+  select * into v_secret from public.round_secrets where round_id = v_round.id;
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+      'user_id', m.user_id,
+      'display_name', m.display_name,
+      'is_host', m.is_host,
+      'total_score', m.total_score,
+      'correct_count', m.correct_count,
+      'total_response_ms', m.total_response_ms,
+      'joined_seq', m.joined_seq
+    ) order by m.total_score desc, m.correct_count desc,
+             m.total_response_ms asc, m.joined_seq asc), '[]'::jsonb)
+  into v_leaderboard
+  from public.room_memberships m
+  where m.room_id = p_room_id;
+
+  select jsonb_build_object(
+      'correct', a.is_correct,
+      'points', a.points_earned,
+      'stage', a.stage_locked,
+      'guessed_answer', a.guessed_answer
+    ) into v_mine
+  from public.answers a
+  where a.round_id = v_round.id and a.user_id = auth.uid();
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+      'kind', e.kind,
+      'actor_id', e.actor_id,
+      'target_id', e.target_id,
+      'actor_points', coalesce(a.points_earned, 0),
+      'target_correct', coalesce(t.is_correct, false),
+      'target_answered', t.user_id is not null,
+      'target_stole', exists (
+        select 1 from public.room_effects x
+        where x.round_id = e.round_id
+          and x.actor_id = e.target_id
+          and x.kind = 'steal'
+      ),
+      'bonus_points', e.bonus_points,
+      'resolved', e.resolved_at is not null
+    ) order by e.created_at, e.id), '[]'::jsonb)
+  into v_effects
+  from public.room_effects e
+  left join public.answers a
+    on a.round_id = e.round_id and a.user_id = e.actor_id
+  left join public.answers t
+    on t.round_id = e.round_id and t.user_id = e.target_id
+  where e.round_id = v_round.id;
+
+  return jsonb_build_object(
+    'round_number', p_round_number,
+    'answer', v_secret.answer_value,
+    'unit', v_secret.unit,
+    'target_player_id', v_secret.target_player_id,
+    'leaderboard', v_leaderboard,
+    'my_answer', v_mine,
+    'effects', v_effects
+  );
+end;
+$$;
+
+create or replace function public.sync_room_state(p_room_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_state jsonb;
+  v_answered_round int;
+  v_mine jsonb;
+  v_effects jsonb;
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in' using errcode = '42501';
+  end if;
+
+  v_state := public.current_round(p_room_id);
+
+  select max(r.round_number) into v_answered_round
+  from public.answers a
+  join public.rounds r on r.id = a.round_id
+  where a.room_id = p_room_id and a.user_id = auth.uid();
+
+  select jsonb_build_object(
+      'correct', a.is_correct,
+      'points', a.points_earned,
+      'stage', a.stage_locked,
+      'guessed_answer', a.guessed_answer
+    ) into v_mine
+  from public.answers a
+  join public.rounds r on r.id = a.round_id
+  where a.room_id = p_room_id and a.user_id = auth.uid()
+    and r.round_number = v_answered_round;
+
+  select coalesce(jsonb_agg(jsonb_build_object(
+      'round_number', r.round_number,
+      'kind', e.kind,
+      'role', case when e.actor_id = auth.uid() then 'actor' else 'target' end,
+      'other_id', case when e.actor_id = auth.uid() then e.target_id else e.actor_id end,
+      'resolved', e.resolved_at is not null,
+      'bonus_points', e.bonus_points
+    ) order by r.round_number, e.created_at, e.id), '[]'::jsonb)
+  into v_effects
+  from public.room_effects e
+  join public.rounds r on r.id = e.round_id
+  where e.room_id = p_room_id
+    and (
+      e.actor_id = auth.uid()
+      or (e.kind = 'steal' and e.target_id = auth.uid())
+    );
+
+  return v_state || jsonb_build_object(
+    'my_answered_round', v_answered_round,
+    'my_answer', v_mine,
+    'my_effects', v_effects,
+    'scope_icon', (select r.scope_icon from public.rooms r where r.id = p_room_id),
+    'server_now', now(),
+    'members', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'user_id', m.user_id,
+        'display_name', m.display_name,
+        'is_host', m.is_host,
+        'joined_seq', m.joined_seq,
+        'online', m.last_seen_at > now() - interval '30 seconds'
+      ) order by m.joined_seq)
+      from public.room_memberships m
+      where m.room_id = p_room_id
+    ), '[]'::jsonb),
+    'leaderboard', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'user_id', m.user_id,
+        'display_name', m.display_name,
+        'total_score', m.total_score,
+        'correct_count', m.correct_count,
+        'total_response_ms', m.total_response_ms,
+        'joined_seq', m.joined_seq
+      ) order by m.total_score desc, m.correct_count desc,
+               m.total_response_ms asc, m.joined_seq asc)
+      from public.room_memberships m
+      where m.room_id = p_room_id
+    ), '[]'::jsonb)
+  );
+end;
+$$;

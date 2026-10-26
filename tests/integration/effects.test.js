@@ -251,3 +251,276 @@ test('each effect is once per game, in a later round too', { skip }, async () =>
   const bet = await useEffect(alex, room.id, 2, 'side_bet', sam.userId);
   assert.equal(bet.error, null, bet.error?.message);
 });
+
+test('a correct steal copies the answer for half points and the target keeps full', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  const steal = await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  assert.equal(steal.error, null, steal.error?.message);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await closeRound(alex, room.id);
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('round_id', round.id);
+  const thief = answers.find((a) => a.user_id === sam.userId);
+  const target = answers.find((a) => a.user_id === alex.userId);
+  assert.equal(thief.guessed_answer, 'Lionel Messi');
+  assert.equal(thief.is_correct, true);
+  assert.equal(thief.points_earned, 3750);
+  assert.equal(thief.stage_locked, target.stage_locked);
+  assert.equal(thief.response_time_ms, target.response_time_ms);
+  assert.equal(target.points_earned, 7500, 'the target keeps the full score');
+
+  const { data: board } = await server.from('room_memberships')
+    .select('user_id, total_score, correct_count').eq('room_id', room.id);
+  const samRow = board.find((m) => m.user_id === sam.userId);
+  assert.equal(samRow.total_score, 3750);
+  assert.equal(samRow.correct_count, 1);
+});
+
+test('a wrong steal copies the wrong guess and scores nothing', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await addAnswer(server, room, round, alex, {
+    correct: false, guessed: 'Definitely Not The Answer',
+  });
+  await closeRound(alex, room.id);
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('round_id', round.id);
+  const thief = answers.find((a) => a.user_id === sam.userId);
+  assert.equal(thief.guessed_answer, 'Definitely Not The Answer');
+  assert.equal(thief.is_correct, false);
+  assert.equal(thief.points_earned, 0);
+});
+
+test('a steal of a player who did not answer scores nothing', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await expireRound(server, round);
+  await closeRound(alex, room.id);
+
+  const { data: thief } = await server.from('answers')
+    .select('*').eq('round_id', round.id).eq('user_id', sam.userId).single();
+  assert.equal(thief.guessed_answer, '');
+  assert.equal(thief.is_correct, false);
+  assert.equal(thief.points_earned, 0);
+});
+
+test('no chains: a steal of a stealer copies nothing', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  await useEffect(robin, room.id, 1, 'steal', sam.userId);
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await closeRound(alex, room.id);
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('round_id', round.id);
+  const samAnswer = answers.find((a) => a.user_id === sam.userId);
+  const robinAnswer = answers.find((a) => a.user_id === robin.userId);
+  assert.equal(samAnswer.points_earned, 3750, 'Sam copies Alex');
+  assert.equal(robinAnswer.points_earned, 0, 'Robin cannot copy a stealer');
+});
+
+test('mutual steals both fail', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(alex, room.id, 1, 'steal', sam.userId);
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await closeRound(alex, room.id);
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('round_id', round.id);
+  assert.ok(answers.every((a) => a.points_earned === 0), 'both placeholders stay zero');
+});
+
+test('two thieves on one correct victim each get half', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await useEffect(robin, room.id, 1, 'steal', alex.userId);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await closeRound(alex, room.id);
+
+  const { data: answers } = await server
+    .from('answers').select('*').eq('round_id', round.id);
+  const samAnswer = answers.find((a) => a.user_id === sam.userId);
+  const robinAnswer = answers.find((a) => a.user_id === robin.userId);
+  const target = answers.find((a) => a.user_id === alex.userId);
+  assert.equal(samAnswer.points_earned, 3750);
+  assert.equal(robinAnswer.points_earned, 3750);
+  assert.equal(target.points_earned, 7500);
+});
+
+test('a steal placeholder lets the round close when everyone else has answered', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await addAnswer(server, room, round, alex);
+  await closeRound(alex, room.id);
+
+  const { data: closed } = await server
+    .from('rounds').select('closed_at').eq('id', round.id).single();
+  assert.ok(closed.closed_at, 'the placeholder counted as Sam having played');
+});
+
+test('a side bet pays +500 when the target is correct and the bettor answered', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'side_bet', alex.userId);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await addAnswer(server, room, round, sam, { correct: true, points: 5000 });
+  await closeRound(alex, room.id);
+
+  const { data: effect } = await server.from('room_effects')
+    .select('*').eq('room_id', room.id).eq('actor_id', sam.userId).eq('kind', 'side_bet').single();
+  assert.equal(effect.bonus_points, 500);
+  assert.ok(effect.resolved_at);
+
+  const { data: samRow } = await server.from('room_memberships')
+    .select('total_score').eq('room_id', room.id).eq('user_id', sam.userId).single();
+  assert.equal(samRow.total_score, 5500, 'own points plus the side bet');
+});
+
+test('a side bet pays nothing when the target is wrong or the bettor did not play', { skip }, async () => {
+  const wrong = await setupRoom();
+  const [alexWrong, samWrong] = wrong.players;
+  await useEffect(samWrong, wrong.room.id, 1, 'side_bet', alexWrong.userId);
+  await addAnswer(wrong.server, wrong.room, wrong.round, alexWrong, {
+    correct: false, guessed: 'Wrong',
+  });
+  await addAnswer(wrong.server, wrong.room, wrong.round, samWrong, { correct: true, points: 5000 });
+  await closeRound(alexWrong, wrong.room.id);
+  const { data: wrongEffect } = await wrong.server.from('room_effects')
+    .select('bonus_points').eq('room_id', wrong.room.id).single();
+  assert.equal(wrongEffect.bonus_points, 0);
+
+  const idle = await setupRoom();
+  const [alexIdle, samIdle] = idle.players;
+  await useEffect(samIdle, idle.room.id, 1, 'side_bet', alexIdle.userId);
+  await addAnswer(idle.server, idle.room, idle.round, alexIdle, { correct: true, points: 7500 });
+  await expireRound(idle.server, idle.round);
+  await closeRound(alexIdle, idle.room.id);
+  const { data: idleEffect } = await idle.server.from('room_effects')
+    .select('bonus_points').eq('room_id', idle.room.id).single();
+  assert.equal(idleEffect.bonus_points, 0, 'no answer or steal means no bet');
+});
+
+test('a side bet on a successful stealer pays', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  await useEffect(sam, room.id, 1, 'side_bet', alex.userId);
+  await addAnswer(server, room, round, sam, { correct: true, points: 3000 });
+  await useEffect(alex, room.id, 1, 'steal', robin.userId);
+  await addAnswer(server, room, round, robin, { correct: true, points: 7500 });
+  await closeRound(sam, room.id);
+
+  const { data: alexAnswer } = await server.from('answers')
+    .select('*').eq('round_id', round.id).eq('user_id', alex.userId).single();
+  assert.equal(alexAnswer.points_earned, 3750, 'the stealer copied correctly');
+
+  const { data: bet } = await server.from('room_effects')
+    .select('bonus_points').eq('room_id', room.id)
+    .eq('actor_id', sam.userId).eq('kind', 'side_bet').single();
+  assert.equal(bet.bonus_points, 500);
+});
+
+test('a side bet pays when the bettor stole instead of answering', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  // Sam has no normal answer, only a steal placeholder. The bet still
+  // counts, because Sam played the round.
+  await useEffect(sam, room.id, 1, 'side_bet', alex.userId);
+  await useEffect(sam, room.id, 1, 'steal', robin.userId);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await addAnswer(server, room, round, robin, { correct: true, points: 7500 });
+  await closeRound(alex, room.id);
+
+  const { data: bet } = await server.from('room_effects')
+    .select('bonus_points').eq('room_id', room.id)
+    .eq('actor_id', sam.userId).eq('kind', 'side_bet').single();
+  assert.equal(bet.bonus_points, 500);
+});
+
+test('the result resolves effects and returns the copied answer', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex, sam] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await addAnswer(server, room, round, alex, { correct: true, points: 7500 });
+  await expireRound(server, round);
+
+  // The deadline has passed. round_result itself must close and resolve.
+  const { data, error } = await sam.client.rpc('round_result', {
+    p_room_id: room.id, p_round_number: 1,
+  });
+  assert.equal(error, null, error?.message);
+  assert.equal(data.my_answer.guessed_answer, 'Lionel Messi');
+  assert.equal(data.my_answer.points, 3750);
+  assert.equal(data.my_answer.correct, true);
+
+  const steal = data.effects.find((e) => e.kind === 'steal' && e.actor_id === sam.userId);
+  assert.equal(steal.target_correct, true);
+  assert.equal(steal.target_answered, true);
+  assert.equal(steal.target_stole, false);
+  assert.equal(steal.actor_points, 3750);
+  assert.equal(steal.resolved, true);
+});
+
+test('the result exposes no effects while the round is open', { skip }, async () => {
+  const { room, players } = await setupRoom();
+  const [alex, sam] = players;
+  const { data, error } = await alex.client.rpc('round_result', {
+    p_room_id: room.id, p_round_number: 1,
+  });
+  assert.equal(error, null, error?.message);
+  assert.equal(data.pending, true);
+  assert.equal(data.effects, undefined);
+});
+
+test('the victim sees a pending steal and a third player does not', { skip }, async () => {
+  const { room, players } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+
+  const { data: victimState } = await alex.client.rpc('sync_room_state', { p_room_id: room.id });
+  const row = victimState.my_effects.find((e) => e.kind === 'steal');
+  assert.equal(row.role, 'target');
+  assert.equal(row.other_id, sam.userId);
+  assert.equal(row.resolved, false);
+
+  const { data: thirdState } = await robin.client.rpc('sync_room_state', { p_room_id: room.id });
+  assert.equal(thirdState.my_effects.length, 0);
+});
+
+test('two thieves on one victim both appear, and a side bet stays with its bettor', { skip }, async () => {
+  const { room, players } = await setupRoom({ players: 3 });
+  const [alex, sam, robin] = players;
+
+  await useEffect(sam, room.id, 1, 'steal', alex.userId);
+  await useEffect(robin, room.id, 1, 'side_bet', alex.userId);
+  await useEffect(robin, room.id, 1, 'steal', alex.userId);
+
+  const { data: victimState } = await alex.client.rpc('sync_room_state', { p_room_id: room.id });
+  assert.equal(victimState.my_effects.filter((e) => e.kind === 'steal').length, 2);
+  assert.equal(victimState.my_effects.some((e) => e.kind === 'side_bet'), false,
+    'a side bet is silent to its target');
+
+  const { data: bettorState } = await robin.client.rpc('sync_room_state', { p_room_id: room.id });
+  assert.equal(bettorState.my_effects.filter((e) => e.kind === 'steal').length, 1, 'the actor sees their own steal');
+  assert.equal(bettorState.my_effects.filter((e) => e.kind === 'side_bet').length, 1);
+});
