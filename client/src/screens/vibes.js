@@ -128,6 +128,8 @@ export function render(root) {
     store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
   };
 
+  const nameTitle = el('h1', { className: 'page-title', text: vibe.name || 'Your vibe' });
+
   const nameInput = el('input', {
     className: 'input input--plain',
     attrs: { type: 'text', id: 'vibe-name', placeholder: 'Name this vibe', value: vibe.name ?? '' },
@@ -136,7 +138,11 @@ export function render(root) {
         // The name the player gives the vibe is the name the room will
         // announce.
         vibe = { ...vibe, name: e.currentTarget.value.trim() || vibe.name };
-        store.setScope({ id: vibe.id, name: vibe.name, icon: vibe.icon, clauses: vibe.clauses });
+        nameTitle.textContent = vibe.name || 'Your vibe';
+        // Written in place, without a redraw: this change fires on the
+        // blur that comes just before a Save click, and a redraw would
+        // replace the button before the click lands.
+        store.state.scope = { ...store.state.scope, name: vibe.name };
       },
     },
   });
@@ -165,7 +171,7 @@ export function render(root) {
     el('section', { className: 'card vibe-summary' }, [
       el('span', { className: 'vibe-summary__icon', text: vibe.icon || '⚽' }),
       el('div', { className: 'vibe-summary__body' }, [
-        el('h1', { className: 'page-title', text: vibe.name || 'Your vibe' }),
+        nameTitle,
         el('p', { className: 'muted-note', text: 'Change it below. The number updates as you go.' }),
       ]),
       el('div', { className: `vibe-summary__count ${tooSmall ? 'is-low' : ''}`, id: 'pool-count' }, [

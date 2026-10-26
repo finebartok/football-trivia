@@ -40,6 +40,16 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // The client is published at the web root, so its pages ask for
+  // `/src/...`, `/styles/...` and so on. In development it lives under
+  // `client/`; map those absolute paths so the page works as published.
+  const CLIENT_PATHS = ['/src/', '/styles/', '/fonts/', '/icons/'];
+  if (CLIENT_PATHS.some((prefix) => pathname.startsWith(prefix))
+    || pathname === '/sw.js'
+    || pathname === '/manifest.webmanifest') {
+    pathname = `/client${pathname}`;
+  }
+
   const filePath = path.join(ROOT, pathname);
   if (!filePath.startsWith(ROOT)) {
     res.writeHead(403).end('forbidden');

@@ -126,6 +126,19 @@ test('a scope over the floor can be saved', async ({ page }) => {
   await expect(page).toHaveURL(/#home/);
 });
 
+test('a name typed just before saving is kept', async ({ page }) => {
+  await page.goto('#vibes');
+  await page.waitForSelector('#pool-count');
+
+  // Click straight from the name field. The blur that precedes the click
+  // must not replace the button before the click lands.
+  await page.locator('#vibe-name').fill('Sunday league');
+  await page.locator('#btn-make-ours').click();
+
+  await expect(page).toHaveURL(/#home/);
+  await expect(page.locator('.vibe-card--saved')).toContainText('Sunday league');
+});
+
 test('a vibe saved on one phone does not appear on another', async ({ page, context }) => {
   await page.goto('#vibes');
   await page.waitForSelector('#pool-count');
