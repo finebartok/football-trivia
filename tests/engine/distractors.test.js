@@ -31,6 +31,33 @@ test('name distractors exclude the subject', () => {
   assert.ok(d.every(p => p.id !== subject.id));
 });
 
+test('name distractors look like the subject, not a lottery', () => {
+  const subject = {
+    id: 1, position: 'Midfield', subPosition: 'Central Midfield', foot: 'right',
+    teams: [{ leagueId: 'GB1', seasons: [2015, 2016, 2017] }],
+  };
+  const sameKind = {
+    id: 2, position: 'Midfield', subPosition: 'Central Midfield', foot: 'right',
+    teams: [{ leagueId: 'GB1', seasons: [2015, 2016, 2017] }],
+  };
+  const otherPosition = {
+    id: 3, position: 'Defender', subPosition: 'Centre-Back', foot: 'left',
+    teams: [{ leagueId: 'IT1', seasons: [2015, 2016] }],
+  };
+  const sameLeague = {
+    id: 4, position: 'Midfield', subPosition: 'Defensive Midfield', foot: 'right',
+    teams: [{ leagueId: 'ES1', seasons: [2015] }],
+  };
+  const sameEra = {
+    id: 5, position: 'Midfield', subPosition: 'Attacking Midfield', foot: 'left',
+    teams: [{ leagueId: 'GB1', seasons: [2010] }],
+  };
+  const pool = [subject, sameKind, otherPosition, sameLeague, sameEra];
+  const picked = nameDistractors({ pool, subject, scope: { clauses: [] }, rng: makeRng(3), count: 3 });
+  assert.deepEqual(new Set(picked.map(p => p.id)), new Set([2, 4, 5]));
+  assert.ok(!picked.some(p => p.id === 3), 'a different position is not a lookalike');
+});
+
 test('buildOptions returns four options with exactly one correct', () => {
   const rng = makeRng(5);
   const opts = buildOptions({ answer: 'A', distractors: ['B', 'C', 'D'], rng });

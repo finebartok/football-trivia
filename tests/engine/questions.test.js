@@ -21,6 +21,32 @@ test('candidate subjects carry a score and only subjects with a real value', () 
   }
 });
 
+test('an identify round tells a story and carries a true hook', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+  const round = composeRound({
+    subject: messi, metric: 'identity', window: registry.windows['wc-2022'],
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1), stages: 4,
+  });
+
+  assert.deepEqual(round.clues.map(c => c.label),
+    ['The stage', 'The trail', 'The record', 'The home']);
+  assert.equal(round.hook, '500 club goals since 2012.');
+  assert.equal(round.prompt, 'Who is this?',
+    'the hook lives beside the prompt, not inside it');
+});
+
+test('a stat round names its subject and gets no hook', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find(p => p.name === 'Lionel Messi');
+  const round = composeRound({
+    subject: messi, metric: 'tournament_goals', window: registry.windows['wc-2022'],
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(1),
+  });
+  assert.equal(round.hook, null);
+  assert.match(round.prompt, /Lionel Messi/);
+});
+
 test('a composed round has four options, one correct, and four clues', () => {
   const { players, registry } = loadFixture();
   const window = registry.windows['wc-2022'];

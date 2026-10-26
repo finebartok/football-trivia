@@ -30,7 +30,7 @@ export function statMatches(pred, stats, player = null) {
   return op(v, pred.value);
 }
 
-function clauseMatches(clause, player) {
+export function clauseMatches(clause, player) {
   const L = clause.leagues?.length ? clause.leagues : null;
   const T = clause.teams?.length ? clause.teams : null;
   const N = clause.nationalities?.length ? clause.nationalities : null;

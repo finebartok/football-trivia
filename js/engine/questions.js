@@ -1,4 +1,4 @@
-import { buildHints, hintOrder } from './hints.js';
+import { buildHints, hintOrder, identityHook } from './hints.js';
 import { metricDescriptor, metricsFor } from './stats.js';
 import { RECIPES } from './recipes.js';
 import { numericDistractors, nameDistractors, buildOptions } from './distractors.js';
@@ -86,23 +86,27 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
   // value carries the answer's number under any metric id (a club_goals hint
   // "60 goals (since 2012)" shares windows[id].goals with a tournament_goals=60
   // round; a "€80M" market-value hint leaks an 80-caps answer).
-  const allHints = hintOrder(buildHints(subject, window, registry));
+  const allHints = hintOrder(buildHints(subject, window, registry, { pool, scope }));
   const safeHints = allHints.filter(h => !hintRevealsAnswer(h, value));
   // Degrade safely: if every hint would reveal the answer (essentially
   // impossible with real biographical hints, but possible with synthetic
   // data), keep the round usable and non-crashing instead of emitting zero
   // clues and an empty revealSchedule.
-  // The surface facts (nationality, position, born) are held back for the
-  // low-multiplier stages, so the last clue is one of them when there is
-  // one. Holding them back and then never showing them is no holding
-  // back at all.
   const ladder = safeHints.length ? safeHints : allHints;
   const n = Math.max(1, stages);
-  const hard = ladder.filter(h => !h.surface);
-  const soft = ladder.filter(h => h.surface);
-  const clues = soft.length && hard.length >= n - 1
-    ? [...hard.slice(0, n - 1), soft[0]]
-    : [...hard, ...soft].slice(0, n);
+  // The ladder is a story: the vibe's own number, the trail, one record,
+  // then one surface fact. The surface fact goes last even when a later
+  // stage has to be dropped - the last clue should be the easy one.
+  const hard = ladder.filter(h => h.role === 'stage' || h.role === 'trail' || h.role === 'record');
+  const profile = ladder.find(h => h.role === 'profile');
+  const home = ladder.find(h => h.role === 'home');
+  const ordered = [...hard];
+  if (profile) ordered.push(profile);
+  if (home) ordered.push(home);
+  const clues = home && n > 1
+    ? [...ordered.filter(h => h !== home).slice(0, n - 1), home]
+    : ordered.slice(0, n);
+  const usedMetrics = clues.map(c => c.metric).filter(Boolean);
 
   const isNumeric = recipe.template === 'stat_value';
   const distractors = isNumeric
@@ -116,6 +120,12 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
     unit: spoken.unit ?? null,
   });
 
+  // One true line under the question, when the player has a trait worth
+  // saying. A stat round already names its subject, so it gets no hook.
+  const hook = recipe.template === 'identify'
+    ? identityHook(subject, pool, { excludeMetrics: usedMetrics })
+    : null;
+
   // Stages land at 2.0s, 6.5s, 11.0s and 15.5s, so the last clue always
   // arrives before the round closes at 20s.
   const revealSchedule = clues.map((_, i) => ({
@@ -128,6 +138,7 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
     metric: recipe.metric,
     family: recipe.family ?? metricDescriptor(metric)?.family ?? 'career',
     prompt: spoken.prompt,
+    hook,
     context: spoken.context ?? null,
     subjectId: subject.id,
     subjectName: subject.name,

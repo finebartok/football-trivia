@@ -46,6 +46,11 @@ test('the client row uses the engine shape the browser already understands', () 
   assert.deepEqual(client.reveal_schedule, [{ stage: 1, revealAtMs: 2000 }]);
 });
 
+test('the room prompt carries the hook on its own line', () => {
+  const { client } = projectRound({ ...composed, hook: 'A centurion with a World Cup goal.' }, 1);
+  assert.equal(client.prompt, 'Who is this?\nA centurion with a World Cup goal.');
+});
+
 test('the secret holds the answer', () => {
   const { secret } = projectRound(composed, 1);
   assert.equal(secret.answer_value, 'Lionel Messi');

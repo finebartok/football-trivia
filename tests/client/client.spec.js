@@ -75,6 +75,20 @@ test('a quiz round shows the window banner, the ladder, clues and four options',
   expect(errors).toEqual([]);
 });
 
+test('the clue ladder reads like a scouting report, not column headings', async ({ page }) => {
+  await startQuiz(page);
+
+  const labels = await page.locator('.clue-card__label').allTextContents();
+  expect(labels.length).toBeGreaterThan(0);
+  for (const label of labels) {
+    expect(['The stage', 'The trail', 'The record', 'The profile', 'The home']).toContain(label);
+  }
+  await expect(page.locator('.round-prompt')).toHaveText('Who is this?');
+  if (await page.locator('.round-hook').count()) {
+    await expect(page.locator('.round-hook')).not.toBeEmpty();
+  }
+});
+
 test('clues reveal on the schedule and the answer leads to the reveal', async ({ page }) => {
   const errors = watchErrors(page);
   await startQuiz(page);

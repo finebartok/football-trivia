@@ -1,4 +1,5 @@
 import { el, mount, jerseyTile, pointsLabel } from '../ui.js';
+import { careerClubs } from '/js/engine/index.js';
 import { store } from '../store.js';
 import { sounds, haptic } from '../sound.js';
 
@@ -74,7 +75,7 @@ export function render(root) {
     if (player.position) facts.push(player.position);
   }
 
-  const path = (player?.teams ?? []).map((t) => t.clubName).filter(Boolean).slice(0, 4);
+  const path = careerClubs(player);
 
   mount(root, [
     el('header', { className: 'topbar' }, [

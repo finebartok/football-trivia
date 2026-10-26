@@ -17,7 +17,7 @@ export function projectRound(round, roundNumber) {
     client: {
       round_number: roundNumber,
       template: round.template,
-      prompt: round.prompt,
+      prompt: round.hook ? `${round.prompt}\n${round.hook}` : round.prompt,
       context: round.context ?? null,
       clues: round.clues.map((c) => ({
         id: c.id,

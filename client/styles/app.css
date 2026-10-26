@@ -270,6 +270,16 @@ a { color: var(--gold); }
   text-align: center;
 }
 
+/* One true line under the question. It is a nudge, not a clue - so it
+   sits quieter than the prompt and never carries the answer. */
+.round-hook {
+  margin: 0 12px 4px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--muted);
+}
+
 /* ---- movement ----
    Four small transitions. The rule above switches every one of them
    off for a player who has asked for less movement. */

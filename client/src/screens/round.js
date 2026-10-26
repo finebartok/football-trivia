@@ -211,6 +211,11 @@ export function render(root) {
     ?? roomState.scopeName
     ?? '';
 
+  // The room stores the prompt and the hook in one text column, so the
+  // line break is the seam. A solo round carries them separately.
+  const [promptText, ...promptHook] = String(round.prompt ?? '').split('\n');
+  const hookText = round.hook ?? promptHook.join(' ').trim();
+
   mount(root, [
     el('header', { className: 'topbar' }, [
       el('span', { className: 'wordmark', text: '⚽ Football Trivia' }),
@@ -224,8 +229,11 @@ export function render(root) {
 
     // What is being asked. The clue ladder is how the answer is found;
     // this is what says what the answer is.
-    round.prompt
-      ? el('p', { className: 'round-prompt', text: round.prompt })
+    promptText
+      ? el('p', { className: 'round-prompt', text: promptText })
+      : null,
+    hookText
+      ? el('p', { className: 'round-hook', text: hookText })
       : null,
 
     el('div', { className: 'round-meta' }, [
