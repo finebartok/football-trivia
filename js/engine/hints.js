@@ -254,7 +254,7 @@ function stageHint(subject, { window, scope, registry } = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// The record: how the player compares with the quiz's own pool.
+// The record: how the player compares with the vibe's own pool.
 // ---------------------------------------------------------------------------
 
 function tournamentGoals(player, window) {
@@ -267,57 +267,57 @@ const RECORD_DEFS = [
     id: 'international_goals', priority: 0, family: 'career',
     value: (player) => player.internationalGoals,
     phrase: (value) => `${value} international ${plural(value, 'goal', 'goals')}`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
   {
     id: 'international_caps', priority: 1, family: 'career',
     value: (player) => player.internationalCaps,
     phrase: (value) => `${value} caps`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
   {
     id: 'club_goals', priority: 2, family: 'window',
     value: (player) => player.stats?.club_goals,
     phrase: (value) => `${value} club goals since 2012`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
   {
     id: 'goals_after_age_30', priority: 3, family: 'window',
     value: (player) => player.stats?.goals_after_age_30,
     phrase: (value) => `Since 2012, ${value} goals after turning 30`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
   {
     id: 'highest_market_value_eur', priority: 4, family: 'career',
     value: (player) => player.highestMarketValueEur,
     phrase: (value) => `${formatMetric('highest_market_value_eur', value)} peak value`,
-    best: 'the highest in this quiz',
-    jointBest: 'the joint-highest in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here went higher`,
+    best: 'the highest in this vibe',
+    jointBest: 'the joint-highest in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe went higher`,
   },
   {
     id: 'tournament_goals', priority: 5, family: 'roster', needsTournament: true,
     value: tournamentGoals,
     phrase: (value, window) => `${value} ${plural(value, 'goal', 'goals')} at the ${window?.label ?? 'tournament'}`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
   {
     id: 'club_appearances', priority: 6, family: 'window',
     value: (player) => player.stats?.club_appearances,
     phrase: (value) => `${value} appearances since 2012`,
-    best: 'the most in this quiz',
-    jointBest: 'the joint-most in this quiz',
-    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} here ${n === 1 ? 'has' : 'have'} more`,
+    best: 'the most in this vibe',
+    jointBest: 'the joint-most in this vibe',
+    higher: (n) => `only ${n} ${plural(n, 'player', 'players')} in this vibe ${n === 1 ? 'has' : 'have'} more`,
   },
 ];
 
@@ -325,9 +325,9 @@ function poolComparison(rank, ties, total, def) {
   if (rank === 1) return ties > 1 ? def.jointBest : def.best;
   const exclusive = Math.min(5, Math.max(2, Math.ceil(total * 0.1)));
   if (rank <= exclusive) return def.higher(rank - 1);
-  if (rank <= Math.ceil(total * 0.1)) return 'in the top 10% here';
-  if (rank <= Math.ceil(total * 0.25)) return 'in the top quarter here';
-  if (rank <= Math.ceil(total * 0.5)) return 'in the top half here';
+  if (rank <= Math.ceil(total * 0.1)) return "in this vibe's top 10%";
+  if (rank <= Math.ceil(total * 0.25)) return "in this vibe's top quarter";
+  if (rank <= Math.ceil(total * 0.5)) return "in this vibe's top half";
   return null;
 }
 

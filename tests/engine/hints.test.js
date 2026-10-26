@@ -47,13 +47,13 @@ test('a pool-aware record only says what the pool proves', () => {
     .find((h) => h.role === 'record');
   assert.equal(record.label, 'The record');
   assert.equal(record.metric, 'international_goals');
-  assert.equal(record.value, '125 international goals — only 1 player here has more.');
+  assert.equal(record.value, '125 international goals — only 1 player in this vibe has more.');
 
   // A smaller pool can make the same player the leader.
   const other = players.find((p) => p.name === 'Sergio Busquets');
   const small = buildHints(messi, window, registry, { pool: [messi, other] })
     .find((h) => h.role === 'record');
-  assert.equal(small.value, '125 international goals — the most in this quiz.');
+  assert.equal(small.value, '125 international goals — the most in this vibe.');
 });
 
 test('the hook is true, rare, and never repeats a clue’s metric', () => {

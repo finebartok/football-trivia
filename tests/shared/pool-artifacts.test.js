@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { planQuiz } from '../../js/engine/index.js';
+import { planQuiz, buildHints, scopePool, resolveWindow } from '../../js/engine/index.js';
 import { PRESETS } from '../../js/presets.js';
 import {
   buildPresetSlices, buildLeanPool, buildMeta, trimRegistry,
@@ -59,6 +59,27 @@ test('a preset slice plans the same quiz as the full pool', () => {
         plan(scope, pool, seed),
         `${preset.id} seed ${seed} plans differently from the full pool`,
       );
+    }
+  }
+});
+
+test('a slice gives every player the same hints as the full pool', () => {
+  for (const preset of PRESETS) {
+    const scope = { clauses: preset.clauses };
+    const slice = byId.get(preset.id);
+    const fullPool = scopePool(scope, pool.players);
+    const fullWindow = resolveWindow(scope, pool.registry);
+    const sliceWindow = resolveWindow(scope, slice.data.registry);
+
+    assert.equal(slice.data.players.length, fullPool.length,
+      `${preset.id} slice holds every player in scope`);
+    for (const player of fullPool) {
+      const fromFull = buildHints(player, fullWindow, pool.registry, { pool: fullPool, scope });
+      const fromSlice = buildHints(player, sliceWindow, slice.data.registry, {
+        pool: slice.data.players, scope,
+      });
+      assert.deepEqual(fromSlice, fromFull,
+        `${preset.id}: ${player.name} gets different hints from the slice`);
     }
   }
 });
