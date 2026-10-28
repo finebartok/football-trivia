@@ -21,3 +21,49 @@
 .verdict.is-bad {
   animation: verdict-pulse 400ms ease both;
 }
+
+/* Party effects. The strip is text-first: the buttons say what they do,
+   and the warning is a sentence, not a colour. */
+.effects { margin: 0 12px 8px; }
+.effects__title {
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.effects__row { display: flex; gap: 8px; }
+.btn--effect { font-size: 14px; padding: 8px 10px; }
+.effects__warning {
+  background: var(--highlight);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12.5px;
+  margin: 0 0 8px;
+}
+.effects__pending { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+.picker {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+}
+.picker__heading { font-weight: 700; margin: 0 0 6px; }
+.picker__row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin: 0 0 6px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+}
+.picker__row.is-picked { outline: 2px solid var(--gold); outline-offset: 1px; }
+.picker__state { color: var(--muted); font-size: 12px; }
+.picker .muted-note { margin: 4px 0 8px; }
+.picker .btn { margin-top: 6px; }

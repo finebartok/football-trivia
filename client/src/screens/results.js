@@ -107,7 +107,6 @@ function renderRoom(root, roomState) {
   const board = roomState.leaderboard ?? [];
   const me = board.find((m) => m.user_id === roomState.me);
   const score = me?.total_score ?? 0;
-  const max = roomState.totalRounds * 7500;
 
   mount(root, [
     el('header', { className: 'topbar' }, [
@@ -117,7 +116,6 @@ function renderRoom(root, roomState) {
     el('section', { className: 'results-hero' }, [
       el('p', { className: 'results-hero__label', text: 'FINAL SCORE' }),
       el('p', { className: 'results-hero__score', text: pointsLabel(score), attrs: { id: 'final-score' } }),
-      el('p', { className: 'muted-note', text: `of ${pointsLabel(max)} possible` }),
     ]),
 
     el('section', { className: 'card' }, [

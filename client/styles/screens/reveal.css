@@ -10,3 +10,11 @@
 .verdict.is-bad { background: var(--surface); }
 .verdict__points { font-family: var(--font-display); font-size: 20px; }
 .verdict.is-good .verdict__points { color: var(--win); }
+.effect-line {
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 6px 0;
+  border-bottom: var(--border);
+  margin: 0;
+}
+.effect-line:last-child { border-bottom: 0; }

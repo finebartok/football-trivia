@@ -240,3 +240,103 @@ test('a room reveal says the answer out loud, once', async ({ browser }) => {
   const second = await host.evaluate(() => window.__oscillators);
   expect(second).toBe(first);
 });
+
+test('a steal warns the victim and copies their answer', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+  const hostErrors = watchErrors(host);
+  const guestErrors = watchErrors(guest);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  await host.locator('#btn-steal').click();
+  await host.locator('.picker__row').filter({ hasText: 'Sam' }).click();
+  await host.locator('#btn-effect-confirm').click();
+
+  // A thief has no answer to give: the reveal waits.
+  await expect(host).toHaveURL(/#reveal/);
+
+  // The victim knows the thief by name while the round is still open.
+  await expect(guest.locator('#steal-warning')).toContainText('Host is copying your answer.');
+
+  await guest.locator('.option').first().click();
+  await expect(guest).toHaveURL(/#reveal/);
+
+  // The Effects card and the copied-player verdict.
+  await expect(host.locator('#effects-result')).toContainText('You copied Sam', { timeout: 20000 });
+  expect([...hostErrors, ...guestErrors]).toEqual([]);
+});
+
+test('the victim sees who copied them and keeps their points at the reveal', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('#btn-steal').click();
+  await host.locator('.picker__row').filter({ hasText: 'Sam' }).click();
+  await host.locator('#btn-effect-confirm').click();
+  await expect(host).toHaveURL(/#reveal/);
+
+  await guest.locator('.option').first().click();
+  await expect(guest).toHaveURL(/#reveal/);
+  await expect(guest.locator('#effects-result')).toContainText(/Host copied your (answer|wrong answer)/, { timeout: 20000 });
+});
+
+test('the target picker shows presence, not answered status, and survives a redraw', async ({ browser }) => {
+  const { host } = await roomWithTwoPlayers(browser);
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+
+  await host.locator('#btn-steal').click();
+  await expect(host.locator('.picker__row')).toHaveCount(1);
+  await expect(host.locator('.picker__row')).toContainText('Sam');
+  await expect(host.locator('.picker__row')).toContainText(/online|away/);
+  await expect(host.locator('.picker__row')).not.toContainText(/answered/i);
+
+  await host.locator('.picker__row').click();
+  await host.waitForTimeout(3000);
+
+  // The two-second redraw did not close it or lose the selection.
+  await expect(host.locator('.picker')).toBeVisible();
+  await expect(host.locator('.picker__row.is-picked')).toHaveCount(1);
+});
+
+test('a side bet shows its pending line and pays or loses at the reveal', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('#btn-side-bet').click();
+  await host.locator('.picker__row').filter({ hasText: 'Sam' }).click();
+  await host.locator('#btn-effect-confirm').click();
+
+  await expect(host.locator('#effects')).toContainText('Side bet on Sam');
+
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(host.locator('#effects-result')).toContainText(/You bet on Sam: (\+\d[\d,]*|no bonus)/, { timeout: 20000 });
+});
+
+test('the effects strip is absent when alone in a room', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const host = await context.newPage();
+  await host.goto('./');
+  await host.locator('.vibe-card--preset').nth(3).click();
+  await host.locator('#btn-create-room').click();
+  await expect(host).toHaveURL(/#room-lobby/);
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(host.locator('#btn-steal')).toHaveCount(0);
+});
+
+test('the effects strip is absent in solo play', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const host = await context.newPage();
+  await host.goto('./');
+  await host.locator('.vibe-card--preset').nth(3).click();
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(host.locator('#btn-steal')).toHaveCount(0);
+});

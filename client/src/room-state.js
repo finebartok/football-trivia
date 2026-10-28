@@ -13,9 +13,15 @@ export function applyRound(state, payload) {
   // able to answer again, and the reveal has to ask about the round that
   // just closed, not the one that just opened.
   if (next && state.round && next.round_number !== state.round.round_number) {
+    // The reveal may have just fetched the result for the round that is
+    // being closed. Keep it: the round change is the same poll that
+    // closes the round, and wiping it would show a blank reveal. The
+    // old answeredRound is read first because it is nulled below.
+    const revealing = state.answeredRound;
+    const keep = state.lastResult?.round_number === revealing ? state.lastResult : null;
     state.myAnswer = null;
     state.answeredRound = null;
-    state.lastResult = null;
+    state.lastResult = keep;
     state.fetchingResult = false;
   }
 
@@ -30,6 +36,12 @@ export function applyRound(state, payload) {
 /** Fold the member list in, in join order. */
 export function applyMembers(state, members) {
   state.members = [...(members ?? [])].sort((a, b) => (a.joined_seq ?? 0) - (b.joined_seq ?? 0));
+  return state;
+}
+
+/** Fold the caller's effects in, in the server's order. */
+export function applyEffects(state, effects) {
+  state.myEffects = [...(effects ?? [])];
   return state;
 }
 
