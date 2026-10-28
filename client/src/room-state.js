@@ -8,17 +8,42 @@
 /** Fold the server's current-round payload into the room state. */
 export function applyRound(state, payload) {
   const next = payload?.round ?? null;
+  const nextStatus = payload?.status ?? state.status ?? 'lobby';
+
+  // A lobby has no game in it. A rematch returns the room here, and a
+  // player who was offline for the reset may still be carrying the last
+  // game's answer, result or effects. None of it belongs to the lobby.
+  if (!next && nextStatus === 'lobby') {
+    state.myAnswer = null;
+    state.answeredRound = null;
+    state.lastResult = null;
+    state.lastResultAskedAt = null;
+    state.fetchingResult = false;
+    state.myEffects = [];
+  }
 
   // A new round means the last answer is spent: the player has to be
   // able to answer again, and the reveal has to ask about the round that
-  // just closed, not the one that just opened.
-  if (next && state.round && next.round_number !== state.round.round_number) {
+  // just closed, not the one that just opened. A rematch can reuse round
+  // number one, so the round id is the reliable identity when both sides
+  // have one.
+  const sameRound = next && state.round
+    ? (next.id && state.round.id
+      ? next.id === state.round.id
+      : next.round_number === state.round.round_number)
+    : null;
+
+  if (next && state.round && !sameRound) {
     // The reveal may have just fetched the result for the round that is
     // being closed. Keep it: the round change is the same poll that
     // closes the round, and wiping it would show a blank reveal. The
     // old answeredRound is read first because it is nulled below.
+    // A new game starts at round one; no result from the last game can
+    // belong to it, even if the old game also ended on round one.
     const revealing = state.answeredRound;
-    const keep = state.lastResult?.round_number === revealing ? state.lastResult : null;
+    const keep = next.round_number === 1
+      ? null
+      : (state.lastResult?.round_number === revealing ? state.lastResult : null);
     state.myAnswer = null;
     state.answeredRound = null;
     state.lastResult = keep;
@@ -28,7 +53,7 @@ export function applyRound(state, payload) {
   state.round = next;
   state.currentRound = payload?.current_round ?? 0;
   state.totalRounds = payload?.total_rounds ?? state.totalRounds ?? 10;
-  state.status = payload?.status ?? state.status ?? 'lobby';
+  state.status = nextStatus;
   state.answeredCount = payload?.answered_count ?? 0;
   return state;
 }

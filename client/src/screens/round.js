@@ -40,6 +40,14 @@ export function render(root) {
 
   const quiz = store.state.quiz;
   const roomState = store.state.room;
+
+  // A rematch returns the room to its lobby; the round screen has nothing
+  // to show.
+  if (store.state.mode === 'room' && roomState?.status === 'lobby' && !roomState.round) {
+    location.hash = '#room-lobby';
+    return;
+  }
+
   // A room that exists is not the same as being in one. A player with a
   // room open can still start a solo game.
   const inRoom = store.state.mode === 'room' && Boolean(roomState?.round);

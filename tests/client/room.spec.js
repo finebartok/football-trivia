@@ -22,7 +22,7 @@ function watchErrors(page) {
   return errors;
 }
 
-import { roomWithTwoPlayers } from './helpers.js';
+import { roomWithTwoPlayers, roomWithOneRound } from './helpers.js';
 
 test('the round screen shows the server round to everyone', async ({ browser }) => {
   const { host, guest } = await roomWithTwoPlayers(browser);
@@ -339,4 +339,61 @@ test('the effects strip is absent in solo play', async ({ browser }) => {
   await host.locator('#btn-start').click();
   await expect(host).toHaveURL(/#round/);
   await expect(host.locator('#btn-steal')).toHaveCount(0);
+});
+
+test('the host rematches in the same room and the guest follows', async ({ browser }) => {
+  const { host, guest, code } = await roomWithOneRound(browser);
+  const hostErrors = watchErrors(host);
+  const guestErrors = watchErrors(guest);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  // A one-round room clamps the mix to one round, and that round is stat.
+  await expect(host.locator('.round-prompt')).toContainText(/How many /);
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+
+  // The round closes, and the reveal shows the value with its unit.
+  await expect(guest.locator('#btn-next')).toContainText('See how it went', { timeout: 30000 });
+  await expect(host.locator('.reveal-card__name')).toContainText(/\d+ (goal|goals|cap|caps)/);
+
+  // The guest sees the waiting note on the results screen.
+  await guest.locator('#btn-next').click();
+  await expect(guest).toHaveURL(/#results/);
+  await expect(guest.locator('#rematch-waiting')).toContainText('Waiting for the host to start again.');
+  await expect(guest.locator('#btn-rematch')).toHaveCount(0);
+
+  // The host goes to the results and sees the button.
+  await expect(host.locator('#btn-next')).toContainText('See how it went', { timeout: 30000 });
+  await host.locator('#btn-next').click();
+  await expect(host).toHaveURL(/#results/);
+  await expect(host.locator('#btn-rematch')).toBeVisible();
+
+  // Put the guest back on the reveal, where a stale result is most likely
+  // to strand them. The reset must pull them to the lobby.
+  await guest.evaluate(() => { location.hash = '#reveal'; });
+  await expect(guest).toHaveURL(/#reveal/);
+  await host.locator('#btn-rematch').click();
+  await expect(host).toHaveURL(/#room-lobby/);
+  await expect(guest).toHaveURL(/#room-lobby/);
+  await expect(host.locator('#room-code')).toHaveText(code);
+
+  // A fresh game in the same room, with zero scores and effects available.
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+  await expect(host.locator('.round-meta')).toContainText('Round 1 of 1');
+  await expect(host.locator('#btn-steal')).toBeVisible();
+  await expect(guest.locator('#btn-steal')).toBeVisible();
+  const score = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return room.state.leaderboard.find((m) => m.user_id === room.state.me)?.total_score ?? null;
+  });
+  expect(score).toBe(0);
+
+  expect([...hostErrors, ...guestErrors]).toEqual([]);
 });

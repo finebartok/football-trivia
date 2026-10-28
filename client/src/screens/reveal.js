@@ -191,6 +191,12 @@ function effectStory(roomState, e, answer) {
  * not on this button.
  */
 function renderRoom(root, roomState) {
+  // A rematch returned the room to its lobby. There is no round to reveal.
+  if (roomState.status === 'lobby' && !roomState.round) {
+    location.hash = '#room-lobby';
+    return;
+  }
+
   const answeredRound = roomState.answeredRound;
   const result = roomState.lastResult;
   const showResult = Boolean(result && result.round_number === answeredRound);
