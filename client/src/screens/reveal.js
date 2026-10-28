@@ -115,6 +115,74 @@ export function render(root) {
   ].filter(Boolean));
 }
 
+/** "Alex", "Alex and Robin", "Alex, Robin and Sam". */
+function namesFor(roomState, ids) {
+  const names = ids.map((id) => labelFor(roomState, id));
+  if (names.length <= 1) return names[0] ?? '';
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
+/** Why the player is waiting, from their own effect rows. */
+function waitingEffectLines(roomState, roundNumber) {
+  const effects = (roomState.myEffects ?? [])
+    .filter((e) => e.round_number === roundNumber);
+  const thief = effects.find((e) => e.role === 'actor' && e.kind === 'steal');
+  const victims = effects.filter((e) => e.role === 'target' && e.kind === 'steal');
+  const bet = effects.find((e) => e.role === 'actor' && e.kind === 'side_bet');
+  const usedSteal = effects.some((e) => e.role === 'actor' && e.kind === 'steal');
+  const lines = [];
+
+  if (thief) {
+    lines.push(el('p', { className: 'muted-note', text: `You're copying ${labelFor(roomState, thief.other_id)}. The result appears when the round closes.` }));
+  }
+  if (victims.length) {
+    const names = namesFor(roomState, victims.map((e) => e.other_id));
+    lines.push(el('p', {
+      className: 'muted-note',
+      text: usedSteal
+        ? `${names} ${victims.length === 1 ? 'is' : 'are'} copying you, but you used your steal — there is nothing to copy.`
+        : `${names} ${victims.length === 1 ? 'is' : 'are'} copying your answer. Your answer is locked.`,
+    }));
+  }
+  if (bet) {
+    lines.push(el('p', { className: 'muted-note', text: `Side bet on ${labelFor(roomState, bet.other_id)}: +500 if they are right.` }));
+  }
+  return lines;
+}
+
+/** The reveal story for one effect. */
+function effectStory(roomState, e, answer) {
+  const me = roomState.me;
+  const actor = labelFor(roomState, e.actor_id);
+  const target = labelFor(roomState, e.target_id);
+
+  if (e.kind === 'side_bet') {
+    const bonus = e.bonus_points > 0 ? `+${pointsLabel(e.bonus_points)}` : 'no bonus';
+    return e.actor_id === me
+      ? `You bet on ${target}: ${bonus}.`
+      : `${actor} bet on ${target}: ${bonus}.`;
+  }
+
+  if (e.actor_id === me) {
+    if (e.target_stole) return `You copied ${target}, but ${target} used their own steal — nothing to copy.`;
+    if (!e.target_answered) return `${target} didn't answer — nothing to copy.`;
+    if (e.target_correct) return `You copied ${target}'s answer. ${target} was right — you earned ${pointsLabel(e.actor_points)}.`;
+    return `You copied ${target}'s answer. ${target} was wrong — you got nothing.`;
+  }
+
+  if (e.target_id === me) {
+    if (e.target_stole) return `${actor} copied you, but you used your steal — there was nothing to copy.`;
+    if (!e.target_answered) return `${actor} tried to copy you, but you didn't answer.`;
+    if (e.target_correct) return `${actor} copied your answer. You still earned ${pointsLabel(answer?.points ?? 0)}.`;
+    return `${actor} copied your wrong answer — you both got nothing.`;
+  }
+
+  if (e.target_stole) return `${actor} copied ${target}, but ${target} used their own steal — nothing to copy.`;
+  if (!e.target_answered) return `${actor} copied ${target} — nothing to copy.`;
+  if (e.target_correct) return `${actor} copied ${target}. ${actor} earned ${pointsLabel(e.actor_points)}.`;
+  return `${actor} copied ${target}'s wrong answer — neither scored.`;
+}
+
 /**
  * The reveal in a room.
  *
@@ -123,17 +191,18 @@ export function render(root) {
  * not on this button.
  */
 function renderRoom(root, roomState) {
-  if (!roomState.lastResult && roomState.answeredRound) {
+  const answeredRound = roomState.answeredRound;
+  const result = roomState.lastResult;
+  const showResult = Boolean(result && result.round_number === answeredRound);
+
+  if (!showResult && answeredRound) {
     // The answer only exists once the round has closed. Ask for it, and
-    // ask again no more often than the poll - asking on every render
-    // would fire hundreds of requests a second.
+    // ask again no more often than the poll.
     const now = Date.now();
     if (!roomState.lastResultAskedAt || now - roomState.lastResultAskedAt > 2000) {
       roomState.lastResultAskedAt = now;
-      room.result(roomState.answeredRound);
+      room.result(answeredRound);
     }
-    // The screen must never be blank. A player who has answered is
-    // waiting for the round to close, and a blank page reads as a crash.
     mount(root, [
       el('header', { className: 'topbar' }, [
         el('span', { className: 'wordmark', text: '⚽ Football Trivia' }),
@@ -141,14 +210,14 @@ function renderRoom(root, roomState) {
       el('section', { className: 'card', attrs: { id: 'reveal-waiting' } }, [
         el('h1', { className: 'page-title', text: 'Waiting for the round to close' }),
         el('p', { className: 'muted-note', text: 'The answer is shown once everyone has answered or the time is up.' }),
+        ...waitingEffectLines(roomState, answeredRound),
       ]),
     ]);
     return;
   }
 
-  const result = roomState.lastResult;
-  const answer = roomState.myAnswer;
-  const roundNumber = roomState.answeredRound ?? roomState.currentRound;
+  const answer = result?.my_answer ?? roomState.myAnswer;
+  const roundNumber = result?.round_number ?? answeredRound ?? roomState.currentRound;
 
   // "1 goal", not "1". The unit belongs with the number.
   const answerText = withUnit(result?.answer, result?.unit);
@@ -185,7 +254,29 @@ function renderRoom(root, roomState) {
     }
   }
 
+  const effects = result?.effects ?? [];
+  const mySteal = effects.find((e) => e.kind === 'steal' && e.actor_id === roomState.me);
+  const ordered = [...effects].sort((a, b) => {
+    const aMine = a.actor_id === roomState.me || a.target_id === roomState.me ? 0 : 1;
+    const bMine = b.actor_id === roomState.me || b.target_id === roomState.me ? 0 : 1;
+    return aMine - bMine;
+  });
+  const effectsCard = effects.length
+    ? el('section', { className: 'card', attrs: { id: 'effects-result' } }, [
+      el('h2', { className: 'section-title', text: 'Effects' }),
+      ...ordered.map((e) => el('p', { className: 'effect-line', text: effectStory(roomState, e, answer) })),
+    ])
+    : null;
 
+  let verdictHeadline;
+  if (mySteal) {
+    const target = labelFor(roomState, mySteal.target_id);
+    verdictHeadline = (mySteal.target_stole || !mySteal.target_answered)
+      ? 'Nothing to copy'
+      : `You copied ${target} — ${mySteal.target_correct ? 'correct' : 'wrong'}`;
+  } else {
+    verdictHeadline = answer?.correct ? 'You got it' : `It was ${answerText}`;
+  }
 
   mount(root, [
     el('header', { className: 'topbar' }, [
@@ -199,11 +290,11 @@ function renderRoom(root, roomState) {
     ]),
 
     el('section', { className: `card verdict ${answer?.correct ? 'is-good' : 'is-bad'}` }, [
-      answer?.correct
-        ? el('strong', { text: 'You got it' })
-        : el('strong', { text: `It was ${answerText}` }),
+      el('strong', { text: verdictHeadline }),
       el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
     ]),
+
+    effectsCard,
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),

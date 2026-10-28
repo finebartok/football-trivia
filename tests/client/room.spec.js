@@ -263,8 +263,24 @@ test('a steal warns the victim and copies their answer', async ({ browser }) => 
   await guest.locator('.option').first().click();
   await expect(guest).toHaveURL(/#reveal/);
 
-  // The Effects card and the copied-player verdict arrive in Task 6.
+  // The Effects card and the copied-player verdict.
+  await expect(host.locator('#effects-result')).toContainText('You copied Sam', { timeout: 20000 });
   expect([...hostErrors, ...guestErrors]).toEqual([]);
+});
+
+test('the victim sees who copied them and keeps their points at the reveal', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await host.locator('#btn-steal').click();
+  await host.locator('.picker__row').filter({ hasText: 'Sam' }).click();
+  await host.locator('#btn-effect-confirm').click();
+  await expect(host).toHaveURL(/#reveal/);
+
+  await guest.locator('.option').first().click();
+  await expect(guest).toHaveURL(/#reveal/);
+  await expect(guest.locator('#effects-result')).toContainText(/Host copied your (answer|wrong answer)/, { timeout: 20000 });
 });
 
 test('the target picker shows presence, not answered status, and survives a redraw', async ({ browser }) => {
@@ -300,7 +316,7 @@ test('a side bet shows its pending line and pays or loses at the reveal', async 
   await host.locator('.option').first().click();
   await guest.locator('.option').first().click();
   await expect(host).toHaveURL(/#reveal/);
-  // The Effects card is asserted in Task 6.
+  await expect(host.locator('#effects-result')).toContainText(/You bet on Sam: (\+\d[\d,]*|no bonus)/, { timeout: 20000 });
 });
 
 test('the effects strip is absent when alone in a room', async ({ browser }) => {
