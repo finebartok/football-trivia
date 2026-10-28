@@ -320,8 +320,6 @@ test('the effects strip is absent in solo play', async ({ browser }) => {
   const host = await context.newPage();
   await host.goto('./');
   await host.locator('.vibe-card--preset').nth(3).click();
-  await host.locator('#btn-create-room').click();
-  await expect(host).toHaveURL(/#room-lobby/);
   await host.locator('#btn-start').click();
   await expect(host).toHaveURL(/#round/);
   await expect(host.locator('#btn-steal')).toHaveCount(0);
