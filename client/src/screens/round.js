@@ -1,6 +1,7 @@
 import { el, mount } from '../ui.js';
-import { store } from '../store.js';
+import { store, notify } from '../store.js';
 import { room } from '../room.js';
+import { labelFor } from '../room-state.js';
 import { answerRound, STAGE_MULTIPLIERS, resolveWindow } from '/js/engine/index.js';
 import { sounds, soundToggle, haptic } from '../sound.js';
 
@@ -13,6 +14,12 @@ const LETTERS = ['A', 'B', 'C', 'D'];
 let revealedBefore = 0;
 let lastTick = null;
 let lastRoundKey = null;
+
+// The picker survives the two-second redraw. It resets when the round
+// changes, and the selected target is kept across a redraw.
+let picker = null;
+let pickedTarget = null;
+let pickerRound = null;
 
 let timer = null;
 
@@ -150,6 +157,168 @@ export function render(root) {
     lastTick = null;
   }
 
+  const roundNumber = inRoom ? roomState.round.round_number : null;
+  if (pickerRound !== roundNumber) {
+    picker = null;
+    pickedTarget = null;
+    pickerRound = roundNumber;
+  }
+
+  const mine = inRoom ? (roomState.myEffects ?? []) : [];
+  const stealUsed = mine.some((e) => e.role === 'actor' && e.kind === 'steal');
+  const betUsed = mine.some((e) => e.role === 'actor' && e.kind === 'side_bet');
+  const pendingBet = mine.find((e) => e.role === 'actor' && e.kind === 'side_bet' && !e.resolved);
+  const thieves = mine.filter((e) => e.role === 'target' && e.kind === 'steal'
+    && e.round_number === roundNumber);
+  const others = inRoom
+    ? (roomState.members ?? []).filter((m) => m.user_id !== roomState.me)
+    : [];
+
+  const namesFor = (ids) => {
+    const names = ids.map((id) => labelFor(roomState, id));
+    if (names.length <= 1) return names[0] ?? '';
+    return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  };
+
+  const warningEl = thieves.length
+    ? el('p', { className: 'effects__warning', attrs: { id: 'steal-warning' } }, [
+      el('strong', { text: `${namesFor(thieves.map((e) => e.other_id))} ${thieves.length === 1 ? 'is' : 'are'} copying your answer.` }),
+      el('span', { text: ' Answering wrong burns them — but you lose the points too.' }),
+    ])
+    : null;
+
+  const effectsHost = el('div', { className: 'effects', attrs: { id: 'effects' } });
+  const showEffects = inRoom && others.length > 0;
+
+  const paintEffects = () => {
+    const errorEl = inRoom && roomState.error
+      ? el('p', { className: 'notice notice--warn', attrs: { id: 'room-error' } }, roomState.error)
+      : null;
+
+    if (!showEffects) {
+      mount(effectsHost, [errorEl]);
+      return;
+    }
+
+    const expiredNow = now() >= deadline;
+
+    if (picker) {
+      if (pickedTarget && !others.some((m) => m.user_id === pickedTarget)) {
+        pickedTarget = null;
+      }
+      const targetName = pickedTarget ? labelFor(roomState, pickedTarget) : '';
+      const heading = picker === 'steal' ? "Copy a friend's answer" : 'Bet on a friend';
+      const rows = others.map((m) => el('button', {
+        className: `picker__row ${pickedTarget === m.user_id ? 'is-picked' : ''}`,
+        attrs: { type: 'button' },
+        on: {
+          click: () => {
+            pickedTarget = m.user_id;
+            paintEffects();
+          },
+        },
+      }, [
+        el('span', { className: 'picker__name', text: labelFor(roomState, m.user_id) }),
+        el('span', { className: 'picker__state', text: m.online ? 'online' : 'away' }),
+      ]));
+
+      const confirm = el('button', {
+        className: 'btn btn--primary',
+        text: picker === 'steal'
+          ? (targetName ? `Copy ${targetName}'s answer` : 'Pick a friend')
+          : (targetName ? `Bet on ${targetName}` : 'Pick a friend'),
+        attrs: { type: 'button', id: 'btn-effect-confirm' },
+      });
+      confirm.disabled = !pickedTarget || expiredNow;
+      confirm.addEventListener('click', async () => {
+        if (!pickedTarget || expiredNow) return;
+        confirm.disabled = true;
+        const data = await room.useEffect(picker, pickedTarget);
+        if (!data) {
+          confirm.disabled = false;
+          return;
+        }
+        picker = null;
+        pickedTarget = null;
+        if (data.kind === 'steal') {
+          location.hash = '#reveal';
+          return;
+        }
+        // The sync redraw happened while the picker was still open, so
+        // close it with a fresh render rather than patching a host that
+        // was replaced by that redraw.
+        notify();
+      });
+
+      const cost = picker === 'steal'
+        ? "You won't answer this round. If they haven't answered, they can burn you. One steal per game."
+        : "+500 if they are right and you answer or steal this round. They won't know until the reveal. One side bet per game.";
+
+      mount(effectsHost, [
+        errorEl,
+        warningEl,
+        el('div', { className: 'picker', attrs: { id: 'effect-picker' } }, [
+          el('p', { className: 'picker__heading', text: heading }),
+          ...rows,
+          el('p', { className: 'muted-note', text: cost }),
+          confirm,
+          el('button', {
+            className: 'btn btn--secondary',
+            text: 'Cancel',
+            attrs: { type: 'button', id: 'btn-effect-cancel' },
+            on: {
+              click: () => {
+                picker = null;
+                pickedTarget = null;
+                paintEffects();
+              },
+            },
+          }),
+        ]),
+      ]);
+      return;
+    }
+
+    const stealButton = el('button', {
+      className: 'btn btn--effect',
+      text: stealUsed ? 'Steal used' : 'Steal a friend',
+      attrs: { type: 'button', id: 'btn-steal' },
+      on: {
+        click: () => {
+          if (stealUsed || now() >= deadline) return;
+          picker = 'steal';
+          pickedTarget = null;
+          paintEffects();
+        },
+      },
+    });
+    const betButton = el('button', {
+      className: 'btn btn--effect',
+      text: betUsed ? 'Side bet used' : 'Side bet',
+      attrs: { type: 'button', id: 'btn-side-bet' },
+      on: {
+        click: () => {
+          if (betUsed || now() >= deadline) return;
+          picker = 'side_bet';
+          pickedTarget = null;
+          paintEffects();
+        },
+      },
+    });
+    stealButton.disabled = stealUsed || expiredNow;
+    betButton.disabled = betUsed || expiredNow;
+
+    mount(effectsHost, [
+      errorEl,
+      warningEl,
+      el('p', { className: 'effects__title', text: 'EFFECTS — ONCE PER GAME' }),
+      el('div', { className: 'effects__row' }, [stealButton, betButton]),
+      pendingBet
+        ? el('p', { className: 'effects__pending', text: `Side bet on ${labelFor(roomState, pendingBet.other_id)}: +500 if they are right.` })
+        : null,
+    ]);
+  };
+
   const paint = () => {
     const elapsed = Math.max(0, now() - startedAt);
     const revealed = revealedStages(round, elapsed);
@@ -195,8 +364,17 @@ export function render(root) {
     optionEls.forEach((b) => {
       if (b.disabled !== expired) b.disabled = expired;
     });
+
+    for (const id of ['btn-steal', 'btn-side-bet', 'btn-effect-confirm']) {
+      const b = effectsHost.querySelector(`#${id}`);
+      if (!b) continue;
+      if (id === 'btn-steal') b.disabled = expired || stealUsed;
+      else if (id === 'btn-side-bet') b.disabled = expired || betUsed;
+      else b.disabled = expired || !pickedTarget;
+    }
   };
 
+  paintEffects();
   paint();
   timer = setInterval(paint, 100);
 
@@ -247,6 +425,7 @@ export function render(root) {
 
     ladderEl,
     clueHost,
+    effectsHost,
     optionsHost,
   ]);
 

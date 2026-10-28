@@ -6,7 +6,7 @@
  */
 import { connect, myUserId, invokeFunction } from './supabase.js';
 import { presetById } from '/js/presets.js';
-import { applyRound, applyMembers, applyLeaderboard } from './room-state.js';
+import { applyRound, applyMembers, applyLeaderboard, applyEffects } from './room-state.js';
 
 const POLL_MS = 2000;
 
@@ -32,6 +32,7 @@ const state = {
   answeredRound: null,
   fetchingResult: false,
   lastResult: null,
+  myEffects: [],
   error: null,
 };
 
@@ -90,6 +91,7 @@ function applyPayload(payload) {
   applyRound(state, payload);
   if (payload.members) applyMembers(state, payload.members);
   if (payload.leaderboard) applyLeaderboard(state, payload.leaderboard);
+  if (payload.my_effects) applyEffects(state, payload.my_effects);
 }
 
 async function subscribe(roomId) {
@@ -101,6 +103,7 @@ async function subscribe(roomId) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rounds', filter: `room_id=eq.${roomId}` }, () => sync())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'room_memberships', filter: `room_id=eq.${roomId}` }, () => sync())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` }, () => sync())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_effects', filter: `room_id=eq.${roomId}` }, () => sync())
     .subscribe();
 }
 
@@ -317,6 +320,8 @@ export const room = {
     state.myAnswer = null;
     state.answeredRound = null;
     state.lastResult = null;
+    state.myEffects = [];
+    state.lastResultAskedAt = null;
     try {
       localStorage.removeItem(ROOM_KEY);
     } catch (err) {
@@ -369,29 +374,55 @@ export const room = {
     return data;
   },
 
+  /** Spend the one steal or the one side bet. */
+  async useEffect(kind, targetUserId) {
+    const supabase = await ensure();
+    if (!supabase || !state.roomId || !state.round) return null;
+    const { data, error } = await supabase.rpc('use_room_effect', {
+      p_room_id: state.roomId,
+      p_round_number: state.round.round_number,
+      p_kind: kind,
+      p_target_user_id: targetUserId,
+    });
+    if (error) {
+      state.error = friendly(error.message);
+      notify();
+      return null;
+    }
+    state.error = null;
+    // The server's round, not the possibly stale local one. The round
+    // screen routes on this and the reveal asks for this round.
+    if (kind === 'steal') state.answeredRound = data.round_number;
+    await sync();
+    notify();
+    return data;
+  },
+
   /** The finished round: the answer and the leaderboard. */
   async result(roundNumber) {
     const supabase = client;
     if (!supabase || !state.roomId) return null;
+    if (roundNumber !== state.answeredRound) return null;
     const { data, error } = await supabase.rpc('round_result', {
       p_room_id: state.roomId,
       p_round_number: roundNumber,
     });
     if (error) {
-      // The round may still be open. That is not a failure the player
-      // needs to hear about - the reveal is waiting for it.
       if (!String(error.message ?? '').includes('still open')) {
         state.error = friendly(error.message);
       }
       notify();
       return null;
     }
-    // The round is still open: the reveal is waiting for it.
     if (data?.pending) {
       notify();
       return null;
     }
+    // The room may have advanced while this request was in flight. A
+    // result for another round must not overwrite the current answer.
+    if (roundNumber !== state.answeredRound) return null;
     state.lastResult = data;
+    if (data.my_answer) state.myAnswer = data.my_answer;
     applyLeaderboard(state, data.leaderboard);
     notify();
     return data;
@@ -412,6 +443,14 @@ function friendly(message) {
   if (m.includes('room is full')) return 'That room is full.';
   if (m.includes('too late')) return 'Too late - that round is over.';
   if (m.includes('not signed in')) return 'Could not sign you in. Try again.';
+  if (m.includes('already used that effect')) return 'You already used that effect this game.';
+  if (m.includes('already answered')) return 'You already answered this round.';
+  if (m.includes('copying a player')) return "You're copying a player this round. No answer of your own.";
+  if (m.includes('not in the room')) return 'That player is no longer in the room.';
+  if (m.includes('not a member of that room')) return "You're not in that room.";
+  if (m.includes('effect on yourself')) return "You can't use an effect on yourself.";
+  if (m.includes('game is not running')) return 'That game is not running.';
+  if (m.includes('round is not open')) return 'That round is over.';
   if (m.includes('fit that vibe')) return m;
   if (m.includes('not one the data knows')) return m;
   if (m.includes('has nothing in it')) return m;
