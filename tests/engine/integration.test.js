@@ -19,12 +19,29 @@ test('generateQuiz returns a playable plan', () => {
   }
 });
 
+test('generateQuiz forwards the stat mix', () => {
+  const { players, registry } = loadFixture();
+  const plan = generateQuiz({
+    scope, pool: players, registry, seed: 1, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  });
+  assert.equal(plan.rounds.filter((r) => r.template === 'stat_value').length, 3);
+  assert.equal(plan.rounds.filter((r) => r.template === 'identify').length, 7);
+});
+
 test('answering a stat round scores correctly', () => {
   const { players, registry } = loadFixture();
-  const plan = generateQuiz({ scope, pool: players, registry, seed: 3, rounds: 10 });
-  const statRound = plan.rounds.find(r => r.template === 'stat_value');
-  if (!statRound) return; // the scope may only support identify rounds
-  const res = answerRound(statRound, { answer: statRound.answer, stage: 1, elapsedMs: 1500 });
+  const plan = generateQuiz({
+    scope, pool: players, registry, seed: 3, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  });
+  const statRound = plan.rounds.find((r) => r.template === 'stat_value');
+  assert.ok(statRound, 'the mix contains a stat round');
+  assert.equal(statRound.options.length, 4);
+  assert.equal(statRound.options.filter((o) => o.correct).length, 1);
+  assert.ok(statRound.unit, 'the stat round carries a unit');
+  const correct = statRound.options.find((o) => o.correct);
+  const res = answerRound(statRound, { answer: correct.value, stage: 1, elapsedMs: 1500 });
   assert.equal(res.correct, true);
   assert.equal(res.points, 7500);
 });

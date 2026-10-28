@@ -14,8 +14,8 @@ export { numericDistractors, nameDistractors, buildOptions } from './distractors
 export { scoreRound, STAGE_MULTIPLIERS } from './scoring.js';
 export { makeRng } from './rng.js';
 
-export function generateQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium' }) {
-  return planQuiz({ scope, pool, registry, seed, rounds, difficulty });
+export function generateQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0 }) {
+  return planQuiz({ scope, pool, registry, seed, rounds, difficulty, phases, statRounds });
 }
 
 export function answerRound(round, { answer, stage, elapsedMs }) {
