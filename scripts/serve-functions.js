@@ -40,11 +40,14 @@ function readBody(req) {
 }
 
 // The hosted project's gateway adds these. The local runner has to do
-// the same, or the browser refuses the call.
+// the same, or the browser refuses the call. Lowercase, because the
+// handler's Response headers come back from the Headers iterator
+// lowercased - a mixed-case twin of the same header would reach the wire
+// twice and the browser would refuse the call.
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'access-control-allow-origin': '*',
+  'access-control-allow-headers': 'authorization, apikey, content-type, x-client-info, x-supabase-api-version',
+  'access-control-allow-methods': 'POST, GET, OPTIONS',
 };
 
 const server = http.createServer(async (req, res) => {
