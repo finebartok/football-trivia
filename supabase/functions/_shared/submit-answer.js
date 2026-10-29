@@ -9,17 +9,7 @@
 import { answerRound, scoreRound } from './vendor/js/engine/index.js';
 import { makeClients } from '../_shared/supabase.js';
 import { json, preflight } from './pool-count.js';
-
-async function hasSteal(admin, roundId, userId) {
-  const { data } = await admin
-    .from('room_effects')
-    .select('id')
-    .eq('round_id', roundId)
-    .eq('actor_id', userId)
-    .eq('kind', 'steal')
-    .maybeSingle();
-  return Boolean(data);
-}
+import { hasSteal } from './effects.js';
 
 export async function handleSubmitAnswer(req, { createClient, env }) {
   const pre = preflight(req);
