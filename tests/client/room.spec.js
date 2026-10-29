@@ -23,6 +23,7 @@ function watchErrors(page) {
 }
 
 import { roomWithTwoPlayers, roomWithOneRound } from './helpers.js';
+import { serverClient } from '../integration/helpers.js';
 
 test('the round screen shows the server round to everyone', async ({ browser }) => {
   const { host, guest } = await roomWithTwoPlayers(browser);
@@ -373,6 +374,57 @@ test('the host rematches in the same room and the guest follows', async ({ brows
   await expect(host).toHaveURL(/#results/);
   await expect(host.locator('#btn-rematch')).toBeVisible();
 
+  // Give the finished game something to reset: a score for each player and
+  // a steal the host has already spent. A rematch that only resets the room
+  // status would leave all of it behind.
+  const ids = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return {
+      host: room.state.members.find((m) => m.is_host)?.user_id,
+      guest: room.state.members.find((m) => !m.is_host)?.user_id,
+    };
+  });
+  const server = serverClient();
+  const { data: roomRow, error: roomError } = await server.from('rooms')
+    .select('id').eq('code', code).single();
+  if (roomError) throw roomError;
+  const { data: roundRow, error: roundError } = await server.from('rounds')
+    .select('id').eq('room_id', roomRow.id)
+    .order('round_number', { ascending: false }).limit(1).single();
+  if (roundError) throw roundError;
+
+  // Seed the scores first: inserting the effect fires a realtime sync, and
+  // it must not read the memberships before the scores are committed.
+  const seeded = [
+    await server.from('room_memberships')
+      .update({ total_score: 1234, correct_count: 3 })
+      .eq('room_id', roomRow.id).eq('user_id', ids.host),
+    await server.from('room_memberships')
+      .update({ total_score: 567, correct_count: 1 })
+      .eq('room_id', roomRow.id).eq('user_id', ids.guest),
+    await server.from('room_effects').insert({
+      room_id: roomRow.id,
+      round_id: roundRow.id,
+      actor_id: ids.host,
+      target_id: ids.guest,
+      kind: 'steal',
+    }),
+  ];
+  for (const { error } of seeded) if (error) throw error;
+
+  // The host's client sees the seeded score and the spent steal before the
+  // rematch, so the checks after it cannot pass on an empty game.
+  const before = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    await room.sync();
+    return {
+      score: room.state.leaderboard.find((m) => m.user_id === room.state.me)?.total_score ?? null,
+      effects: room.state.myEffects.length,
+    };
+  });
+  expect(before.score).toBe(1234);
+  expect(before.effects).toBe(1);
+
   // Put the guest back on the reveal, where a stale result is most likely
   // to strand them. The reset must pull them to the lobby.
   await guest.evaluate(() => { location.hash = '#reveal'; });
@@ -389,11 +441,20 @@ test('the host rematches in the same room and the guest follows', async ({ brows
   await expect(host.locator('.round-meta')).toContainText('Round 1 of 1');
   await expect(host.locator('#btn-steal')).toBeVisible();
   await expect(guest.locator('#btn-steal')).toBeVisible();
-  const score = await host.evaluate(async () => {
+
+  // The reset cleared the seeded score and the spent steal, not just the
+  // room status: the host is back to zero and can steal again.
+  await expect(host.locator('#btn-steal')).toBeEnabled();
+  await expect(host.locator('#btn-steal')).toHaveText('Steal a friend');
+  const after = await host.evaluate(async () => {
     const { room } = await import('/src/room.js');
-    return room.state.leaderboard.find((m) => m.user_id === room.state.me)?.total_score ?? null;
+    return {
+      score: room.state.leaderboard.find((m) => m.user_id === room.state.me)?.total_score ?? null,
+      effects: room.state.myEffects.length,
+    };
   });
-  expect(score).toBe(0);
+  expect(after.score).toBe(0);
+  expect(after.effects).toBe(0);
 
   expect([...hostErrors, ...guestErrors]).toEqual([]);
 });
