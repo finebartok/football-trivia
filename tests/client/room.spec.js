@@ -458,3 +458,33 @@ test('the host rematches in the same room and the guest follows', async ({ brows
 
   expect([...hostErrors, ...guestErrors]).toEqual([]);
 });
+
+test('a press that spans a room redraw still answers', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+  const hostErrors = watchErrors(host);
+  const guestErrors = watchErrors(guest);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+
+  const box = await host.locator('.option').first().boundingBox();
+  await host.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await host.mouse.down();
+
+  // A poll lands while the finger is still down. It notifies every
+  // subscriber, which is exactly what used to replace the button.
+  await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    await room.sync();
+  });
+
+  await host.mouse.up();
+  await expect(host).toHaveURL(/#reveal/);
+
+  const answered = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return room.state.answeredRound;
+  });
+  expect(answered).toBe(1);
+  expect([...hostErrors, ...guestErrors]).toEqual([]);
+});

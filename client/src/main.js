@@ -29,6 +29,12 @@ const ROOM_SCREENS = new Set(['#join', '#room-lobby', '#round', '#reveal', '#res
 
 let rendering = false;
 let lastHash = null;
+// A press can span a two-second room sync. Rebuilding the screen while
+// the pointer is down replaces the button under the finger, and the
+// browser never fires the click. Defer store-driven renders until the
+// press is over.
+let pointerDown = false;
+let pendingRender = false;
 
 function screenFor(hash) {
   const screen = SCREENS[hash];
@@ -36,7 +42,7 @@ function screenFor(hash) {
   return SCREENS['#home'];
 }
 
-export function render() {
+function renderNow() {
   if (rendering) return;
   rendering = true;
   try {
@@ -98,7 +104,36 @@ export function render() {
   }
 }
 
-window.addEventListener('hashchange', render);
+export function render() {
+  if (pointerDown) {
+    pendingRender = true;
+    return;
+  }
+  renderNow();
+}
+
+function releasePointer() {
+  pointerDown = false;
+  if (!pendingRender) return;
+  pendingRender = false;
+  // The click for this press is dispatched after pointerup. A zero-delay
+  // task lets that click run against the live element first.
+  setTimeout(render, 0);
+}
+
+window.addEventListener('pointerdown', (event) => {
+  if (event.button !== 0 || !event.isPrimary) return;
+  pointerDown = true;
+}, true);
+
+window.addEventListener('pointerup', (event) => {
+  if (event.button !== 0 || !event.isPrimary) return;
+  releasePointer();
+}, true);
+
+window.addEventListener('pointercancel', releasePointer, true);
+
+window.addEventListener('hashchange', renderNow);
 store.subscribe(render);
 
 // Mount the current hash immediately (synchronously) so the screen is on
