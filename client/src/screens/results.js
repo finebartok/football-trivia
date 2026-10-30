@@ -1,6 +1,7 @@
 import { el, mount, pointsLabel, shareText } from '../ui.js';
 import { store } from '../store.js';
 import { labelFor } from '../room-state.js';
+import { room } from '../room.js';
 
 export function render(root) {
   const roomState = store.state.room;
@@ -104,9 +105,39 @@ export function render(root) {
 
 /** The final leaderboard of a room. */
 function renderRoom(root, roomState) {
+  // A rematch happened while this client was on the results screen.
+  if (roomState.status === 'lobby') {
+    location.hash = '#room-lobby';
+    return;
+  }
+
   const board = roomState.leaderboard ?? [];
   const me = board.find((m) => m.user_id === roomState.me);
   const score = me?.total_score ?? 0;
+  const isHost = roomState.members.some((m) => m.user_id === roomState.me && m.is_host);
+
+  const rematch = isHost
+    ? el('button', {
+      className: 'btn btn--primary results-cta',
+      text: 'Play again',
+      attrs: { type: 'button', id: 'btn-rematch' },
+      on: {
+        click: async () => {
+          rematch.disabled = true;
+          rematch.textContent = 'Resetting…';
+          const ok = await room.rematch();
+          if (!ok) {
+            rematch.disabled = false;
+            rematch.textContent = 'Play again';
+          }
+        },
+      },
+    })
+    : el('p', {
+      className: 'muted-note',
+      attrs: { id: 'rematch-waiting' },
+      text: 'Waiting for the host to start again.',
+    });
 
   mount(root, [
     el('header', { className: 'topbar' }, [
@@ -127,10 +158,14 @@ function renderRoom(root, roomState) {
       el('p', { className: 'muted-note', text: 'A fresh quiz is written every time you play.' }),
     ]),
 
+    roomState.error
+      ? el('p', { className: 'notice notice--warn', attrs: { id: 'room-error' }, text: roomState.error })
+      : null,
+    rematch,
     el('a', {
-      className: 'btn btn--primary results-cta',
+      className: 'btn',
       text: 'Craft your own vibe',
       attrs: { href: '#vibes' },
     }),
-  ]);
+  ].filter(Boolean));
 }

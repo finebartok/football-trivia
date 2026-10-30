@@ -40,6 +40,14 @@ export function render(root) {
 
   const quiz = store.state.quiz;
   const roomState = store.state.room;
+
+  // A rematch returns the room to its lobby; the round screen has nothing
+  // to show.
+  if (store.state.mode === 'room' && roomState?.status === 'lobby' && !roomState.round) {
+    location.hash = '#room-lobby';
+    return;
+  }
+
   // A room that exists is not the same as being in one. A player with a
   // room open can still start a solo game.
   const inRoom = store.state.mode === 'room' && Boolean(roomState?.round);
@@ -125,7 +133,7 @@ export function render(root) {
         if (inRoom) {
           // The server decides whether the answer was right and what it
           // is worth. The client never scores its own game.
-          const scored = await room.answer(opt.value ?? opt.label);
+          const scored = await room.answer(opt.value ?? opt.label, round.round_number);
           if (!scored) return;
           location.hash = '#reveal';
           return;

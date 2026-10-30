@@ -83,7 +83,7 @@ test('the clue ladder reads like a scouting report, not column headings', async 
   for (const label of labels) {
     expect(['The stage', 'The trail', 'The record', 'The profile', 'The home']).toContain(label);
   }
-  await expect(page.locator('.round-prompt')).toHaveText('Who is this?');
+  await expect(page.locator('.round-prompt')).toHaveText(/Who is this\?|How many /);
   if (await page.locator('.round-hook').count()) {
     await expect(page.locator('.round-hook')).not.toBeEmpty();
   }
@@ -120,6 +120,18 @@ test('the answer buttons are not rebuilt while the round ticks', async ({ page }
     return now.dataset.stamp === 'original';
   });
   expect(survived, 'the option button must survive the round timer').toBe(true);
+});
+
+test('a solo quiz mixes three stat rounds into ten', async ({ page }) => {
+  const errors = watchErrors(page);
+  await startQuiz(page);
+  const templates = await page.evaluate(async () => {
+    const { store } = await import('/src/store.js');
+    return store.state.quiz.rounds.map((round) => round.template);
+  });
+  expect(templates.filter((t) => t === 'stat_value')).toHaveLength(3);
+  expect(templates.filter((t) => t === 'identify')).toHaveLength(7);
+  expect(errors).toEqual([]);
 });
 
 test('a human-speed press answers the round', async ({ page }) => {
@@ -174,6 +186,8 @@ test('a whole quiz plays through to the results', async ({ page }) => {
   await expect(page).toHaveURL(/#results/);
   await expect(page.locator('#final-score')).not.toBeEmpty();
   await expect(page.locator('.results-cta')).toContainText('Craft your own vibe');
+  await expect(page.locator('.card').filter({ hasText: 'Your quiz' }))
+    .toContainText('different kinds of question');
   expect(errors).toEqual([]);
 });
 

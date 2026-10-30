@@ -9,6 +9,11 @@ const scope = {
   clauses: [{ leagues: ['ES1'], seasonStart: 2010, seasonEnd: 2019 }],
 };
 
+const wcScope = {
+  v: 2, name: 'World Cup 2022',
+  clauses: [{ tournaments: ['wc-2022'] }],
+};
+
 test('a plan has the requested number of rounds', () => {
   const { players, registry } = loadFixture();
   const plan = planQuiz({ scope, pool: players, registry, seed: 1, rounds: 10 });
@@ -39,22 +44,81 @@ test('no subject is asked about twice', () => {
   assert.equal(new Set(ids).size, ids.length);
 });
 
-test('no metric repeats consecutively', () => {
+test('a stat metric does not repeat consecutively when another stat recipe exists', () => {
   const { players, registry } = loadFixture();
-  // v1 asks one kind of question, so the rule can only be exercised
-  // where there is a choice - which is the v1.1 phase.
   const plan = planQuiz({
-    scope,
+    scope: wcScope,
     pool: players,
     registry,
-    seed: 5,
+    seed: 1,
     rounds: 10,
     phases: ['v1.1'],
+    statRounds: 3,
   });
-  for (let i = 1; i < plan.rounds.length; i++) {
-    assert.notEqual(plan.rounds[i].metric, plan.rounds[i - 1].metric,
-      `metric repeated at rounds ${i} and ${i + 1}`);
+  const stats = plan.rounds.map((r, i) => ({ i, template: r.template, metric: r.metric }));
+  assert.equal(stats.filter((r) => r.template === 'stat_value').length, 3);
+  for (let i = 1; i < stats.length; i++) {
+    const a = stats[i - 1];
+    const b = stats[i];
+    if (a.template !== 'stat_value' || b.template !== 'stat_value') continue;
+    assert.notEqual(a.metric, b.metric,
+      `stat metric repeated at rounds ${i} and ${i + 1}`);
   }
+});
+
+test('a ten-round v1.2 quiz has three stat rounds and seven identity rounds', () => {
+  const { players, registry } = loadFixture();
+  const plan = planQuiz({
+    scope, pool: players, registry, seed: 1, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  });
+  const templates = plan.rounds.map((r) => r.template);
+  assert.equal(templates.filter((t) => t === 'stat_value').length, 3);
+  assert.equal(templates.filter((t) => t === 'identify').length, 7);
+});
+
+test('the same seed puts the stat rounds in the same places', () => {
+  const { players, registry } = loadFixture();
+  const make = (seed) => planQuiz({
+    scope, pool: players, registry, seed, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  });
+  assert.deepEqual(
+    make(1).rounds.map((r) => r.template),
+    make(1).rounds.map((r) => r.template),
+  );
+});
+
+test('a different seed can move the stat rounds', () => {
+  const { players, registry } = loadFixture();
+  const places = (seed) => planQuiz({
+    scope, pool: players, registry, seed, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  }).rounds.map((r, i) => (r.template === 'stat_value' ? i : -1)).filter((i) => i >= 0);
+  assert.notDeepEqual(places(1), places(2));
+});
+
+test('statRounds 0 keeps the v1 identity-only quiz', () => {
+  const { players, registry } = loadFixture();
+  const plan = planQuiz({
+    scope, pool: players, registry, seed: 1, rounds: 10,
+    phases: ['v1.1'], statRounds: 0,
+  });
+  assert.ok(plan.rounds.every((r) => r.template === 'identify'));
+});
+
+test('a pool without stat data falls back to identity', () => {
+  const { players, registry } = loadFixture();
+  const late = {
+    v: 2, name: 'Late Bloomers',
+    clauses: [{ stats: [{ metric: 'goals_after_age_30', op: '>=', value: 50 }] }],
+  };
+  const plan = planQuiz({
+    scope: late, pool: players, registry, seed: 1, rounds: 10,
+    phases: ['v1.1'], statRounds: 3,
+  });
+  assert.equal(plan.rounds.length, 10);
+  assert.ok(plan.rounds.every((r) => r.template === 'identify'));
 });
 
 test('the plan asks about different people, and gives different clues', () => {

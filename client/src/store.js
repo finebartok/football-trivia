@@ -211,6 +211,8 @@ export const store = {
       seed,
       rounds: 10,
       difficulty: 'medium',
+      phases: ['v1.1'],
+      statRounds: 3,
     });
     state.quiz = quiz;
     state.roundIndex = 0;

@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { serverClient } from '../integration/helpers.js';
 
 /**
  * A host with a room open, and a guest who has joined it.
@@ -28,4 +29,14 @@ export async function roomWithTwoPlayers(browser, { presetIndex = 3, setup } = {
   await expect(guest).toHaveURL(/#room-lobby/);
 
   return { host, guest, code };
+}
+
+/** A two-player room whose next game is one round long. */
+export async function roomWithOneRound(browser) {
+  const made = await roomWithTwoPlayers(browser);
+  const server = serverClient();
+  const { error } = await server.from('rooms')
+    .update({ total_rounds: 1 }).eq('code', made.code);
+  if (error) throw error;
+  return made;
 }

@@ -40,6 +40,7 @@ const listeners = new Set();
 const ROOM_KEY = 'football-trivia-room';
 let channel = null;
 let pollTimer = null;
+let currentPollInterval = null;
 let client = null;
 let me = null;
 
@@ -101,21 +102,27 @@ async function subscribe(roomId) {
   channel = client
     .channel(`room:${roomId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rounds', filter: `room_id=eq.${roomId}` }, () => sync())
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'room_memberships', filter: `room_id=eq.${roomId}` }, () => sync())
+    // Joins arrive at once. Updates do not: every sync writes the
+    // caller's last_seen_at, and an UPDATE subscription would make each
+    // sync trigger the next one. The poll covers names and host changes.
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'room_memberships', filter: `room_id=eq.${roomId}` }, () => sync())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `id=eq.${roomId}` }, () => sync())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'room_effects', filter: `room_id=eq.${roomId}` }, () => sync())
     .subscribe();
 }
 
-function startPolling() {
+function startPolling(ms = POLL_MS) {
+  if (pollTimer && currentPollInterval === ms) return;
   stopPolling();
-  pollTimer = setInterval(() => { sync().catch(() => {}); }, POLL_MS);
+  currentPollInterval = ms;
+  pollTimer = setInterval(() => { sync().catch(() => {}); }, ms);
 }
 
 function stopPolling() {
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
+    currentPollInterval = null;
   }
 }
 
@@ -158,8 +165,20 @@ async function sync() {
   }
   // The poll is also the heartbeat: the server marks a member offline
   // after thirty seconds without one, so it runs for as long as the
-  // player is in the room.
-  if (data.status === 'final' && pollTimer) stopPolling();
+  // player is in the room. A final room keeps a slow poll; a rematch returning to
+  // the lobby restores the fast poll, even for a client that missed the realtime
+  // update.
+  if (data.status === 'final') {
+    startPolling(5000);
+    // The reveal asks for the round's result, and retries on the next
+    // redraw. The final poll is the last redraw: fetch the result here
+    // rather than leaving a pending ask unanswered.
+    if (state.answeredRound && state.lastResult?.round_number !== state.answeredRound) {
+      void room.result(state.answeredRound);
+    }
+  } else if (data.status === 'lobby') {
+    startPolling(POLL_MS);
+  }
   notify();
   return data;
 }
@@ -350,10 +369,27 @@ export const room = {
     return data;
   },
 
+  /** Return the finished room to its lobby for a fresh game. */
+  async rematch() {
+    const supabase = await ensure();
+    if (!supabase || !state.roomId) return false;
+    state.error = null;
+    const { data, error } = await supabase.rpc('reset_room', { p_room_id: state.roomId });
+    if (error) {
+      state.error = friendly(error.message);
+      notify();
+      return false;
+    }
+    await sync();
+    notify();
+    return data?.ok === true;
+  },
+
   /** Lock an answer. The score comes back from the server. */
-  async answer(guessed) {
+  async answer(guessed, roundNumber) {
     const supabase = await ensure();
     if (!supabase || !state.round) return null;
+    if (roundNumber !== state.round.round_number) return null;
     const { status, data } = await invokeFunction('submit-answer', {
       room_id: state.roomId,
       round_number: state.round.round_number,
@@ -368,7 +404,7 @@ export const room = {
     // Remember which round this was. The room moves on to the next one
     // as soon as the round closes, and the reveal still needs to know
     // which round it is revealing.
-    state.answeredRound = state.round.round_number;
+    state.answeredRound = roundNumber;
     state.error = null;
     notify();
     return data;
@@ -451,6 +487,8 @@ function friendly(message) {
   if (m.includes('effect on yourself')) return "You can't use an effect on yourself.";
   if (m.includes('game is not running')) return 'That game is not running.';
   if (m.includes('round is not open')) return 'That round is over.';
+  if (m.includes('only the host')) return 'Only the host can start a rematch.';
+  if (m.includes('not finished')) return 'That game has not finished yet.';
   if (m.includes('fit that vibe')) return m;
   if (m.includes('not one the data knows')) return m;
   if (m.includes('has nothing in it')) return m;

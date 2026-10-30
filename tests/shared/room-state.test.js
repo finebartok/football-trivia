@@ -121,3 +121,55 @@ test('the same round keeps the answer', () => {
   assert.equal(state.answeredRound, 1);
   assert.deepEqual(state.lastResult, { answer: 'Lionel Messi' });
 });
+
+test('a rematch clears the last game when the room returns to the lobby', () => {
+  const state = {
+    status: 'final',
+    round: null,
+    currentRound: 1,
+    totalRounds: 1,
+    myAnswer: { points: 100 },
+    answeredRound: 1,
+    lastResult: { round_number: 1 },
+    fetchingResult: true,
+    myEffects: [{ kind: 'steal' }],
+    lastResultAskedAt: 5,
+  };
+  applyRound(state, { status: 'lobby', current_round: 0, total_rounds: 1, round: null });
+  assert.equal(state.status, 'lobby');
+  assert.equal(state.myAnswer, null);
+  assert.equal(state.answeredRound, null);
+  assert.equal(state.lastResult, null);
+  assert.equal(state.fetchingResult, false);
+  assert.deepEqual(state.myEffects, []);
+  assert.equal(state.lastResultAskedAt, null);
+});
+
+test('a rematch clears a game the player never saw finish', () => {
+  const state = {
+    status: 'round_active',
+    round: { id: 'old', round_number: 1 },
+    myAnswer: { points: 100 },
+    answeredRound: 1,
+    lastResult: { round_number: 1 },
+    myEffects: [{ kind: 'steal' }],
+  };
+  applyRound(state, { status: 'lobby', current_round: 0, round: null });
+  assert.equal(state.myAnswer, null);
+  assert.equal(state.answeredRound, null);
+  assert.equal(state.lastResult, null);
+  assert.deepEqual(state.myEffects, []);
+});
+
+test('round one of a new game clears the last game even when the number repeats', () => {
+  const state = {
+    round: { id: 'old', round_number: 1 },
+    myAnswer: { points: 100 },
+    answeredRound: 1,
+    lastResult: { round_number: 1, answer: 'old game' },
+  };
+  applyRound(state, { status: 'round_active', round: { id: 'new', round_number: 1 } });
+  assert.equal(state.myAnswer, null);
+  assert.equal(state.answeredRound, null);
+  assert.equal(state.lastResult, null);
+});

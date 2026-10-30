@@ -2,12 +2,12 @@ import { scopePool } from './scope.js';
 import { resolveWindow } from './window.js';
 import { candidateSubjects, composeRound } from './questions.js';
 import { recipesFor } from './recipes.js';
-import { makeRng } from './rng.js';
+import { makeRng, shuffle } from './rng.js';
 export const MIN_POOL = 20;
 
 const DIFFICULTY_DEPTH = { easy: 1, medium: 2, hard: 3 };
 
-export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [] }) {
+export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0 }) {
   const rng = makeRng(seed);
   const players = scopePool(scope, pool);
 
@@ -21,26 +21,42 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
     throw new Error('no question recipe is available for this scope');
   }
 
+  // The stat rounds are placed before anything is composed, so the mix is
+  // a property of the plan and not of what happened to be available late.
+  const statCount = Math.max(0, Math.min(rounds, Math.trunc(Number(statRounds) || 0)));
+  const statSlots = statCount === 0
+    ? new Set()
+    : new Set(shuffle(rng, Array.from({ length: rounds }, (_, i) => i)).slice(0, statCount));
+
   const usedSubjects = new Set();
   const plan = [];
 
   for (let i = 0; i < rounds; i++) {
     const depth = DIFFICULTY_DEPTH[difficulty] ?? 2;
-    const candidates = [];
+    const wanted = statSlots.has(i) ? 'stat_value' : 'identify';
+    const preferred = recipes.filter((r) => r.template === wanted);
+    const groups = wanted === 'stat_value'
+      ? [preferred, recipes.filter((r) => r.template !== 'stat_value')]
+      : [preferred];
 
-    for (const recipe of recipes) {
-      // No metric repeats consecutively - but only when there is another
-      // recipe to pick instead. With one recipe a repeat is the only
-      // option, and the quiz must not be one round long.
-      if (recipes.length > 1 && plan.length && plan[plan.length - 1].metric === recipe.metric) continue;
-      const cands = candidateSubjects({ scope, pool: players, registry, window, metric: recipe.metric });
-      for (const c of cands) {
-        // No subject repeats.
-        if (usedSubjects.has(c.subject.id)) continue;
-        // candidateSubjects already filters out subjects the metric has no
-        // value for, so composeRound cannot throw on this pair.
-        candidates.push({ ...c, recipe });
+    let candidates = [];
+    for (const group of groups) {
+      candidates = [];
+      for (const recipe of group) {
+        // No metric repeats consecutively - but only when there is another
+        // recipe in this group to pick instead. A group with one recipe
+        // must still fill the slot.
+        if (group.length > 1 && plan.length && plan[plan.length - 1].metric === recipe.metric) continue;
+        const cands = candidateSubjects({ scope, pool: players, registry, window, metric: recipe.metric });
+        for (const c of cands) {
+          // No subject repeats.
+          if (usedSubjects.has(c.subject.id)) continue;
+          // candidateSubjects already filters out subjects the metric has no
+          // value for, so composeRound cannot throw on this pair.
+          candidates.push({ ...c, recipe });
+        }
       }
+      if (candidates.length > 0) break;
     }
 
     if (candidates.length === 0) break;

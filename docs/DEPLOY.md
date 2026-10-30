@@ -154,6 +154,9 @@ should go to `<your-ref>.supabase.co`, not to `127.0.0.1`.
 - [ ] The answer is scored by the server and the leaderboard updates.
 - [ ] The service worker registers and the game still opens on a second visit.
 - [ ] The fonts load from `/client/fonts/` and the page does not jump.
+- [ ] A room reaches a stat round, the options carry their units, and the reveal shows the value with its unit.
+- [ ] The host rematches after the final, round 1 of the new game starts in the same room, and the room code is unchanged.
+- [ ] A steal still copies the target's answer and pays half their points.
 
 ## 4. The things that will bite
 
