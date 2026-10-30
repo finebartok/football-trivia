@@ -27,3 +27,4 @@ playwright-report/
 
 # The Netlify CLI links a site in this directory
 .netlify/
+client/src/config.js
