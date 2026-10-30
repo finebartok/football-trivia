@@ -131,7 +131,14 @@ window.addEventListener('pointerup', (event) => {
   releasePointer();
 }, true);
 
-window.addEventListener('pointercancel', releasePointer, true);
+window.addEventListener('pointercancel', (event) => {
+  if (!event.isPrimary) return;
+  releasePointer();
+}, true);
+
+// A mouse released outside the window never fires pointerup here. The
+// press is over, so let the deferred render through.
+window.addEventListener('blur', releasePointer);
 
 window.addEventListener('hashchange', renderNow);
 store.subscribe(render);

@@ -488,3 +488,104 @@ test('a press that spans a room redraw still answers', async ({ browser }) => {
   expect(answered).toBe(1);
   expect([...hostErrors, ...guestErrors]).toEqual([]);
 });
+
+test('a guest becomes host after the final and can rematch', async ({ browser }) => {
+  const { host, guest, code } = await roomWithOneRound(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  // Both answer the only round, so the room reaches final.
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+
+  await expect(guest.locator('#btn-next')).toContainText('See how it went', { timeout: 30000 });
+  await guest.locator('#btn-next').click();
+  await expect(guest).toHaveURL(/#results/);
+  await expect(guest.locator('#rematch-waiting')).toBeVisible();
+
+  // The host leaves after the final. leave_room moves the host role to
+  // the guest, and only the slow final poll can tell the guest.
+  await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    await room.leave();
+  });
+
+  await expect(guest.locator('#btn-rematch')).toBeVisible({ timeout: 15000 });
+  await guest.locator('#btn-rematch').click();
+  await expect(guest).toHaveURL(/#room-lobby/);
+  await expect(guest.locator('#room-code')).toHaveText(code);
+});
+
+test('a press that spans a round advance does not answer the new round', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+  const hostErrors = watchErrors(host);
+  const guestErrors = watchErrors(guest);
+  let submits = 0;
+  host.on('request', (req) => {
+    if (req.url().includes('submit-answer')) submits += 1;
+  });
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(host.locator('.round-meta')).toContainText('Round 1 of 10');
+
+  const ids = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return { roomId: room.state.roomId, me: room.state.me, roundId: room.state.round.id };
+  });
+
+  const box = await host.locator('.option').first().boundingBox();
+  await host.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await host.mouse.down();
+
+  // The round closes while the press is still down. The next sync
+  // advances the room to round 2, but the deferred render leaves the
+  // round-1 buttons live under the finger.
+  const server = serverClient();
+  const { error: deadlineError } = await server.from('rounds')
+    .update({ deadline_at: new Date(Date.now() - 1000).toISOString() })
+    .eq('id', ids.roundId);
+  if (deadlineError) throw deadlineError;
+
+  await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    await room.sync();
+  });
+
+  await expect(host.locator('.option').first()).toBeEnabled();
+  const advanced = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return { round: room.state.round?.round_number ?? null, answered: room.state.answeredRound };
+  });
+  expect(advanced.round).toBe(2);
+
+  await host.mouse.up();
+
+  // The click belongs to round 1, so it is dropped instead of answering
+  // round 2. Give a stale submission time to land before checking.
+  await expect(host.locator('.round-meta')).toContainText('Round 2 of 10');
+  await host.waitForTimeout(1500);
+
+  await expect(host).toHaveURL(/#round/);
+  const after = await host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    return { round: room.state.round?.round_number ?? null, answered: room.state.answeredRound };
+  });
+  expect(after.round).toBe(2);
+  expect(after.answered).toBeNull();
+  expect(submits).toBe(0);
+
+  const { data: roundTwo, error: roundError } = await server.from('rounds')
+    .select('id').eq('room_id', ids.roomId).eq('round_number', 2).single();
+  if (roundError) throw roundError;
+  const { data: answers, error: answerError } = await server.from('answers')
+    .select('id').eq('round_id', roundTwo.id).eq('user_id', ids.me);
+  if (answerError) throw answerError;
+  expect(answers).toEqual([]);
+
+  expect([...hostErrors, ...guestErrors]).toEqual([]);
+});

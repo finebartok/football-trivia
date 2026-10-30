@@ -133,7 +133,7 @@ export function render(root) {
         if (inRoom) {
           // The server decides whether the answer was right and what it
           // is worth. The client never scores its own game.
-          const scored = await room.answer(opt.value ?? opt.label);
+          const scored = await room.answer(opt.value ?? opt.label, round.round_number);
           if (!scored) return;
           location.hash = '#reveal';
           return;

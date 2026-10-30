@@ -193,9 +193,10 @@ shows a text error if the server refuses.
   host to start again."
 - When any client sees the room status change to `lobby`, the results
   screen redirects to `#room-lobby`.
-- The poll stops when a room reaches `final`. When a sync sees `lobby`
-  after `final`, restart the poll so a client that missed the realtime
-  update still follows the rematch.
+- The poll slows to five seconds when a room reaches `final`, so a client
+  still notices a host change or a rematch there. When a sync sees `lobby`
+  after `final`, the poll returns to two seconds so a client that missed
+  the realtime update still follows the rematch.
 - The lobby is unchanged: the code, members, and Start button are already
   there. Effect uses are available again because their round rows were
   deleted.

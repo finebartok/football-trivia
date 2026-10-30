@@ -40,6 +40,7 @@ const listeners = new Set();
 const ROOM_KEY = 'football-trivia-room';
 let channel = null;
 let pollTimer = null;
+let currentPollInterval = null;
 let client = null;
 let me = null;
 
@@ -110,15 +111,18 @@ async function subscribe(roomId) {
     .subscribe();
 }
 
-function startPolling() {
+function startPolling(ms = POLL_MS) {
+  if (pollTimer && currentPollInterval === ms) return;
   stopPolling();
-  pollTimer = setInterval(() => { sync().catch(() => {}); }, POLL_MS);
+  currentPollInterval = ms;
+  pollTimer = setInterval(() => { sync().catch(() => {}); }, ms);
 }
 
 function stopPolling() {
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
+    currentPollInterval = null;
   }
 }
 
@@ -161,19 +165,19 @@ async function sync() {
   }
   // The poll is also the heartbeat: the server marks a member offline
   // after thirty seconds without one, so it runs for as long as the
-  // player is in the room. A final room stops it; a rematch returning to
-  // the lobby starts it again, even for a client that missed the realtime
+  // player is in the room. A final room keeps a slow poll; a rematch returning to
+  // the lobby restores the fast poll, even for a client that missed the realtime
   // update.
   if (data.status === 'final') {
-    stopPolling();
+    startPolling(5000);
     // The reveal asks for the round's result, and retries on the next
     // redraw. The final poll is the last redraw: fetch the result here
     // rather than leaving a pending ask unanswered.
     if (state.answeredRound && state.lastResult?.round_number !== state.answeredRound) {
       void room.result(state.answeredRound);
     }
-  } else if (data.status === 'lobby' && !pollTimer) {
-    startPolling();
+  } else if (data.status === 'lobby') {
+    startPolling(POLL_MS);
   }
   notify();
   return data;
@@ -382,9 +386,10 @@ export const room = {
   },
 
   /** Lock an answer. The score comes back from the server. */
-  async answer(guessed) {
+  async answer(guessed, roundNumber) {
     const supabase = await ensure();
     if (!supabase || !state.round) return null;
+    if (roundNumber !== state.round.round_number) return null;
     const { status, data } = await invokeFunction('submit-answer', {
       room_id: state.roomId,
       round_number: state.round.round_number,
@@ -399,7 +404,7 @@ export const room = {
     // Remember which round this was. The room moves on to the next one
     // as soon as the round closes, and the reveal still needs to know
     // which round it is revealing.
-    state.answeredRound = state.round.round_number;
+    state.answeredRound = roundNumber;
     state.error = null;
     notify();
     return data;

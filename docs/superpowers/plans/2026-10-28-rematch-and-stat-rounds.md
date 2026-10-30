@@ -1727,23 +1727,14 @@ Expected: a clean working tree, and one commit per task above.
 - No source changes. This task applies the migration, deploys the functions, publishes the client, and verifies the live game.
 
 **Interfaces:**
-- Consumes: the merged v1.2 branch and `.env.local`.
+- Consumes: the v1.2 branch and `.env.local`.
 - Produces: the hosted project running v1.2.
 
-- [ ] **Step 1: Merge and push**
+- [ ] **Step 1: Apply the hosted migration and functions**
 
-After the branch review passes, merge the work to `main` and push:
-
-```bash
-git checkout main
-git pull --ff-only
-git merge --no-ff v1-2-rematch-stat-rounds
-git push origin main
-```
-
-Expected: Vercel starts a deploy from `main`.
-
-- [ ] **Step 2: Apply the hosted migration and functions**
+The server goes first: the new client calls `reset_room`, and the old
+`start-room` does not serve the stat mix. If the migration fails, the live
+client is still the old, working one.
 
 ```bash
 set -a
@@ -1755,6 +1746,20 @@ npm run supabase:deploy
 ```
 
 Expected: `20261028000100_rematch.sql` is applied, and `start-room`, `submit-answer`, and `pool-count` are deployed. The pool does not change; do not re-upload it.
+
+- [ ] **Step 2: Merge and push**
+
+After the branch review passes and the hosted server is running v1.2, merge
+the work to `main` and push:
+
+```bash
+git checkout main
+git pull --ff-only
+git merge --no-ff v1-2-rematch-exec
+git push origin main
+```
+
+Expected: Vercel starts a deploy from `main`.
 
 - [ ] **Step 3: Confirm the client points at the hosted project and is live**
 
