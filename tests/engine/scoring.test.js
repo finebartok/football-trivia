@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scoreRound, STAGE_MULTIPLIERS } from '../../js/engine/scoring.js';
+import { scoreRound, scoreBreakdown, STAGE_MULTIPLIERS } from '../../js/engine/scoring.js';
 
 test('an incorrect answer scores zero', () => {
   assert.equal(scoreRound({ correct: false, stage: 1, elapsedMs: 0 }).points, 0);
@@ -33,3 +33,17 @@ test('the time factor never falls below 1 or rises above 1.5', () => {
 test('the multipliers are the ones the ladder shows', () => {
   assert.deepEqual(STAGE_MULTIPLIERS, { 1: 5, 2: 3, 3: 2, 4: 1 });
 });
+
+test('the breakdown recomputes the awarded points from the stage and response time', () => {
+  const scored = scoreRound({ correct: true, stage: 3, elapsedMs: 4000 });
+  const shown = scoreBreakdown({ stage: 3, elapsedMs: 4000 });
+  assert.equal(shown.multiplier, 2);
+  assert.equal(shown.timeFactor, scored.timeFactor);
+  assert.equal(Math.round(1000 * shown.multiplier * shown.timeFactor), scored.points);
+});
+
+test('stored values win over recomputation', () => {
+  const shown = scoreBreakdown({ stage: 2, elapsedMs: 9000, multiplier: 3, timeFactor: 1.25 });
+  assert.deepEqual(shown, { multiplier: 3, timeFactor: 1.25 });
+});
+

@@ -13,3 +13,16 @@ export function scoreRound({ correct, stage, elapsedMs, roundMs = ROUND_MS }) {
   const points = correct ? Math.round(1000 * multiplier * timeFactor) : 0;
   return { points, multiplier, timeFactor };
 }
+
+/**
+ * What the reveal says the answer was worth. Solo passes the multiplier and
+ * time factor it stored with the answer; a room passes the stage and the
+ * response time and gets the same numbers recomputed.
+ */
+export function scoreBreakdown({ stage, elapsedMs = 0, multiplier, timeFactor }) {
+  const scored = scoreRound({ correct: false, stage, elapsedMs });
+  return {
+    multiplier: multiplier ?? scored.multiplier,
+    timeFactor: timeFactor ?? scored.timeFactor,
+  };
+}

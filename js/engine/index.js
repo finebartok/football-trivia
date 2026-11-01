@@ -11,7 +11,7 @@ export { careerClubs, careerTeams } from './career.js';
 export { RECIPES, recipesFor } from './recipes.js';
 export { composeRound, candidateSubjects } from './questions.js';
 export { numericDistractors, nameDistractors, buildOptions } from './distractors.js';
-export { scoreRound, STAGE_MULTIPLIERS } from './scoring.js';
+export { scoreRound, scoreBreakdown, STAGE_MULTIPLIERS } from './scoring.js';
 export { makeRng } from './rng.js';
 
 export function generateQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0 }) {
