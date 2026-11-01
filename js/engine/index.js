@@ -6,7 +6,7 @@ export { planQuiz } from './planner.js';
 export { scopePool, playerInScope, statMatches } from './scope.js';
 export { resolveWindow, windowLabel } from './window.js';
 export { METRICS, formatMetric, metricsFor } from './stats.js';
-export { buildHints, hintOrder, identityHook } from './hints.js';
+export { buildHints, hintOrder, identityHook, recordHints, profileHints, teammateHints, familyClues, CLUE_FAMILIES, CLUE_FAMILY_LABELS } from './hints.js';
 export { careerClubs, careerTeams } from './career.js';
 export { RECIPES, recipesFor } from './recipes.js';
 export { composeRound, candidateSubjects } from './questions.js';

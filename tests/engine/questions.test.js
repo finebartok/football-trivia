@@ -241,3 +241,57 @@ test('a round whose every hint would reveal the answer still degrades safely', (
   assert.equal(round.revealSchedule.length, round.clues.length,
     'revealSchedule must match the clue count');
 });
+
+test('a teammate round names real teammates and never offers one as an option', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find((p) => p.name === 'Lionel Messi');
+  const round = composeRound({
+    subject: messi, metric: 'identity', window: registry.windows['wc-2022'],
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(2),
+    stages: 4, clueFamily: 'teammate_trail',
+  });
+
+  assert.equal(round.clueFamily, 'teammate_trail');
+  assert.ok(round.clues.length >= 3);
+  // composeRound strips teammateId from the public clue shape, so the
+  // test reads the names back out of the rendered value.
+  const teammateNames = round.clues
+    .map((c) => /^Played with (.+) at /.exec(c.value)?.[1])
+    .filter(Boolean);
+  assert.ok(teammateNames.length >= 2, 'a teammate round must name at least two teammates');
+  const optionValues = new Set(round.options.map((o) => o.value));
+  for (const name of teammateNames) {
+    assert.ok(!optionValues.has(name), `${name} must not be an option`);
+  }
+});
+
+test('the record book uses two distinct metrics and labels itself honestly', () => {
+  const { players, registry } = loadFixture();
+  const messi = players.find((p) => p.name === 'Lionel Messi');
+  const round = composeRound({
+    subject: messi, metric: 'identity', window: registry.windows['wc-2022'],
+    scope: { clauses: [] }, registry, pool: players, rng: makeRng(3),
+    stages: 4, clueFamily: 'record_book',
+  });
+
+  assert.equal(round.clueFamily, 'record_book');
+  const records = round.clues.filter((c) => c.label === 'The record');
+  assert.ok(records.length >= 2);
+  assert.ok(new Set(records.map((c) => c.id)).size === records.length);
+});
+
+test('a family with too little data falls back to mixed', () => {
+  const subject = {
+    id: 1, name: 'Synthetic', position: 'Midfield', dateOfBirth: '1990-01-01',
+    citizenship: ['X'], heightCm: 180, internationalCaps: 3, internationalGoals: 0,
+    highestMarketValueEur: 1000000, teams: [], windows: {}, stats: {},
+  };
+  const pool = [subject];
+  const round = composeRound({
+    subject, metric: 'identity', window: null, scope: { clauses: [] },
+    registry: { windows: {}, leagues: {}, clubs: [], tournaments: [] },
+    pool, rng: makeRng(1), stages: 3, clueFamily: 'teammate_trail',
+  });
+  assert.equal(round.clueFamily, 'mixed');
+});
+

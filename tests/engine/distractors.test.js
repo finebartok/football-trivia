@@ -116,3 +116,15 @@ test('buildOptions keeps exactly one correct and distinct labels with zero distr
   assert.equal(opts.filter(o => o.correct).length, 1);
   assert.equal(new Set(opts.map(o => o.label)).size, OPTION_COUNT);
 });
+
+test('name distractors never include an excluded teammate', () => {
+  const { players } = loadFixture();
+  const subject = players.find((p) => p.name === 'Lionel Messi');
+  const excluded = players.filter((p) => p.id !== subject.id).slice(0, 3).map((p) => p.id);
+  for (let i = 0; i < 20; i++) {
+    const picked = nameDistractors({
+      pool: players, subject, rng: makeRng(i), count: 3, excludeIds: excluded,
+    });
+    assert.ok(picked.every((p) => !excluded.includes(p.id)));
+  }
+});

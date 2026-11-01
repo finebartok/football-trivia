@@ -1,4 +1,4 @@
-import { buildHints, hintOrder, identityHook } from './hints.js';
+import { buildHints, hintOrder, identityHook, familyClues } from './hints.js';
 import { metricDescriptor, metricsFor } from './stats.js';
 import { RECIPES } from './recipes.js';
 import { numericDistractors, nameDistractors, buildOptions } from './distractors.js';
@@ -55,7 +55,29 @@ export function candidateSubjects({ scope, pool, registry, window, metric }) {
   return out.sort((a, b) => b.score - a.score);
 }
 
-export function composeRound({ subject, metric, window, scope, registry, pool, rng, difficulty = 'medium', roundMs = 20000, stages = 4 }) {
+function dedupeById(hints) {
+  const seen = new Set();
+  return hints.filter((hint) => {
+    if (!hint?.id || seen.has(hint.id)) return false;
+    seen.add(hint.id);
+    return true;
+  });
+}
+
+/** The v1.2 mixed ladder: the vibe's number, the trail, a record, then a surface fact. */
+function mixedOrder(ladder, n) {
+  const hard = ladder.filter((h) => h.role === 'stage' || h.role === 'trail' || h.role === 'record');
+  const profile = ladder.find((h) => h.role === 'profile');
+  const home = ladder.find((h) => h.role === 'home');
+  const ordered = [...hard];
+  if (profile) ordered.push(profile);
+  if (home) ordered.push(home);
+  return home && n > 1
+    ? [...ordered.filter((h) => h !== home).slice(0, n - 1), home]
+    : ordered.slice(0, n);
+}
+
+export function composeRound({ subject, metric, window, scope, registry, pool, rng, difficulty = 'medium', roundMs = 20000, stages = 4, clueFamily = 'mixed' }) {
   const recipe = RECIPES.find(r => r.metric === metric && r.windowKinds.includes(window?.kind ?? 'career'));
   if (!recipe) {
     throw new Error(`composeRound: no recipe for metric "${metric}" in window kind "${window?.kind ?? 'career'}"`);
@@ -82,36 +104,38 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
     return numbersIn(hint.value).some(n => n === answerNumber);
   }
 
-  // Never let the hint ladder reveal the answer: drop any hint whose rendered
-  // value carries the answer's number under any metric id (a club_goals hint
-  // "60 goals (since 2012)" shares windows[id].goals with a tournament_goals=60
-  // round; a "€80M" market-value hint leaks an 80-caps answer).
   const allHints = hintOrder(buildHints(subject, window, registry, { pool, scope }));
   const safeHints = allHints.filter(h => !hintRevealsAnswer(h, value));
-  // Degrade safely: if every hint would reveal the answer (essentially
-  // impossible with real biographical hints, but possible with synthetic
-  // data), keep the round usable and non-crashing instead of emitting zero
-  // clues and an empty revealSchedule.
-  const ladder = safeHints.length ? safeHints : allHints;
+  // Degrade safely: if every hint would reveal the answer, keep the round
+  // usable and non-crashing instead of emitting zero clues.
+  const baseLadder = safeHints.length ? safeHints : allHints;
+
+  const own = clueFamily && clueFamily !== 'mixed'
+    ? (familyClues(clueFamily, subject, window, registry, { pool, scope, rng }) ?? [])
+    : [];
+  const ownSafe = own.filter(h => !hintRevealsAnswer(h, value));
+  const ownIds = new Set(ownSafe.map(h => h.id));
+  const merged = dedupeById([...ownSafe, ...baseLadder]);
+
   const n = Math.max(1, stages);
-  // The ladder is a story: the vibe's own number, the trail, one record,
-  // then one surface fact. The surface fact goes last even when a later
-  // stage has to be dropped - the last clue should be the easy one.
-  const hard = ladder.filter(h => h.role === 'stage' || h.role === 'trail' || h.role === 'record');
-  const profile = ladder.find(h => h.role === 'profile');
-  const home = ladder.find(h => h.role === 'home');
-  const ordered = [...hard];
-  if (profile) ordered.push(profile);
-  if (home) ordered.push(home);
-  const clues = home && n > 1
-    ? [...ordered.filter(h => h !== home).slice(0, n - 1), home]
-    : ordered.slice(0, n);
+  let clues = ownSafe.length >= 2 ? merged.slice(0, n) : mixedOrder(baseLadder, n);
+
+  // The label is always honest: a family that could not put two of its own
+  // clues on the ladder is a mixed round.
+  if (clueFamily !== 'mixed' && clues.filter(h => ownIds.has(h.id)).length < 2) {
+    clues = mixedOrder(baseLadder, n);
+  }
+  const effectiveFamily = clueFamily !== 'mixed'
+    && clues.filter(h => ownIds.has(h.id)).length >= 2
+    ? clueFamily
+    : 'mixed';
   const usedMetrics = clues.map(c => c.metric).filter(Boolean);
 
+  const teammateIds = [...new Set(clues.map(c => c.teammateId).filter(Boolean))];
   const isNumeric = recipe.template === 'stat_value';
   const distractors = isNumeric
     ? numericDistractors({ value, pool, subject, metric, window, rng, count: 3 }).map(String)
-    : nameDistractors({ pool, subject, scope, rng, count: 3 });
+    : nameDistractors({ pool, subject, scope, rng, count: 3, excludeIds: teammateIds });
 
   const options = buildOptions({
     answer: spoken.answer,
@@ -137,6 +161,7 @@ export function composeRound({ subject, metric, window, scope, registry, pool, r
     template: recipe.template,
     metric: recipe.metric,
     family: recipe.family ?? metricDescriptor(metric)?.family ?? 'career',
+    clueFamily: effectiveFamily,
     prompt: spoken.prompt,
     hook,
     context: spoken.context ?? null,

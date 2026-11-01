@@ -90,8 +90,9 @@ function lookalikeScore(subject, candidate) {
   return score;
 }
 
-export function nameDistractors({ pool, subject, scope, rng, count = 3 }) {
-  const candidates = (pool ?? []).filter(p => !subject || p.id !== subject.id);
+export function nameDistractors({ pool, subject, scope, rng, count = 3, excludeIds = [] }) {
+  const excluded = new Set(excludeIds);
+  const candidates = (pool ?? []).filter(p => (!subject || p.id !== subject.id) && !excluded.has(p.id));
   if (!candidates.length) return [];
 
   const scored = candidates
