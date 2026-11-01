@@ -3,9 +3,30 @@ import { resolveWindow } from './window.js';
 import { candidateSubjects, composeRound } from './questions.js';
 import { recipesFor } from './recipes.js';
 import { makeRng, shuffle } from './rng.js';
+import { CLUE_FAMILIES } from './hints.js';
+
 export const MIN_POOL = 20;
 
 const DIFFICULTY_DEPTH = { easy: 1, medium: 2, hard: 3 };
+
+/**
+ * The clue family for each identify slot.
+ *
+ * Ten rounds get two of each family, fully shuffled. Any other count
+ * cycles a seeded family order, so a shorter game still sees variety.
+ */
+export function clueFamilySchedule(rounds, rng) {
+  const order = shuffle(rng, [...CLUE_FAMILIES]);
+  if (rounds === 10) return shuffle(rng, [...order, ...order]);
+  const out = [];
+  while (out.length < rounds) {
+    for (const family of order) {
+      if (out.length >= rounds) break;
+      out.push(family);
+    }
+  }
+  return out;
+}
 
 export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0 }) {
   const rng = makeRng(seed);
@@ -28,12 +49,20 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
     ? new Set()
     : new Set(shuffle(rng, Array.from({ length: rounds }, (_, i) => i)).slice(0, statCount));
 
+  const identifyCount = rounds - statCount;
+  const familySchedule = clueFamilySchedule(identifyCount, rng);
+  let familyCursor = 0;
+
   const usedSubjects = new Set();
   const plan = [];
+
 
   for (let i = 0; i < rounds; i++) {
     const depth = DIFFICULTY_DEPTH[difficulty] ?? 2;
     const wanted = statSlots.has(i) ? 'stat_value' : 'identify';
+    const clueFamily = wanted === 'identify'
+      ? familySchedule[familyCursor++] ?? 'mixed'
+      : 'mixed';
     const preferred = recipes.filter((r) => r.template === wanted);
     const groups = wanted === 'stat_value'
       ? [preferred, recipes.filter((r) => r.template !== 'stat_value')]
@@ -77,6 +106,7 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
       rng,
       difficulty,
       stages,
+      clueFamily,
     });
     round.stage = i + 1;
 
@@ -85,6 +115,7 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
   }
 
   const families = new Set(plan.map(r => r.family));
+  const clueFamilies = new Set(plan.map(r => r.clueFamily).filter(Boolean));
   let hardest = { index: 1, depth: 0 };
   for (const [i, r] of plan.entries()) {
     if (r.clues.length > hardest.depth) hardest = { index: i + 1, depth: r.clues.length };
@@ -96,6 +127,7 @@ export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficu
     summary: {
       rounds: plan.length,
       metricFamilies: families.size,
+      clueFamilies: clueFamilies.size,
       subjects: new Set(plan.map(r => r.subjectId)).size,
       hardestRound: hardest.index,
     },

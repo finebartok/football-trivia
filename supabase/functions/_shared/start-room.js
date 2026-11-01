@@ -139,7 +139,6 @@ export async function handleStartRoom(req, { createClient, env }) {
         rounds: room.total_rounds,
         difficulty: room.difficulty,
         phases: ['v1.1'],
-        statRounds: 3,
       });
 
       // The plan is stored once. The projection runs once. The database

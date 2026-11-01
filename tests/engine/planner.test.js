@@ -193,3 +193,54 @@ test('the v1.1 templates are still there, waiting for their phase', () => {
   assert.ok(recipes.length > 0, 'the stat_value recipes exist');
   assert.ok(recipes.every((r) => r.phase === 'v1.1'), 'they are marked for a later phase');
 });
+
+import { CLUE_FAMILIES } from '../../js/engine/hints.js';
+import { clueFamilySchedule } from '../../js/engine/planner.js';
+import { makeRng } from '../../js/engine/rng.js';
+
+const barcaScope = { v: 2, name: 'Barcelona', clauses: [{ teams: [8] }] };
+
+test('a solo quiz is ten identify rounds and zero stat rounds', () => {
+  const { players, registry } = loadFixture();
+  const plan = planQuiz({ scope: barcaScope, pool: players, registry, seed: 1, rounds: 10, phases: ['v1.1'] });
+  assert.equal(plan.rounds.filter((r) => r.template === 'identify').length, 10);
+  assert.equal(plan.rounds.filter((r) => r.template === 'stat_value').length, 0);
+});
+
+test('the family schedule gives ten rounds two of each family', () => {
+  const schedule = clueFamilySchedule(10, makeRng(1));
+  assert.equal(schedule.length, 10);
+  const counts = {};
+  for (const family of schedule) counts[family] = (counts[family] ?? 0) + 1;
+  for (const family of CLUE_FAMILIES) assert.equal(counts[family], 2, `${family} rounds`);
+});
+
+test('a ten-round plan labels every round with a known family', () => {
+  const { players, registry } = loadFixture();
+  const plan = planQuiz({ scope: barcaScope, pool: players, registry, seed: 1, rounds: 10 });
+  assert.equal(plan.rounds.length, 10);
+  for (const round of plan.rounds) {
+    assert.ok(CLUE_FAMILIES.includes(round.clueFamily), `${round.clueFamily} is a known family`);
+  }
+  // Some families fall back to mixed on a thin player; the plan still has
+  // to offer variety, not ten identical ladders.
+  const kinds = new Set(plan.rounds.map((r) => r.clueFamily));
+  assert.ok(kinds.size >= 3, `only ${kinds.size} kinds of clue`);
+  assert.equal(plan.summary.clueFamilies, kinds.size);
+});
+
+test('the same seed puts the same clue families in the same order', () => {
+  const { players, registry } = loadFixture();
+  const make = (seed) => planQuiz({ scope: barcaScope, pool: players, registry, seed, rounds: 10 });
+  assert.deepEqual(
+    make(7).rounds.map((r) => r.clueFamily),
+    make(7).rounds.map((r) => r.clueFamily),
+  );
+});
+
+test('a shorter schedule cycles every family once before repeating', () => {
+  const schedule = clueFamilySchedule(7, makeRng(1));
+  assert.equal(schedule.length, 7);
+  assert.equal(new Set(schedule).size, 5);
+});
+
