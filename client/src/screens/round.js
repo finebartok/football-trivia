@@ -2,11 +2,15 @@ import { el, mount } from '../ui.js';
 import { store, notify } from '../store.js';
 import { room } from '../room.js';
 import { labelFor } from '../room-state.js';
-import { answerRound, STAGE_MULTIPLIERS, resolveWindow } from '/js/engine/index.js';
+import { answerRound, STAGE_MULTIPLIERS, resolveWindow, CLUE_FAMILY_LABELS } from '/js/engine/index.js';
 import { sounds, soundToggle, haptic } from '../sound.js';
 
 const ROUND_MS = 20000;
 const LETTERS = ['A', 'B', 'C', 'D'];
+
+// Solo owns its clue index. A room's index comes from the server.
+let clueIndex = 0;
+let revealInFlight = false;
 
 // What the screen has already said. It lives outside the screen because
 // the screen is rebuilt on every redraw - and in a room that is every
@@ -30,11 +34,6 @@ function stopTimer() {
   }
 }
 
-/** Which stages have been revealed by now. */
-function revealedStages(round, elapsed) {
-  return round.revealSchedule.filter((s) => elapsed >= s.revealAtMs).length;
-}
-
 export function render(root) {
   stopTimer();
 
@@ -54,9 +53,7 @@ export function render(root) {
 
   // The server's round is the engine's round with one key renamed: the
   // column is reveal_schedule, the engine calls it revealSchedule.
-  const round = inRoom
-    ? { ...roomState.round, revealSchedule: roomState.round.reveal_schedule ?? [] }
-    : store.currentRound();
+  const round = inRoom ? roomState.round : store.currentRound();
 
   if (!round || (!inRoom && !quiz)) {
     location.hash = '#home';
@@ -90,6 +87,15 @@ export function render(root) {
   // every player would see a different round.
   const clockOffset = inRoom ? (roomState.clockOffset ?? 0) : 0;
   const now = () => Date.now() + clockOffset;
+
+  // A room's ladder can be replaced by a poll or a reveal; always read the
+  // live one, never the array captured by this render.
+  const liveClues = () => (inRoom ? (roomState.round?.clues ?? round.clues) : round.clues);
+  const visibleCount = () => {
+    const total = liveClues().length;
+    const index = inRoom ? (roomState.round?.clue_index ?? 0) : clueIndex;
+    return Math.min(total, Math.max(1, index + 1));
+  };
 
   const timerEl = el('span', { className: 'round-timer', attrs: { id: 'round-timer' } });
 
@@ -129,7 +135,6 @@ export function render(root) {
       click: async () => {
         sounds.click();
         const elapsed = Math.max(0, now() - startedAt);
-        const stage = Math.max(1, revealedStages(round, elapsed));
         if (inRoom) {
           // The server decides whether the answer was right and what it
           // is worth. The client never scores its own game.
@@ -138,10 +143,13 @@ export function render(root) {
           location.hash = '#reveal';
           return;
         }
+        const stage = Math.min(round.clues.length, clueIndex + 1);
         const scored = answerRound(round, { answer: opt.value ?? opt.label, stage, elapsedMs: elapsed });
         store.recordAnswer({
           roundIndex: store.state.roundIndex,
           stage,
+          multiplier: scored.multiplier,
+          timeFactor: scored.timeFactor,
           correct: scored.correct,
           points: scored.points,
           chosen: opt.label,
@@ -156,12 +164,39 @@ export function render(root) {
   ]));
   const optionsHost = el('div', { attrs: { id: 'round-options' } }, optionEls);
 
+  const revealBtn = el('button', {
+    className: 'btn btn--secondary btn--reveal',
+    attrs: { type: 'button', id: 'btn-reveal-clue' },
+  });
+  revealBtn.addEventListener('click', async () => {
+    if (now() >= deadline) return;
+    const total = liveClues().length;
+    if (visibleCount() >= total) return;
+
+    if (inRoom) {
+      if (revealInFlight) return;
+      revealInFlight = true;
+      paint();
+      await room.revealClue();
+      revealInFlight = false;
+      // The new clue's chime comes from paint(), once, when it sees the
+      // index move. Ringing it here too would double it.
+      paint();
+      return;
+    }
+
+    clueIndex = Math.min(total - 1, clueIndex + 1);
+    paint();
+  });
+
   const roundKey = inRoom
     ? `room-${roomState.round.round_number}`
     : `solo-${store.state.roundIndex}`;
   if (roundKey !== lastRoundKey) {
     lastRoundKey = roundKey;
     revealedBefore = 0;
+    clueIndex = 0;
+    revealInFlight = false;
     lastTick = null;
   }
 
@@ -329,7 +364,7 @@ export function render(root) {
 
   const paint = () => {
     const elapsed = Math.max(0, now() - startedAt);
-    const revealed = revealedStages(round, elapsed);
+    const revealed = visibleCount();
 
     // One note per clue, not one per tick - and not one per redraw
     // either. The room redraws every two seconds, and a player reading
@@ -359,7 +394,7 @@ export function render(root) {
 
     clueEls.forEach((c, i) => {
       const shown = i < revealed;
-      c.valueEl.textContent = shown ? round.clues[i].value : '— — —';
+      c.valueEl.textContent = shown ? liveClues()[i].value : '— — —';
       c.cardEl.classList.toggle('is-revealed', shown);
       c.cardEl.classList.toggle('is-locked', !shown);
     });
@@ -379,6 +414,14 @@ export function render(root) {
       if (id === 'btn-steal') b.disabled = expired || stealUsed;
       else if (id === 'btn-side-bet') b.disabled = expired || betUsed;
       else b.disabled = expired || !pickedTarget;
+    }
+
+    if (revealed >= liveClues().length) {
+      revealBtn.textContent = 'All clues revealed.';
+      revealBtn.disabled = true;
+    } else {
+      revealBtn.textContent = `Reveal next clue (×${STAGE_MULTIPLIERS[revealed + 1]})`;
+      revealBtn.disabled = expired || revealInFlight;
     }
   };
 
@@ -429,9 +472,16 @@ export function render(root) {
           ? `Round ${roomState.round.round_number} of ${roomState.totalRounds}`
           : `Round ${round.stage} of ${quiz.rounds.length}`,
       }),
-    ]),
+      (() => {
+        const family = inRoom ? roomState.round.clue_family : round.clueFamily;
+        return CLUE_FAMILY_LABELS[family]
+          ? el('span', { className: 'round-meta__chip', text: CLUE_FAMILY_LABELS[family] })
+          : null;
+      })(),
+    ].filter(Boolean)),
 
     ladderEl,
+    revealBtn,
     clueHost,
     effectsHost,
     optionsHost,

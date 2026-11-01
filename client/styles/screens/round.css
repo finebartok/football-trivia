@@ -1,6 +1,28 @@
 .round-timer { font-family: var(--font-display); font-size: 20px; color: var(--ink); }
 .round-timer.is-urgent { color: var(--red); }
-.round-meta { padding: 0 14px 6px; }
+.round-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 14px 6px;
+}
+.round-meta__chip {
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.btn--reveal {
+  display: block;
+  width: calc(100% - 24px);
+  box-sizing: border-box;
+  margin: 0 12px 8px;
+}
 .clue-card { display: flex; flex-direction: column; gap: 2px; }
 .clue-card__label { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-family: var(--font-body); }
 .clue-card__value { font-size: 15px; font-weight: 700; font-family: var(--font-display); color: var(--ink); }
@@ -67,3 +89,10 @@
 .picker__state { color: var(--muted); font-size: 12px; }
 .picker .muted-note { margin: 4px 0 8px; }
 .picker .btn { margin-top: 6px; }
+
+.verdict__breakdown {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+

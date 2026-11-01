@@ -1,5 +1,5 @@
 import { el, mount, jerseyTile, pointsLabel } from '../ui.js';
-import { careerClubs } from '/js/engine/index.js';
+import { careerClubs, scoreBreakdown } from '/js/engine/index.js';
 import { store } from '../store.js';
 import { sounds, haptic } from '../sound.js';
 
@@ -11,6 +11,14 @@ import { labelFor } from '../room-state.js';
 
 function findPlayer(id) {
   return (store.state.pool?.players ?? []).find((p) => p.id === id) ?? null;
+}
+
+function breakdownText({ stage, multiplier, timeFactor, elapsedMs }) {
+  if (!stage) return null;
+  const shown = scoreBreakdown({ stage, elapsedMs: elapsedMs ?? 0, multiplier, timeFactor });
+  const bits = [`×${shown.multiplier} clue stage`];
+  if (Number.isFinite(shown.timeFactor)) bits.push(`${shown.timeFactor.toFixed(2)}× speed`);
+  return bits.join(' · ');
 }
 
 export function render(root) {
@@ -35,6 +43,14 @@ export function render(root) {
 
   const total = store.state.answers.reduce((sum, a) => sum + a.points, 0);
   const correct = store.state.answers.filter((a) => a.correct).length;
+
+  const breakdown = answer
+    ? breakdownText({
+      stage: answer.stage,
+      multiplier: answer.multiplier,
+      timeFactor: answer.timeFactor,
+    })
+    : null;
 
   const verdictKey = inRoom
     ? `room-${roomState.answeredRound ?? roomState.currentRound}`
@@ -100,6 +116,7 @@ export function render(root) {
         ? el('strong', { text: 'You got it' })
         : el('strong', { text: `It was ${answerText}` }),
       el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
+      breakdown ? el('p', { className: 'verdict__breakdown', text: breakdown }) : null,
     ]),
 
     el('section', { className: 'card' }, [
@@ -225,6 +242,17 @@ function renderRoom(root, roomState) {
   const answer = result?.my_answer ?? roomState.myAnswer;
   const roundNumber = result?.round_number ?? answeredRound ?? roomState.currentRound;
 
+  const mySteal = (result?.effects ?? []).find(
+    (e) => e.kind === 'steal' && e.actor_id === roomState.me,
+  );
+  const nothingToCopy = Boolean(mySteal && (mySteal.target_stole || !mySteal.target_answered));
+  const breakdown = answer?.stage && !nothingToCopy
+    ? breakdownText({
+      stage: answer.stage,
+      elapsedMs: answer.response_time_ms ?? 0,
+    })
+    : null;
+
   // "1 goal", not "1". The unit belongs with the number.
   const answerText = withUnit(result?.answer, result?.unit);
 
@@ -261,7 +289,6 @@ function renderRoom(root, roomState) {
   }
 
   const effects = result?.effects ?? [];
-  const mySteal = effects.find((e) => e.kind === 'steal' && e.actor_id === roomState.me);
   const ordered = [...effects].sort((a, b) => {
     const aMine = a.actor_id === roomState.me || a.target_id === roomState.me ? 0 : 1;
     const bMine = b.actor_id === roomState.me || b.target_id === roomState.me ? 0 : 1;
@@ -273,7 +300,7 @@ function renderRoom(root, roomState) {
       ...ordered.map((e) => el('p', { className: 'effect-line', text: effectStory(roomState, e, answer) })),
     ])
     : null;
-
+  
   let verdictHeadline;
   if (mySteal) {
     const target = labelFor(roomState, mySteal.target_id);
@@ -298,6 +325,7 @@ function renderRoom(root, roomState) {
     el('section', { className: `card verdict ${answer?.correct ? 'is-good' : 'is-bad'}` }, [
       el('strong', { text: verdictHeadline }),
       el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
+      breakdown ? el('p', { className: 'verdict__breakdown', text: breakdown }) : null,
     ]),
 
     effectsCard,

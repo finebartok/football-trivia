@@ -67,8 +67,8 @@ test('a quiz round shows the window banner, the ladder, clues and four options',
   await expect(page.locator('#clue-ladder .step')).toHaveCount(3);
   await expect(page.locator('.option')).toHaveCount(4);
 
-  // the clue ladder must not show every clue at once
-  await expect(page.locator('.clue-card.is-revealed')).toHaveCount(0);
+  // the first clue is free; the rest cost multiplier
+  await expect(page.locator('.clue-card.is-revealed')).toHaveCount(1);
 
   // and the options must be enabled
   await expect(page.locator('.option').first()).toBeEnabled();
@@ -81,7 +81,10 @@ test('the clue ladder reads like a scouting report, not column headings', async 
   const labels = await page.locator('.clue-card__label').allTextContents();
   expect(labels.length).toBeGreaterThan(0);
   for (const label of labels) {
-    expect(['The stage', 'The trail', 'The record', 'The profile', 'The home']).toContain(label);
+    expect([
+      'The stage', 'The trail', 'The record', 'The profile', 'The home',
+      'The role', 'The birth year', 'The height', 'The teammate',
+    ]).toContain(label);
   }
   await expect(page.locator('.round-prompt')).toHaveText(/Who is this\?|How many /);
   if (await page.locator('.round-hook').count()) {
@@ -89,13 +92,12 @@ test('the clue ladder reads like a scouting report, not column headings', async 
   }
 });
 
-test('clues reveal on the schedule and the answer leads to the reveal', async ({ page }) => {
+test('a revealed clue and the answer lead to the reveal', async ({ page }) => {
   const errors = watchErrors(page);
   await startQuiz(page);
 
-  await page.waitForTimeout(2500);
-  const revealed = await page.locator('.clue-card.is-revealed').count();
-  expect(revealed).toBeGreaterThan(0);
+  await page.locator('#btn-reveal-clue').click();
+  await expect(page.locator('.clue-card.is-revealed')).toHaveCount(2);
 
   await page.locator('.option').first().click();
   await expect(page).toHaveURL(/#reveal/);
@@ -122,16 +124,55 @@ test('the answer buttons are not rebuilt while the round ticks', async ({ page }
   expect(survived, 'the option button must survive the round timer').toBe(true);
 });
 
-test('a solo quiz mixes three stat rounds into ten', async ({ page }) => {
+test('a solo quiz is ten identify rounds with a clue family on every round', async ({ page }) => {
   const errors = watchErrors(page);
   await startQuiz(page);
-  const templates = await page.evaluate(async () => {
+  const rounds = await page.evaluate(async () => {
     const { store } = await import('/src/store.js');
-    return store.state.quiz.rounds.map((round) => round.template);
+    return store.state.quiz.rounds.map((round) => ({
+      template: round.template,
+      family: round.clueFamily,
+    }));
   });
-  expect(templates.filter((t) => t === 'stat_value')).toHaveLength(3);
-  expect(templates.filter((t) => t === 'identify')).toHaveLength(7);
+  expect(rounds).toHaveLength(10);
+  expect(rounds.every((round) => round.template === 'identify')).toBe(true);
+  expect(new Set(rounds.map((round) => round.family)).size).toBeGreaterThan(1);
   expect(errors).toEqual([]);
+});
+
+test('one clue is visible at round start and revealing lowers the multiplier', async ({ page }) => {
+  await startQuiz(page);
+
+  await expect(page.locator('.clue-card.is-revealed')).toHaveCount(1);
+  const first = await page.locator('.clue-card__value').first().innerText();
+  expect(first).not.toBe('— — —');
+
+  await expect(page.locator('#btn-reveal-clue')).toContainText('×3');
+  await page.locator('#btn-reveal-clue').click();
+
+  await expect(page.locator('.clue-card.is-revealed')).toHaveCount(2);
+  await expect(page.locator('#btn-reveal-clue')).toContainText('×2');
+});
+
+test('the round shows its clue family', async ({ page }) => {
+  await startQuiz(page);
+  await expect(page.locator('.round-meta__chip')).toHaveText(
+    /Career trail|Teammate trail|Record book|Profile|Mixed bag/,
+  );
+});
+
+test('answering immediately locks the x5 stage and shows the breakdown', async ({ page }) => {
+  await startQuiz(page);
+  await page.locator('.option').first().click();
+  await expect(page).toHaveURL(/#reveal/);
+
+  const answer = await page.evaluate(async () => {
+    const { store } = await import('/src/store.js');
+    return store.state.answers[0];
+  });
+  expect(answer.stage).toBe(1);
+  expect(answer.multiplier).toBe(5);
+  await expect(page.locator('.verdict__breakdown')).toContainText('×5');
 });
 
 test('a human-speed press answers the round', async ({ page }) => {
@@ -187,7 +228,7 @@ test('a whole quiz plays through to the results', async ({ page }) => {
   await expect(page.locator('#final-score')).not.toBeEmpty();
   await expect(page.locator('.results-cta')).toContainText('Craft your own vibe');
   await expect(page.locator('.card').filter({ hasText: 'Your quiz' }))
-    .toContainText('different kinds of question');
+    .toContainText('kinds of clue');
   expect(errors).toEqual([]);
 });
 

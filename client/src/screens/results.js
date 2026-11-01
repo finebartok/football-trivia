@@ -38,10 +38,10 @@ export function render(root) {
   const summary = quiz.summary ?? {};
 
   const recapBits = [];
-  // In v1 every round is "Who is this?", so one kind of question is not
-  // worth a line.
-  if (summary.metricFamilies > 1) {
-    recapBits.push(`${summary.metricFamilies} different kinds of question`);
+  // The current mode is all "who is this?", so the interesting variety is
+  // the kind of clue ladder, not the question type.
+  if (summary.clueFamilies > 1) {
+    recapBits.push(`${summary.clueFamilies} kinds of clue`);
   }
   if (summary.hardestRound) recapBits.push(`hardest round: ${summary.hardestRound}`);
   const recap = recapBits.join(' · ');
