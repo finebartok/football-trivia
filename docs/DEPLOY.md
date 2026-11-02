@@ -82,6 +82,9 @@ the player pool from it.
 
 **The database and the functions:**
 
+**IMPORTANT: Deploy the migration and functions BEFORE the client.**
+If the client is deployed first, it will call `reveal_clue` or request `clue_family` before the server supports them, causing rounds to fail.
+
 ```bash
 npx supabase login
 npx supabase link --project-ref <your-ref>

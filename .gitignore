@@ -4,6 +4,7 @@ package-lock.json.bak
 # Source snapshots and build artifacts from the ingestion pipeline (large, reproducible)
 data/raw/
 data/football.db
+data/pools/
 
 # Brainstorming companion mockups
 .superpowers/
