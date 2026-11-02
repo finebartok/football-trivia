@@ -79,3 +79,17 @@ test('a numeric answer is stored as a string', () => {
   assert.equal(client.options[0].label, '3 goals');
   assert.equal(client.options[0].value, '3');
 });
+
+test('the reveal is secret until the round closes', () => {
+  const reveal = { format: 'range', value: 61, range: '50+' };
+  const { client, secret } = projectRound({ ...composed, reveal }, 1);
+  assert.deepEqual(secret.reveal, reveal);
+  assert.equal('reveal' in client, false);
+  assert.equal(JSON.stringify(client).includes('"reveal"'), false);
+});
+
+test('the secret points at the answer player when the subject is only a clue', () => {
+  const teammate = { ...composed, template: 'teammate', answerPlayerId: 999 };
+  const { secret } = projectRound(teammate, 1);
+  assert.equal(secret.target_player_id, 999);
+});

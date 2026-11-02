@@ -195,8 +195,9 @@ test('the v1.1 templates are still there, waiting for their phase', () => {
 });
 
 import { CLUE_FAMILIES } from '../../js/engine/hints.js';
-import { clueFamilySchedule } from '../../js/engine/planner.js';
+import { clueFamilySchedule, planIqQuiz, iqFormatSchedule } from '../../js/engine/planner.js';
 import { makeRng } from '../../js/engine/rng.js';
+import { IQ_FORMATS } from '../../js/engine/formats.js';
 
 const barcaScope = { v: 2, name: 'Barcelona', clauses: [{ teams: [8] }] };
 
@@ -242,5 +243,60 @@ test('a shorter schedule cycles every family once before repeating', () => {
   const schedule = clueFamilySchedule(7, makeRng(1));
   assert.equal(schedule.length, 7);
   assert.equal(new Set(schedule).size, 5);
+});
+
+test('the IQ schedule gives ten rounds every format twice plus two flex rounds', () => {
+  const schedule = iqFormatSchedule(10, makeRng(1));
+  assert.equal(schedule.length, 10);
+  for (const format of IQ_FORMATS) {
+    assert.ok(schedule.filter((f) => f === format).length >= 2, `${format} has two rounds`);
+  }
+  for (let i = 1; i < schedule.length; i++) {
+    assert.notEqual(schedule[i], schedule[i - 1], `round ${i + 1} repeats the format before it`);
+  }
+});
+
+test('a shorter IQ schedule still cycles every format', () => {
+  const schedule = iqFormatSchedule(6, makeRng(1));
+  assert.equal(schedule.length, 6);
+  assert.equal(new Set(schedule).size, 4);
+});
+
+test('a ten-round Football IQ quiz uses only the four formats', () => {
+  const { players, registry } = loadFixture();
+  const plan = planIqQuiz({ scope, pool: players, registry, seed: 7, rounds: 10 });
+  assert.equal(plan.rounds.length, 10);
+  assert.equal(plan.mode, 'football_iq');
+
+  const templates = plan.rounds.map((r) => r.template);
+  for (const template of templates) assert.ok(IQ_FORMATS.includes(template), `${template} is an IQ format`);
+  assert.ok(!templates.includes('identify'));
+  assert.ok(!templates.includes('stat_value'));
+  assert.equal(plan.summary.formats, 4);
+  assert.equal(plan.summary.rounds, 10);
+  assert.equal(plan.summary.subjects, 10);
+  assert.equal(new Set(plan.rounds.map((r) => r.subjectId)).size, 10, 'no subject repeats');
+  for (const round of plan.rounds) assert.equal(round.clueFamily, null);
+});
+
+test('the same seed produces the same Football IQ plan', () => {
+  const { players, registry } = loadFixture();
+  const make = () => planIqQuiz({ scope, pool: players, registry, seed: 41, rounds: 10 });
+  const a = make();
+  const b = make();
+  assert.deepEqual(a.rounds.map((r) => r.prompt), b.rounds.map((r) => r.prompt));
+  assert.deepEqual(a.rounds.map((r) => r.answer), b.rounds.map((r) => r.answer));
+});
+
+test('planQuiz routes on mode and refuses an unknown one', () => {
+  const { players, registry } = loadFixture();
+  const iq = planQuiz({ scope, pool: players, registry, seed: 3, rounds: 10, mode: 'football_iq' });
+  assert.equal(iq.mode, 'football_iq');
+  assert.ok(iq.rounds.every((r) => IQ_FORMATS.includes(r.template)));
+
+  const guess = planQuiz({ scope, pool: players, registry, seed: 3, rounds: 10, mode: 'guess_player' });
+  assert.ok(guess.rounds.every((r) => r.template === 'identify'));
+
+  assert.throws(() => planQuiz({ scope, pool: players, registry, mode: 'trivia' }), /unknown game mode/);
 });
 

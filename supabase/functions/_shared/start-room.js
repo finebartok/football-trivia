@@ -140,6 +140,7 @@ export async function handleStartRoom(req, { createClient, env }) {
         rounds: room.total_rounds,
         difficulty: room.difficulty,
         phases: ['v1.1'],
+        mode: room.game_mode ?? 'guess_player',
       });
 
       // The plan is stored once. The projection runs once. The database
@@ -213,6 +214,7 @@ export async function handleStartRoom(req, { createClient, env }) {
       answer_value: first.secret.answer_value,
       target_player_id: first.secret.target_player_id,
       unit: first.secret.unit,
+      reveal: first.secret.reveal ?? null,
     });
 
     await admin.from('rooms').update({

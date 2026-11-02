@@ -4,6 +4,7 @@ import { candidateSubjects, composeRound } from './questions.js';
 import { recipesFor } from './recipes.js';
 import { makeRng, shuffle } from './rng.js';
 import { CLUE_FAMILIES } from './hints.js';
+import { IQ_FORMATS, FORMAT_LABELS, composeFormatRound } from './formats.js';
 
 export const MIN_POOL = 20;
 
@@ -28,7 +29,91 @@ export function clueFamilySchedule(rounds, rng) {
   return out;
 }
 
-export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0 }) {
+/**
+ * The format for each Football IQ slot.
+ *
+ * A full cycle is all four formats shuffled, so ten rounds are two of each
+ * plus two from a third cycle. A cycle never repeats the format before it,
+ * which keeps two same-format rounds from sitting side by side.
+ */
+export function iqFormatSchedule(rounds, rng) {
+  const out = [];
+  while (out.length < rounds) {
+    const cycle = shuffle(rng, [...IQ_FORMATS]);
+    if (out.length && cycle[0] === out[out.length - 1] && cycle.length > 1) {
+      const swap = 1 + Math.floor(rng() * (cycle.length - 1));
+      [cycle[0], cycle[swap]] = [cycle[swap], cycle[0]];
+    }
+    out.push(...cycle.slice(0, rounds - out.length));
+  }
+  return out;
+}
+
+export function planIqQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium' }) {
+  const rng = makeRng(seed);
+  const players = scopePool(scope, pool);
+
+  if (players.length < MIN_POOL) {
+    throw new Error(`scope resolves to ${players.length} players, below the floor of ${MIN_POOL}`);
+  }
+
+  const window = resolveWindow(scope, registry);
+  const schedule = iqFormatSchedule(rounds, rng);
+  const depth = DIFFICULTY_DEPTH[difficulty] ?? 2;
+  const usedSubjects = new Set();
+  const plan = [];
+
+  for (let i = 0; i < rounds; i++) {
+    const stages = depth >= 3 ? 4 : depth >= 2 ? (i < rounds / 2 ? 3 : 4) : 3;
+    const attempts = [schedule[i], ...IQ_FORMATS.filter((f) => f !== schedule[i])];
+
+    let round = null;
+    for (const format of attempts) {
+      round = composeFormatRound({
+        format,
+        pool: players,
+        registry,
+        window,
+        scope,
+        rng,
+        stages,
+        difficulty,
+        excludeSubjectIds: usedSubjects,
+      });
+      if (round) break;
+    }
+    if (!round) break;
+
+    round.stage = i + 1;
+    plan.push(round);
+    usedSubjects.add(round.subjectId);
+  }
+
+  return {
+    scope,
+    seed,
+    mode: 'football_iq',
+    rounds: plan,
+    summary: {
+      rounds: plan.length,
+      formats: new Set(plan.map((r) => r.template)).size,
+      formatCounts: plan.reduce((counts, r) => {
+        counts[r.template] = (counts[r.template] ?? 0) + 1;
+        return counts;
+      }, {}),
+      subjects: new Set(plan.map((r) => r.subjectId)).size,
+    },
+  };
+}
+
+export function planQuiz({ scope, pool, registry, seed = 1, rounds = 10, difficulty = 'medium', phases = [], statRounds = 0, mode = 'guess_player' }) {
+  if (mode === 'football_iq') {
+    return planIqQuiz({ scope, pool, registry, seed, rounds, difficulty });
+  }
+  if (mode !== 'guess_player') {
+    throw new Error(`unknown game mode: ${mode}`);
+  }
+
   const rng = makeRng(seed);
   const players = scopePool(scope, pool);
 

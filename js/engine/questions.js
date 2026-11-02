@@ -12,7 +12,7 @@ export function informativeness(value, values) {
   return present.filter(v => v !== value).length / present.length;
 }
 
-function metricValue(subject, metric, window) {
+export function metricValue(subject, metric, window) {
   if (metric === 'identity') return subject.name;
   if (metric === 'international_caps') return subject.internationalCaps;
   if (metric === 'international_goals') return subject.internationalGoals;
@@ -22,12 +22,21 @@ function metricValue(subject, metric, window) {
     return window?.id ? (subject.windows?.[window.id]?.goals) : undefined;
   }
   if (metric === 'club_goals') {
-    // A windowed metric never falls back to a career total: "61 goals in
-    // 2014-15" and "300 career goals" are different facts. No window id, no
-    // value — missing stays undefined, it never becomes 0.
-    return window?.id && subject.windows?.[window.id]?.goals !== undefined
-      ? subject.windows[window.id].goals
-      : undefined;
+    // A season reads that season's window. A career reading is the
+    // dataset's own total, which starts in 2012/13.
+    if (window?.kind === 'season') {
+      return subject.windows?.[window.id]?.goals;
+    }
+    if (window?.kind === 'tournament') return undefined;
+    return subject.stats?.club_goals;
+  }
+  if (metric === 'club_appearances') {
+    if (window?.kind === 'season') {
+      const entry = subject.windows?.[window.id];
+      return entry?.appearances ?? entry?.club_appearances;
+    }
+    if (window?.kind === 'tournament') return undefined;
+    return subject.stats?.club_appearances;
   }
   if (metric === 'goals_after_age_30') return subject.stats?.goals_after_age_30;
   return undefined;
