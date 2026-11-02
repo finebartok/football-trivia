@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildHints, hintOrder, identityHook } from '../../js/engine/hints.js';
+import { buildHints, hintOrder, identityHook, recordHints, profileHints, teammateHints, familyClues, CLUE_FAMILIES, CLUE_FAMILY_LABELS } from '../../js/engine/hints.js';
 import { careerClubs } from '../../js/engine/career.js';
 import { loadFixture } from '../../js/engine/fixture.js';
+import { makeRng } from '../../js/engine/rng.js';
 
 function messiAndPool() {
   const { players, registry } = loadFixture();
@@ -140,4 +141,65 @@ test('hintOrder puts the same roles in the same order', () => {
   ];
   assert.deepEqual(hintOrder(hints).map((h) => h.role),
     ['stage', 'trail', 'record', 'profile', 'home']);
+});
+
+test('the record book can state more than one record and skips the stage metric', () => {
+  const { messi, players, registry, window } = messiAndPool();
+  const stage = buildHints(messi, window, registry, { pool: players })
+    .find((h) => h.role === 'stage');
+  const records = recordHints(messi, players, stage, window);
+
+  assert.ok(records.length >= 2, 'a deep pool must support at least two records');
+  assert.equal(new Set(records.map((h) => h.metric)).size, records.length);
+  assert.ok(!records.some((h) => h.metric === stage.metric), 'the record must not repeat the stage');
+  assert.equal(new Set(records.map((h) => h.id)).size, records.length, 'record ids must be distinct');
+});
+
+test('profile facts are separate clues and a missing height is skipped', () => {
+  const { messi } = messiAndPool();
+  const clues = profileHints(messi);
+  const roles = clues.map((h) => h.role);
+  assert.ok(roles.includes('role'));
+  assert.ok(roles.includes('born'));
+  assert.ok(roles.includes('home'));
+  assert.ok(roles.includes('height'));
+
+  const short = profileHints({ id: 1, name: 'No Height', position: 'Midfield', dateOfBirth: '1990-01-01', citizenship: ['X'] });
+  assert.ok(!short.some((h) => h.role === 'height'));
+});
+
+test('every teammate clue names a real club-season teammate and never the subject', () => {
+  const { messi, players } = messiAndPool();
+  const clues = teammateHints(messi, players, { rng: makeRng(4) });
+  assert.ok(clues.length >= 2);
+  assert.ok(clues.length <= 3);
+
+  const index = new Map();
+  for (const player of players) {
+    for (const team of player.teams ?? []) {
+      for (const season of team.seasons ?? []) {
+        const key = `${team.clubId}|${season}`;
+        if (!index.has(key)) index.set(key, new Set());
+        index.get(key).add(player.id);
+      }
+    }
+  }
+  for (const clue of clues) {
+    assert.ok(clue.teammateId);
+    assert.notEqual(clue.teammateId, messi.id);
+    const shared = (messi.teams ?? []).some((team) => (team.seasons ?? []).some((season) =>
+      index.get(`${team.clubId}|${season}`)?.has(clue.teammateId)));
+    assert.ok(shared, `${clue.value} does not share a club-season with the subject`);
+  }
+});
+
+test('a player with no teammates falls back to no teammate ladder', () => {
+  const lonely = { id: 1, name: 'Lonely', teams: [{ clubId: 9, clubName: 'Alone FC', seasons: [2020] }] };
+  assert.deepEqual(teammateHints(lonely, [lonely], { rng: makeRng(1) }), []);
+  assert.equal(familyClues('teammate_trail', lonely, null, {}, { pool: [lonely], rng: makeRng(1) }), null);
+});
+
+test('the family catalogue is complete', () => {
+  assert.deepEqual([...CLUE_FAMILIES], ['career_trail', 'teammate_trail', 'record_book', 'profile', 'mixed']);
+  for (const family of CLUE_FAMILIES) assert.ok(CLUE_FAMILY_LABELS[family]);
 });

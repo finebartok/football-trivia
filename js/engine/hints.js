@@ -3,6 +3,7 @@ import { careerClubs } from './career.js';
 import { clauseMatches } from './scope.js';
 import { resolveWindow } from './window.js';
 import { seasonLabel } from '../../lib/seasons.js';
+import { shuffle } from './rng.js';
 
 const ICONS = {
   nat: 'nat', pos: 'pos', path: 'path', shirt: 'shirt', honors: 'honors',
@@ -15,9 +16,13 @@ const LABELS = {
   record: 'The record',
   profile: 'The profile',
   home: 'The home',
+  role: 'The role',
+  born: 'The birth year',
+  height: 'The height',
+  teammate: 'The teammate',
 };
 
-const ROLE_RANK = { stage: 0, trail: 1, record: 2, profile: 3, home: 4 };
+const ROLE_RANK = { stage: 0, trail: 1, record: 2, profile: 3, home: 4, role: 3, born: 3, height: 4, teammate: 1 };
 
 const NUMBER_WORDS = [
   'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
@@ -39,10 +44,10 @@ function nationalityOf(player) {
   return player?.nationality ?? player?.citizenship?.[0] ?? null;
 }
 
-function hint(role, value, { iconKey, family = 'career', metric = null, windowId = null } = {}) {
-  const surface = role === 'profile' || role === 'home';
+function hint(role, value, { iconKey, family = 'career', metric = null, windowId = null, id = null, teammateId = null } = {}) {
+  const surface = role === 'profile' || role === 'home' || role === 'role' || role === 'born' || role === 'height';
   return {
-    id: role,
+    id: id ?? role,
     label: LABELS[role],
     value,
     iconKey: iconKey ?? ICONS.honors,
@@ -51,6 +56,7 @@ function hint(role, value, { iconKey, family = 'career', metric = null, windowId
     role,
     ...(metric ? { metric } : {}),
     ...(windowId ? { window: windowId } : {}),
+    ...(teammateId ? { teammateId } : {}),
   };
 }
 
@@ -335,8 +341,8 @@ function poolComparison(rank, ties, total, def) {
   return null;
 }
 
-function recordHint(subject, pool, stage, window) {
-  if (!Array.isArray(pool) || pool.length < 2) return null;
+export function recordHints(subject, pool, stage, window) {
+  if (!Array.isArray(pool) || pool.length < 2) return [];
   const candidates = [];
 
   for (const def of RECORD_DEFS) {
@@ -362,15 +368,18 @@ function recordHint(subject, pool, stage, window) {
     candidates.push({ def, value, comparison, rank, ties });
   }
 
-  if (!candidates.length) return null;
   candidates.sort((a, b) => a.rank - b.rank || a.ties - b.ties || a.def.priority - b.def.priority);
-  const chosen = candidates[0];
-  return hint('record', `${chosen.def.phrase(chosen.value, window)} — ${chosen.comparison}.`, {
+  return candidates.map((chosen) => hint('record', `${chosen.def.phrase(chosen.value, window)} — ${chosen.comparison}.`, {
+    id: `record-${chosen.def.id}`,
     family: chosen.def.family,
     metric: chosen.def.id,
     iconKey: chosen.def.id === 'highest_market_value_eur' ? ICONS.value : ICONS.honors,
     windowId: chosen.def.needsTournament ? window?.id : null,
-  });
+  }));
+}
+
+function recordHint(subject, pool, stage, window) {
+  return recordHints(subject, pool, stage, window)[0] ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -410,10 +419,108 @@ function profileHint(subject) {
   return hint('profile', `${parts.join(', ')}.`, { iconKey: ICONS.pos });
 }
 
+export function profileHints(subject) {
+  const out = [];
+  const role = roleNoun(subject);
+  const foot = subject.foot
+    ? (subject.foot.toLowerCase() === 'both' ? 'two-footed' : `${subject.foot.toLowerCase()}-footed`)
+    : null;
+
+  if (role) out.push(hint('role', `A ${foot ? `${foot} ` : ''}${role}.`, { iconKey: ICONS.pos }));
+
+  const born = subject.dateOfBirth ? String(subject.dateOfBirth).slice(0, 4) : null;
+  if (born) out.push(hint('born', `Born in ${born}.`, { iconKey: ICONS.age }));
+
+  const home = homeHint(subject);
+  if (home) out.push(home);
+
+  const height = Number(subject.heightCm);
+  if (Number.isFinite(height) && height > 0) {
+    out.push(hint('height', `${height} cm tall.`, { iconKey: ICONS.age }));
+  }
+
+  return out;
+}
+
 function homeHint(subject) {
   const nationality = nationalityOf(subject);
   if (!nationality) return null;
   return hint('home', `From ${nationality}.`, { iconKey: ICONS.nat });
+}
+
+function clubSeasonIndex(pool) {
+  const index = new Map();
+  for (const player of pool ?? []) {
+    for (const team of player.teams ?? []) {
+      for (const season of team.seasons ?? []) {
+        const key = `${team.clubId}|${season}`;
+        if (!index.has(key)) {
+          index.set(key, {
+            clubId: team.clubId,
+            clubName: team.clubName,
+            season,
+            players: new Set(),
+          });
+        }
+        index.get(key).players.add(player.id);
+      }
+    }
+  }
+  return index;
+}
+
+export function teammateHints(subject, pool, { rng = Math.random, limit = 3 } = {}) {
+  if (!subject || !Array.isArray(pool)) return [];
+
+  const index = clubSeasonIndex(pool);
+  const byId = new Map(pool.map((player) => [player.id, player]));
+  const entries = [];
+  const seen = new Set([subject.id]);
+
+  for (const team of subject.teams ?? []) {
+    for (const season of team.seasons ?? []) {
+      const bucket = index.get(`${team.clubId}|${season}`);
+      if (!bucket) continue;
+      for (const id of bucket.players) {
+        if (seen.has(id)) continue;
+        const player = byId.get(id);
+        if (!player) continue;
+        seen.add(id);
+        entries.push({ player, clubId: team.clubId, clubName: team.clubName, season });
+      }
+    }
+  }
+
+  if (entries.length < 2) return [];
+
+  const shuffled = shuffle(rng, entries);
+  const picked = [];
+  const usedClubs = new Set();
+  const usedSeasons = new Set();
+
+  // Prefer a different club and a different season for each name.
+  for (const entry of shuffled) {
+    if (picked.length >= limit) break;
+    if (usedClubs.has(entry.clubId) || usedSeasons.has(entry.season)) continue;
+    picked.push(entry);
+    usedClubs.add(entry.clubId);
+    usedSeasons.add(entry.season);
+  }
+  for (const entry of shuffled) {
+    if (picked.length >= limit) break;
+    if (!picked.includes(entry)) picked.push(entry);
+  }
+
+  return picked.map((entry) => hint(
+    'teammate',
+    `Played with ${entry.player.name} at ${entry.clubName} in ${seasonLabel(entry.season)}.`,
+    {
+      id: `teammate-${entry.player.id}`,
+      family: 'teammate',
+      iconKey: ICONS.team,
+      teammateId: entry.player.id,
+    },
+  ));
 }
 
 // ---------------------------------------------------------------------------
@@ -501,6 +608,68 @@ export function identityHook(subject, pool = [], { excludeMetrics = [] } = {}) {
 // ---------------------------------------------------------------------------
 // The catalogue.
 // ---------------------------------------------------------------------------
+
+export const CLUE_FAMILIES = Object.freeze([
+  'career_trail',
+  'teammate_trail',
+  'record_book',
+  'profile',
+  'mixed',
+]);
+
+export const CLUE_FAMILY_LABELS = Object.freeze({
+  career_trail: 'Career trail',
+  teammate_trail: 'Teammate trail',
+  record_book: 'Record book',
+  profile: 'Profile',
+  mixed: 'Mixed bag',
+});
+
+/**
+ * The family's own ladder, in the order it should be revealed.
+ *
+ * `null` means the family cannot supply a usable ladder; the caller falls
+ * back to the mixed ladder. The mixed ladder itself is `buildHints`.
+ */
+export function familyClues(family, subject, window, registry, { pool, scope, rng } = {}) {
+  const stage = stageHint(subject, { window, scope, registry });
+
+  switch (family) {
+    case 'career_trail': {
+      const clues = [
+        stage,
+        trailHint(subject),
+        recordHints(subject, pool, stage, window)[0] ?? null,
+        homeHint(subject),
+      ];
+      return clues.filter(Boolean);
+    }
+    case 'teammate_trail': {
+      const mates = teammateHints(subject, pool, { rng, limit: 3 });
+      if (mates.length < 2) return null;
+      const clues = [
+        mates[0],
+        mates[1],
+        trailHint(subject),
+        mates[2] ?? null,
+        profileHints(subject)[0] ?? homeHint(subject),
+      ];
+      return clues.filter(Boolean);
+    }
+    case 'record_book': {
+      const records = recordHints(subject, pool, stage, window).slice(0, 3);
+      if (records.length < 2) return null;
+      const tail = homeHint(subject) ?? profileHints(subject)[0] ?? null;
+      return [...records, tail].filter(Boolean);
+    }
+    case 'profile': {
+      const clues = profileHints(subject);
+      return clues.length >= 2 ? clues : null;
+    }
+    default:
+      return null;
+  }
+}
 
 export function buildHints(subject, window, registry, { limit, pool, scope } = {}) {
   const hints = [];
