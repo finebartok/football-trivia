@@ -173,3 +173,33 @@ test('round one of a new game clears the last game even when the number repeats'
   assert.equal(state.answeredRound, null);
   assert.equal(state.lastResult, null);
 });
+
+test('a poll that races a reveal cannot move the clue ladder backwards', () => {
+  const state = {
+    round: {
+      id: 'r1', round_number: 1, clue_index: 2,
+      clues: [{ value: 'one' }, { value: 'two' }, { value: 'three' }],
+    },
+  };
+  applyRound(state, {
+    current_round: 1,
+    round: {
+      id: 'r1', round_number: 1, clue_index: 1,
+      clues: [{ value: 'one' }, { value: null }, { value: null }],
+    },
+  });
+  assert.equal(state.round.clue_index, 2);
+  assert.equal(state.round.clues[1].value, 'two');
+});
+
+test('a higher clue index from the server wins', () => {
+  const state = {
+    round: { id: 'r1', round_number: 1, clue_index: 0, clues: [{ value: 'one' }, { value: null }] },
+  };
+  applyRound(state, {
+    current_round: 1,
+    round: { id: 'r1', round_number: 1, clue_index: 1, clues: [{ value: 'one' }, { value: 'two' }] },
+  });
+  assert.equal(state.round.clue_index, 1);
+  assert.equal(state.round.clues[1].value, 'two');
+});

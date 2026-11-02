@@ -50,7 +50,22 @@ export function applyRound(state, payload) {
     state.fetchingResult = false;
   }
 
-  state.round = next;
+  // Progress within a round only increases. A poll can race a reveal; the
+  // poll must not move the ladder backwards or lock a clue the player has
+  // already paid for.
+  let merged = next;
+  if (next && sameRound
+    && typeof next.clue_index === 'number'
+    && typeof state.round.clue_index === 'number'
+    && state.round.clue_index > next.clue_index) {
+    merged = {
+      ...next,
+      clue_index: state.round.clue_index,
+      clues: state.round.clues,
+    };
+  }
+
+  state.round = merged;
   state.currentRound = payload?.current_round ?? 0;
   state.totalRounds = payload?.total_rounds ?? state.totalRounds ?? 10;
   state.status = nextStatus;

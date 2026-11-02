@@ -46,6 +46,29 @@ test('the round screen shows the server round to everyone', async ({ browser }) 
   expect(errors).toEqual([]);
 });
 
+test('each player reveals their own clues and is scored on their own stage', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+  const errors = watchErrors(host);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  await expect(host.locator('.clue-card.is-revealed')).toHaveCount(1);
+  await host.locator('#btn-reveal-clue').click();
+  await expect(host.locator('.clue-card.is-revealed')).toHaveCount(2);
+  await expect(guest.locator('.clue-card.is-revealed')).toHaveCount(1);
+
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+  await expect(host.locator('.verdict__breakdown')).toContainText('×3');
+  await expect(guest.locator('.verdict__breakdown')).toContainText('×5');
+  expect(errors).toEqual([]);
+});
+
 test('the option labels say what they count', async ({ browser }) => {
   const { host } = await roomWithTwoPlayers(browser);
   await host.locator('#btn-start').click();
@@ -102,7 +125,7 @@ test('a player who refreshes mid-round keeps their score', async ({ browser }) =
   // Still in the room, and the answer they gave is still theirs.
   await expect(guest).toHaveURL(/#round|#reveal/);
   const answer = await guest.evaluate(async () => {
-    const m = await import('/client/src/room.js');
+    const m = await import('/src/room.js');
     return { answeredRound: m.room.state.answeredRound, points: m.room.state.myAnswer?.points ?? null };
   });
   expect(answer.answeredRound).toBe(1);
@@ -351,16 +374,16 @@ test('the host rematches in the same room and the guest follows', async ({ brows
   await expect(host).toHaveURL(/#round/);
   await expect(guest).toHaveURL(/#round/);
 
-  // A one-round room clamps the mix to one round, and that round is stat.
-  await expect(host.locator('.round-prompt')).toContainText(/How many /);
+  // A one-round room is a single identify round now.
+  await expect(host.locator('.round-prompt')).toContainText('Who is this?');
   await host.locator('.option').first().click();
   await guest.locator('.option').first().click();
   await expect(host).toHaveURL(/#reveal/);
   await expect(guest).toHaveURL(/#reveal/);
 
-  // The round closes, and the reveal shows the value with its unit.
+  // The round closes, and the reveal shows the answer.
   await expect(guest.locator('#btn-next')).toContainText('See how it went', { timeout: 30000 });
-  await expect(host.locator('.reveal-card__name')).toContainText(/\d+ (goal|goals|cap|caps)/);
+  await expect(host.locator('.reveal-card__name')).not.toBeEmpty();
 
   // The guest sees the waiting note on the results screen.
   await guest.locator('#btn-next').click();

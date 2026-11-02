@@ -130,7 +130,10 @@ function stopPolling() {
 async function sync() {
   const supabase = client;
   if (!supabase || !state.roomId) return null;
-  const { data, error } = await supabase.rpc('sync_room_state', { p_room_id: state.roomId });
+  const { data, error } = await supabase.rpc('sync_room_state', {
+    p_room_id: state.roomId,
+    p_on_demand: true,
+  });
   if (error) {
     state.error = friendly(error.message);
     notify();
@@ -394,6 +397,7 @@ export const room = {
       room_id: state.roomId,
       round_number: state.round.round_number,
       guessed_answer: guessed,
+      on_demand: true,
     });
     if (status !== 200) {
       state.error = friendly(data?.error);
@@ -405,6 +409,33 @@ export const room = {
     // as soon as the round closes, and the reveal still needs to know
     // which round it is revealing.
     state.answeredRound = roundNumber;
+    state.error = null;
+    notify();
+    return data;
+  },
+
+  /** Reveal the next clue for this player. The server owns the index. */
+  async revealClue() {
+    const supabase = await ensure();
+    if (!supabase || !state.round) return null;
+    const { data, error } = await supabase.rpc('reveal_clue', {
+      p_room_id: state.roomId,
+      p_round_number: state.round.round_number,
+      p_clue_index: state.round.clue_index ?? 0,
+    });
+    if (error) {
+      state.error = friendly(error.message);
+      notify();
+      return null;
+    }
+    if (state.round && data?.round_number === state.round.round_number) {
+      state.round = {
+        ...state.round,
+        clue_index: data.clue_index,
+        clue_total: data.clue_total,
+        clues: data.clues,
+      };
+    }
     state.error = null;
     notify();
     return data;
