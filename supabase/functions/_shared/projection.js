@@ -19,6 +19,7 @@ export function projectRound(round, roundNumber) {
       template: round.template,
       prompt: round.hook ? `${round.prompt}\n${round.hook}` : round.prompt,
       context: round.context ?? null,
+      clue_family: round.clueFamily ?? null,
       clues: round.clues.map((c) => ({
         id: c.id,
         label: c.label,

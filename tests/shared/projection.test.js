@@ -8,6 +8,7 @@ const composed = {
   context: '2022 World Cup',
   subjectId: 28003,
   answer: 'Lionel Messi',
+  clueFamily: 'career_trail',
   options: [
     { id: 'opt-0', label: 'Lionel Messi', value: 'Lionel Messi', correct: true },
     { id: 'opt-1', label: 'Neymar', value: 'Neymar', correct: false },
@@ -15,6 +16,11 @@ const composed = {
   clues: [{ id: 'c1', label: 'CAREER CLUBS', value: 'Barcelona', iconKey: null }],
   revealSchedule: [{ stage: 1, revealAtMs: 2000 }],
 };
+
+test('the client row carries the clue family', () => {
+  const { client } = projectRound(composed, 1);
+  assert.equal(client.clue_family, 'career_trail');
+});
 
 test('the client row never says which option is right', () => {
   const { client } = projectRound(composed, 1);
@@ -26,7 +32,7 @@ test('the client row never says which option is right', () => {
 test('the client row carries only what a player can see on screen', () => {
   const { client } = projectRound(composed, 1);
   assert.deepEqual(Object.keys(client).sort(), [
-    'clues', 'context', 'options', 'prompt', 'reveal_schedule', 'round_number', 'template',
+    'clue_family', 'clues', 'context', 'options', 'prompt', 'reveal_schedule', 'round_number', 'template',
   ]);
 });
 

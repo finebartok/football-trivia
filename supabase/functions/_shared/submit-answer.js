@@ -27,6 +27,7 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
     const roomId = body.room_id;
     const roundNumber = body.round_number;
     const guessed = body.guessed_answer;
+    const onDemand = body.on_demand === true;
     if (!roomId || !roundNumber) {
       return json({ error: 'room_id and round_number are required' }, 400);
     }
@@ -88,15 +89,30 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
         correct: existing.is_correct,
         points: existing.points_earned,
         stage: existing.stage_locked,
+        response_time_ms: existing.response_time_ms,
         already: true,
       });
     }
 
     // The stage the server says the player answered at: the number of
     // reveals that had happened by the time the answer arrived.
-    const schedule = round.reveal_schedule ?? [];
+    let stage;
+    if (onDemand) {
+      const { data: progress } = await admin
+        .from('round_progress')
+        .select('clue_index')
+        .eq('round_id', round.id)
+        .eq('user_id', userId)
+        .maybeSingle();
+      const index = progress?.clue_index ?? 0;
+      const total = round.clues?.length ?? 1;
+      stage = Math.max(1, Math.min(total, index + 1));
+    } else {
+      const schedule = round.reveal_schedule ?? [];
+      const elapsed = Math.max(0, receivedAt.getTime() - new Date(round.started_at).getTime());
+      stage = Math.max(1, schedule.filter((s) => elapsed >= (s.revealAtMs ?? 0)).length);
+    }
     const elapsed = Math.max(0, receivedAt.getTime() - new Date(round.started_at).getTime());
-    const stage = Math.max(1, schedule.filter((s) => elapsed >= (s.revealAtMs ?? 0)).length);
 
     // The engine decides whether the answer is right and what it is worth.
     const verdict = answerRound(
@@ -134,6 +150,7 @@ export async function handleSubmitAnswer(req, { createClient, env }) {
             correct: theirs.is_correct,
             points: theirs.points_earned,
             stage: theirs.stage_locked,
+            response_time_ms: theirs.response_time_ms,
             already: true,
           });
         }

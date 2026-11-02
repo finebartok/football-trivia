@@ -24,6 +24,7 @@ function roundPayload(round) {
     clues: round.clues,
     options: round.options,
     reveal_schedule: round.reveal_schedule,
+    clue_family: round.clue_family,
     started_at: round.started_at,
     deadline_at: round.deadline_at,
   };
@@ -187,6 +188,7 @@ export async function handleStartRoom(req, { createClient, env }) {
           clues: first.client.clues,
           options: first.client.options,
           reveal_schedule: first.client.reveal_schedule,
+          clue_family: first.client.clue_family,
           started_at: startedAt,
           deadline_at: deadlineAt,
         })
