@@ -98,6 +98,27 @@ test('a club round asks about a season with exactly one club', () => {
       `the clue "${clue.value}" names the answer club`,
     );
   }
+
+  const ids = round.clues.map((clue) => clue.id);
+  assert.ok(
+    ['club-goals', 'club-squad', 'club-other'].includes(ids[0]),
+    'the first clue describes the club-season',
+  );
+  assert.ok(
+    ids.filter((id) => ['club-goals', 'club-squad', 'club-other'].includes(id)).length >= 2,
+    'two clues describe the club-season',
+  );
+  assert.ok(!ids.includes('club-league'), 'the league shared by every option is not a clue');
+
+  for (const name of valuesOf(round, 'value')) {
+    const clubSeasons = players
+      .flatMap((player) => player.teams ?? [])
+      .filter((team) => team.clubName === name && (team.seasons ?? []).includes(start));
+    assert.ok(
+      clubSeasons.some((team) => team.leagueId === entries[0].leagueId),
+      `${name} was not in ${entries[0].leagueId} in ${round.reveal.season}`,
+    );
+  }
 });
 
 test('a teammate round shares a club-season and never offers the subject', () => {

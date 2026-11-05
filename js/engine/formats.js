@@ -93,98 +93,132 @@ function roundShape({
 // Club in a season
 // ---------------------------------------------------------------------------
 
-function clubSeasons(player) {
-  const out = [];
-  for (const team of player.teams ?? []) {
-    for (const season of team.seasons ?? []) out.push({ team, season });
+function clubSeasonIndex(pool) {
+  const index = new Map();
+  const byId = new Map(pool.map((player) => [player.id, player]));
+  for (const player of pool) {
+    for (const team of player.teams ?? []) {
+      for (const season of team.seasons ?? []) {
+        const key = `${team.clubId}|${season}`;
+        if (!index.has(key)) {
+          index.set(key, {
+            clubId: team.clubId,
+            clubName: team.clubName,
+            leagueId: team.leagueId,
+            season,
+            players: new Set(),
+          });
+        }
+        index.get(key).players.add(player.id);
+      }
+    }
+  }
+  return { index, byId };
+}
+
+function leagueSeasonIndex(index) {
+  const out = new Map();
+  for (const entry of index.values()) {
+    const key = `${entry.leagueId}|${entry.season}`;
+    if (!out.has(key)) out.set(key, []);
+    out.get(key).push(entry);
   }
   return out;
 }
 
-function soleClubSeason(player, season) {
-  const entries = clubSeasons(player).filter((entry) => entry.season === season);
-  return entries.length === 1 ? entries[0] : null;
-}
-
-function poolClubs(pool) {
-  const byId = new Map();
-  for (const player of pool) {
-    for (const team of player.teams ?? []) {
-      if (!byId.has(team.clubId)) {
-        byId.set(team.clubId, {
-          id: team.clubId,
-          name: team.clubName,
-          leagueId: team.leagueId,
-          seasons: new Set(team.seasons ?? []),
-        });
-      } else {
-        for (const s of team.seasons ?? []) byId.get(team.clubId).seasons.add(s);
-      }
+function clubCandidateEntries(subject, index, byLeagueSeason) {
+  const bySeason = new Map();
+  for (const team of subject.teams ?? []) {
+    for (const season of team.seasons ?? []) {
+      if (!bySeason.has(season)) bySeason.set(season, []);
+      bySeason.get(season).push(team);
     }
   }
-  return [...byId.values()];
-}
 
-function clubDistractors(answerTeam, season, pool, rng) {
-  const others = poolClubs(pool).filter((club) => club.id !== answerTeam.clubId);
-  const scored = others.map((club) => {
-    let score = 0;
-    if (club.leagueId === answerTeam.leagueId) score += 4;
-    const overlap = [...club.seasons].some((s) => Math.abs(s - season) <= 3);
-    if (overlap) score += 2;
-    return { club, score };
-  }).sort((a, b) => b.score - a.score);
+  const career = careerTeams(subject);
+  const entries = [];
+  for (const [season, teams] of bySeason) {
+    if (teams.length !== 1) continue;
+    const team = teams[0];
+    const bucket = index.get(`${team.clubId}|${season}`);
+    const goals = subject.windows?.[seasonKey(team, season)]?.goals;
+    const positiveGoals = typeof goals === 'number' && goals > 0;
+    const hasTeammate = (bucket?.players.size ?? 0) > 1;
+    const sameLeague = (byLeagueSeason.get(`${team.leagueId}|${season}`) ?? [])
+      .filter((other) => other.clubId !== team.clubId);
+    const optionNames = [...new Set(sameLeague.map((club) => club.clubName))];
+    if (optionNames.length < 3) continue;
 
-  const shortlist = scored.slice(0, Math.max(12, 12)).map((x) => x.club.name);
-  return shuffle(rng, shortlist).slice(0, 3);
+    const careerTeam = career.find((other) => other.clubId !== team.clubId
+      && (other.seasons ?? []).length > 0
+      && sameLeague.some((option) => option.clubId === other.clubId));
+    const careerEntry = careerTeam
+      ? {
+        name: sameLeague.find((option) => option.clubId === careerTeam.clubId).clubName,
+        season: Math.min(...careerTeam.seasons),
+      }
+      : null;
+    const facts = (positiveGoals ? 1 : 0) + (hasTeammate ? 1 : 0) + (careerEntry ? 1 : 0);
+    if (facts < 2) continue;
+
+    entries.push({
+      team,
+      season,
+      goals: positiveGoals ? goals : null,
+      optionNames,
+      careerEntry,
+    });
+  }
+  return entries;
 }
 
 function leagueName(team, registry) {
   return team.leagueName ?? registry?.leagues?.[team.leagueId] ?? null;
 }
 
-function otherClubFact(player, excludeClubId) {
-  for (const team of careerTeams(player)) {
-    if (team.clubId === excludeClubId) continue;
-    const season = Math.min(...(team.seasons ?? []));
-    if (!Number.isFinite(season)) continue;
-    return `Also played for ${team.clubName} in ${seasonLabel(season)}.`;
-  }
-  return null;
-}
-
 export function buildClubRound({ pool, registry, window, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
+  const { index, byId } = clubSeasonIndex(pool);
+  const byLeagueSeason = leagueSeasonIndex(index);
   const candidates = [];
   for (const subject of pool) {
     if (excludeSubjectIds.has(subject.id)) continue;
-    const eligible = [];
-    for (const entry of clubSeasons(subject)) {
-      if (soleClubSeason(subject, entry.season)) eligible.push(entry);
-    }
-    if (eligible.length) candidates.push({ subject, eligible });
+    const entries = clubCandidateEntries(subject, index, byLeagueSeason);
+    if (entries.length) candidates.push({ subject, entries });
   }
   if (!candidates.length) return null;
 
   const chosen = pick(rng, candidates);
-  const entry = preferredFirst(chosen.eligible, window, rng)[0];
-  const { team, season } = entry;
+  const entry = preferredFirst(chosen.entries, window, rng)[0];
+  const { team, season, goals, optionNames, careerEntry } = entry;
   const league = leagueName(team, registry);
-  const goals = chosen.subject.windows?.[seasonKey(team, season)]?.goals;
+  const bucket = index.get(`${team.clubId}|${season}`);
+  const teammates = [...(bucket?.players ?? [])]
+    .filter((id) => id !== chosen.subject.id)
+    .map((id) => byId.get(id))
+    .filter(Boolean);
+  const teammate = teammates.length ? pick(rng, teammates) : null;
 
   const clues = [
-    league ? { id: 'club-league', label: 'The league', value: `That season, they played in ${league}.`, iconKey: 'league' } : null,
-    goals !== undefined && goals !== null
+    goals
       ? { id: 'club-goals', label: 'The season', value: `They scored ${goals} ${goals === 1 ? 'goal' : 'goals'} in ${seasonLabel(season)}.`, iconKey: 'honors' }
+      : teammate
+        ? { id: 'club-squad', label: 'The squad', value: `${teammate.name} was in the squad that season.`, iconKey: 'team' }
+        : null,
+    goals && teammate
+      ? { id: 'club-squad', label: 'The squad', value: `${teammate.name} was in the squad that season.`, iconKey: 'team' }
       : null,
-    ...profileHints(chosen.subject),
-    otherClubFact(chosen.subject, team.clubId)
-      ? { id: 'club-other', label: 'The career', value: otherClubFact(chosen.subject, team.clubId), iconKey: 'path' }
+    careerEntry
+      ? { id: 'club-other', label: 'The career', value: `Also played for ${careerEntry.name} in ${seasonLabel(careerEntry.season)}.`, iconKey: 'path' }
       : null,
+    ...profileHints(chosen.subject).slice(0, 1),
   ];
 
+  const distractors = careerEntry
+    ? [careerEntry.name, ...shuffle(rng, optionNames.filter((name) => name !== careerEntry.name))]
+    : shuffle(rng, optionNames);
   const options = buildOptions({
     answer: team.clubName,
-    distractors: clubDistractors(team, season, pool, rng),
+    distractors,
     rng,
   });
 
@@ -214,21 +248,14 @@ export function buildClubRound({ pool, registry, window, rng, difficulty, stages
 // Teammate
 // ---------------------------------------------------------------------------
 
-function clubSeasonIndex(pool) {
-  const index = new Map();
-  const byId = new Map(pool.map((p) => [p.id, p]));
-  for (const player of pool) {
-    for (const team of player.teams ?? []) {
-      for (const season of team.seasons ?? []) {
-        const key = `${team.clubId}|${season}`;
-        if (!index.has(key)) {
-          index.set(key, { clubId: team.clubId, clubName: team.clubName, season, players: new Set() });
-        }
-        index.get(key).players.add(player.id);
-      }
-    }
+function otherClubFact(player, excludeClubId) {
+  for (const team of careerTeams(player)) {
+    if (team.clubId === excludeClubId) continue;
+    const season = Math.min(...(team.seasons ?? []));
+    if (!Number.isFinite(season)) continue;
+    return `Also played for ${team.clubName} in ${seasonLabel(season)}.`;
   }
-  return { index, byId };
+  return null;
 }
 
 export function buildTeammateRound({ pool, registry, window, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
