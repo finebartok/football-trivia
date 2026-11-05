@@ -378,14 +378,26 @@ export function buildComparisonRound({ pool, rng, difficulty, stages = 4, exclud
     const answer = rows[0];
     if (excludeSubjectIds.has(answer.player.id)) continue;
 
-    const [first, second, third, fourth] = rows.map((row) => row.value);
-    const bounds = [fourth, third, second];
-    const clues = bounds.map((bound, i) => ({
-      id: `comparison-${metric.id}-${i}`,
-      label: i === 0 ? 'The field' : i === 1 ? 'The shortlist' : 'The leader',
-      value: `The answer has more than ${withUnit(bound, metric.unit)}.`,
-      iconKey: 'honors',
-    }));
+    const clues = [
+      {
+        id: `comparison-${metric.id}-0`,
+        label: 'The field',
+        value: `The answer has more than ${rows[3].player.name}.`,
+        iconKey: 'honors',
+      },
+      {
+        id: `comparison-${metric.id}-1`,
+        label: 'The shortlist',
+        value: `The answer has more than ${rows[2].player.name}.`,
+        iconKey: 'honors',
+      },
+      {
+        id: `comparison-${metric.id}-2`,
+        label: 'The runner-up',
+        value: `The answer has more than ${rows[1].player.name}.`,
+        iconKey: 'honors',
+      },
+    ];
     const profile = profileHints(answer.player)[0];
     if (profile) clues.push(profile);
 

@@ -169,9 +169,16 @@ test('a comparison round has four distinct values and a unique maximum', () => {
   assert.ok(optionNames.includes(round.answer));
   for (const row of ranked) assert.ok(optionNames.includes(row.player.name));
 
-  const bounds = round.clues.filter((clue) => /^The (field|shortlist|leader)$/.test(clue.label));
-  assert.ok(bounds.length >= 3, 'three bounds narrow the field');
-  for (const bound of bounds) assert.match(bound.value, /more than/i);
+  const comparators = round.clues.filter((clue) => /^The (field|shortlist|runner-up)$/.test(clue.label));
+  assert.equal(comparators.length, 3, 'three named comparators narrow the field');
+  const named = comparators.map((clue) => {
+    const match = clue.value.match(/^The answer has more than (.+)\.$/);
+    assert.ok(match, clue.value);
+    assert.doesNotMatch(clue.value, /\d/);
+    return match[1];
+  });
+  assert.deepEqual(named, ranked.slice(1).reverse().map((row) => row.player.name));
+  assert.ok(named.every((name) => optionNames.includes(name)));
 });
 
 test('a range round buckets the exact value and never prints it in a clue', () => {

@@ -187,3 +187,47 @@ test('regression: Mikel Villanueva gets club-season clues and same-league option
     );
   }
 });
+
+test('comparison contract: named comparators eliminate the other three options', () => {
+  for (const round of eachRound(buildComparisonRound, 40)) {
+    const ranked = round.reveal.values;
+    assert.equal(ranked.length, 4);
+    assert.equal(new Set(ranked.map((row) => row.value)).size, 4);
+    assert.deepEqual(
+      ranked.map((row) => row.value),
+      [...ranked.map((row) => row.value)].sort((a, b) => b - a),
+    );
+    assert.equal(round.answer, ranked[0].player.name);
+
+    const options = round.options.map((option) => option.value);
+    assert.equal(options.length, 4);
+    assert.equal(new Set(options).size, 4);
+    const comparators = round.clues.filter((clue) => clue.id.startsWith('comparison-'));
+    assert.equal(comparators.length, 3);
+    assert.deepEqual(comparators.map((clue) => clue.label), ['The field', 'The shortlist', 'The runner-up']);
+    assert.ok(round.clues[0].id.startsWith('comparison-'), 'the first clue is a comparator');
+
+    const named = comparators.map((clue) => {
+      const match = clue.value.match(/^The answer has more than (.+)\.$/);
+      assert.ok(match, `unexpected comparator: ${clue.value}`);
+      assert.doesNotMatch(clue.value, /\d/);
+      assert.ok(options.includes(match[1]), `${match[1]} is not an option`);
+      return match[1];
+    });
+    assert.deepEqual(named, [ranked[3].player.name, ranked[2].player.name, ranked[1].player.name]);
+    assert.deepEqual(options.filter((name) => !named.includes(name)), [round.answer]);
+  }
+});
+
+test('regression: the Messi/Ronaldo comparison names its comparators', () => {
+  const round = build(buildComparisonRound, 6);
+  assert.equal(round.metric, 'international_goals');
+  assert.equal(round.answer, 'Cristiano Ronaldo');
+  const comparators = round.clues.filter((clue) => clue.id.startsWith('comparison-'));
+  assert.deepEqual(comparators.map((clue) => clue.value), [
+    'The answer has more than Robert Lewandowski.',
+    'The answer has more than Romelu Lukaku.',
+    'The answer has more than Lionel Messi.',
+  ]);
+  for (const clue of comparators) assert.doesNotMatch(clue.value, /\d/);
+});
