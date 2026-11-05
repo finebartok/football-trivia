@@ -231,3 +231,84 @@ test('regression: the Messi/Ronaldo comparison names its comparators', () => {
   ]);
   for (const clue of comparators) assert.doesNotMatch(clue.value, /\d/);
 });
+
+function rangeBound(clue) {
+  let match = clue.value.match(/^€([\d.]+)M or more\.$/);
+  if (match) {
+    const floor = Number(match[1]) * 1_000_000;
+    return (value) => value >= floor;
+  }
+  match = clue.value.match(/^Under €([\d.]+)M\.$/);
+  if (match) {
+    const ceiling = Number(match[1]) * 1_000_000;
+    return (value) => value < ceiling;
+  }
+  match = clue.value.match(/^More than ([\d,]+) (?:goals|caps|apps)\.$/);
+  if (match) {
+    const floor = Number(match[1].replaceAll(',', ''));
+    return (value) => value > floor;
+  }
+  match = clue.value.match(/^Fewer than ([\d,]+) (?:goals|caps|apps)\.$/);
+  if (match) {
+    const ceiling = Number(match[1].replaceAll(',', ''));
+    return (value) => value < ceiling;
+  }
+  return null;
+}
+
+test('range contract: every bucket clue is true of the hidden value', () => {
+  for (const round of eachRound(buildRangeRound, 40)) {
+    assert.ok(round.reveal.value > 0);
+    const options = round.options.map((option) => option.value);
+    assert.equal(options.length, 4);
+    assert.equal(new Set(options).size, 4);
+    assert.ok(options.includes(round.answer));
+
+    for (const clue of round.clues.filter((c) => c.id === 'range-over' || c.id === 'range-under')) {
+      const holds = rangeBound(clue);
+      assert.ok(holds, `unrecognised bound: ${clue.value}`);
+      assert.ok(holds(round.reveal.value), `${clue.value} is false for ${round.reveal.value}`);
+    }
+    for (const clue of round.clues) {
+      const exact = String(round.reveal.value);
+      const tokens = clue.value.match(/\d[\d,]*/g) ?? [];
+      assert.ok(
+        !tokens.some((token) => token.replaceAll(',', '') === exact),
+        `the clue "${clue.value}" states the exact value`,
+      );
+    }
+  }
+});
+
+test('teammate contract: the clues describe the hidden teammate, not the subject', () => {
+  for (const round of eachRound(buildTeammateRound, 40)) {
+    const subject = byId.get(round.subjectId);
+    const teammate = byId.get(round.answerPlayerId);
+    assert.ok(subject && teammate);
+    assert.notEqual(subject.id, teammate.id);
+
+    const season = seasonStart(round.reveal.season);
+    const shared = (subject.teams ?? []).some((team) => (team.seasons ?? []).includes(season)
+      && (teammate.teams ?? []).some((other) => other.clubId === team.clubId
+        && (other.seasons ?? []).includes(season)));
+    assert.ok(shared, 'the teammate shares the club-season in the prompt');
+
+    const optionNames = round.options.map((option) => option.value);
+    assert.ok(optionNames.includes(round.answer));
+    assert.ok(!optionNames.includes(round.subjectName));
+
+    const profileValues = new Set(profileHints(teammate).map((hint) => hint.value));
+    const careerClubs = new Set((teammate.teams ?? []).map((team) => team.clubName));
+    for (const clue of round.clues) {
+      assert.ok(!clue.value.includes(round.subjectName), `the clue "${clue.value}" describes the subject`);
+      assert.ok(!clue.value.toLowerCase().includes(round.answer.toLowerCase()), 'the clue names the answer');
+      if (clue.id === 'mate-other') {
+        const match = clue.value.match(/^Also played for (.+) in (\d{4}\/\d{2})\.$/);
+        assert.ok(match, `unexpected career clue: ${clue.value}`);
+        assert.ok(careerClubs.has(match[1]), `${match[1]} is not a teammate club`);
+      } else {
+        assert.ok(profileValues.has(clue.value), `the clue "${clue.value}" is not a teammate profile fact`);
+      }
+    }
+  }
+});

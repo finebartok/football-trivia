@@ -487,8 +487,8 @@ function rangeMetricsFor(window) {
 function boundText(metric, value, unit, direction) {
   if (metric === 'highest_market_value_eur') {
     return direction === 'over'
-      ? `More than ${formatMetric(metric, value)}.`
-      : `Less than ${formatMetric(metric, value)}.`;
+      ? `${formatMetric(metric, value)} or more.`
+      : `Under ${formatMetric(metric, value)}.`;
   }
   const noun = withUnit(value, unit);
   return direction === 'over'
@@ -540,8 +540,9 @@ export function buildRangeRound({ pool, window, registry, rng, difficulty, stage
 
     const chosen = pick(rng, candidates);
     const { bucket } = chosen;
+    const floor = metricId === 'highest_market_value_eur' ? bucket.start : bucket.start - 1;
     const lower = bucket.start > 0
-      ? { id: 'range-over', label: 'The floor', value: boundText(metricId, bucket.start - 1, descriptor.unit, 'over'), iconKey: 'honors' }
+      ? { id: 'range-over', label: 'The floor', value: boundText(metricId, floor, descriptor.unit, 'over'), iconKey: 'honors' }
       : null;
     const upper = bucket.end !== null
       ? { id: 'range-under', label: 'The ceiling', value: boundText(metricId, bucket.end + 1, descriptor.unit, 'under'), iconKey: 'honors' }

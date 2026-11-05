@@ -35,6 +35,41 @@ function valuesOf(round, key) {
   return round.options.map((option) => option[key]);
 }
 
+function rangeAt(value, extra = []) {
+  return buildRangeRound({
+    pool: [
+      { id: `boundary-${value}`, name: `Boundary ${value}`, highestMarketValueEur: value },
+      ...extra,
+    ],
+    registry,
+    window: null,
+    scope: { clauses: [] },
+    rng: makeRng(1),
+    difficulty: 'medium',
+    stages: 4,
+  });
+}
+
+test('market-value range clues include values exactly on a bucket edge', () => {
+  const cases = [
+    [10_000_000, '€10-29M', ['€10M or more.', 'Under €30M.']],
+    [29_999_999, '€10-29M', ['€10M or more.', 'Under €30M.']],
+    [30_000_000, '€30-59M', ['€30M or more.', 'Under €60M.']],
+    [60_000_000, '€60M+', ['€60M or more.']],
+  ];
+  for (const [value, answer, bounds] of cases) {
+    const extra = answer === '€60M+'
+      ? [{ id: 'boundary-higher', name: 'Boundary higher', highestMarketValueEur: 70_000_000 }]
+      : [];
+    const round = rangeAt(value, extra);
+    assert.ok(round, `${value} supplies a range round`);
+    assert.equal(round.answer, answer);
+    const values = round.clues.map((clue) => clue.value);
+    for (const bound of bounds) assert.ok(values.includes(bound), `${value} should show "${bound}"`);
+    assert.ok(!values.includes('More than €30.0M.'), 'the market floor is not rounded down');
+  }
+});
+
 const RANGE_CASES = {
   club_goals: {
     labels: ['0-9', '10-24', '25-49', '50+'],
