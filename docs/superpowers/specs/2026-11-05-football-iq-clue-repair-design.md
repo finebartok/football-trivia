@@ -1,7 +1,8 @@
 # v1.4.1: Football IQ clue repair
 
 Date: 2026-11-05
-Status: design approved in conversation; written spec awaiting review
+Status: approved 2026-11-05; implementation plan in
+`../plans/2026-11-05-football-iq-clue-repair.md`
 Supersedes: sections 3.3, 3.5, and the market-value wording in 3.6 of
 `2026-11-01-football-iq-mode-design.md`
 Base: `5b5d1d8` (v1.4 live)
@@ -155,9 +156,10 @@ In order:
 3. **The runner-up** — "The answer has more than **{runner-up}**."
 4. **The profile** — one fact about the answer, as flavour.
 
-No numbers appear in the clues. Each named comparator is one of the
-options, so the ladder works by elimination: the 4th is ruled out, then
-the 3rd, then the runner-up.
+No numbers appear in the three comparator clues. The final profile clue
+may contain a birth year. Each named comparator is one of the options, so
+the ladder works by elimination: the 4th is ruled out, then the 3rd, then
+the runner-up.
 
 ### Reveal
 
@@ -209,7 +211,7 @@ Club-specific checks:
 
 Comparison-specific checks:
 
-- no digits in any clue;
+- the three comparator clues contain no digits;
 - each named comparator is an option;
 - the answer is the only option not named by a comparator clue.
 
