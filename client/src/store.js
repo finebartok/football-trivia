@@ -4,11 +4,32 @@ import { room } from './room.js';
 
 const VIBES_KEY = 'football-trivia-vibes';
 const THEME_KEY = 'football-trivia-theme';
+const GAME_MODE_KEY = 'football-trivia-mode';
+
+export const GAME_MODES = Object.freeze([
+  {
+    id: 'guess_player',
+    label: 'Guess the player',
+    desc: 'One clue ladder, one face to find.',
+  },
+  {
+    id: 'football_iq',
+    label: 'Football IQ',
+    desc: 'Clubs, teammates, comparisons and stat ranges.',
+  },
+]);
+
+export function modeLabel(id) {
+  return GAME_MODES.find((mode) => mode.id === id)?.label ?? GAME_MODES[0].label;
+}
 
 const state = {
   booting: true,
   poolError: null,
   poolLoading: null,
+  // The mode the player picked for their next solo game. A room carries
+  // its own mode and never uses this one.
+  gameMode: 'guess_player',
   // The counts from the published metadata, before any players arrive.
   poolCounts: null,
   countsTried: false,
@@ -70,6 +91,7 @@ export const store = {
   async init() {
     this.loadVibes();
     this.loadTheme();
+    this.loadGameMode();
     // The players are fetched when a game needs them - a preset's lobby,
     // a hand-built vibe - and not on the home screen, so a player who
     // only joins a room never downloads the pool.
@@ -201,6 +223,26 @@ export const store = {
     }
     return state.theme;
   },
+  setGameMode(mode) {
+    if (!GAME_MODES.some((entry) => entry.id === mode)) return state.gameMode;
+    state.gameMode = mode;
+    try {
+      localStorage.setItem(GAME_MODE_KEY, mode);
+    } catch (err) {
+      // A mode that cannot be persisted still applies to this session.
+    }
+    notify();
+    return state.gameMode;
+  },
+  loadGameMode() {
+    try {
+      const saved = localStorage.getItem(GAME_MODE_KEY);
+      if (GAME_MODES.some((entry) => entry.id === saved)) state.gameMode = saved;
+    } catch (err) {
+      // fall back to guess-the-player
+    }
+    return state.gameMode;
+  },
   async startQuiz({ scope, seed }) {
     state.mode = 'solo';
     const pool = await this.ensurePool(scope);
@@ -212,6 +254,7 @@ export const store = {
       rounds: 10,
       difficulty: 'medium',
       phases: ['v1.1'],
+      mode: state.gameMode,
     });
     state.quiz = quiz;
     state.roundIndex = 0;

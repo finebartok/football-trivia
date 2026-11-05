@@ -1,6 +1,6 @@
 import { el, mount } from '../ui.js';
 import { soundToggle } from '../sound.js';
-import { store, notify } from '../store.js';
+import { store, notify, GAME_MODES } from '../store.js';
 import { PRESETS, countFor } from '../pool.js';
 
 // The browser's offer to install the game. It is a quiet line, not a
@@ -33,6 +33,24 @@ function topbar() {
     }),
     soundToggle(),
   ]);
+}
+
+function modeSwitch() {
+  return el('div', {
+    className: 'mode-switch',
+    attrs: { role: 'group', 'aria-label': 'Game mode' },
+  }, GAME_MODES.map((mode) => el('button', {
+    className: `mode-switch__btn ${store.state.gameMode === mode.id ? 'is-active' : ''}`,
+    text: mode.label,
+    attrs: {
+      type: 'button',
+      id: mode.id === 'guess_player' ? 'mode-guess' : 'mode-iq',
+      'aria-pressed': store.state.gameMode === mode.id ? 'true' : 'false',
+    },
+    on: {
+      click: () => store.setGameMode(mode.id),
+    },
+  })));
 }
 
 function presetCard(preset) {
@@ -117,6 +135,7 @@ export function render(root) {
         className: 'hero__sub',
         text: 'Pick the football you want. A quiz gets written around it.',
       }),
+      modeSwitch(),
       el('a', {
         className: 'btn btn--primary hero__cta',
         text: 'Craft a vibe',

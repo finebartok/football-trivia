@@ -1,7 +1,8 @@
 import { el, mount, pointsLabel, shareText } from '../ui.js';
-import { store } from '../store.js';
+import { store, modeLabel } from '../store.js';
 import { labelFor } from '../room-state.js';
 import { room } from '../room.js';
+import { FORMAT_LABELS } from '/js/engine/index.js';
 
 export function render(root) {
   const roomState = store.state.room;
@@ -38,14 +39,18 @@ export function render(root) {
   const summary = quiz.summary ?? {};
 
   const recapBits = [];
-  // The current mode is all "who is this?", so the interesting variety is
-  // the kind of clue ladder, not the question type.
-  if (summary.clueFamilies > 1) {
+  // Guess-the-player varies the clue ladder; Football IQ varies the
+  // question format. The recap says which game was played.
+  if (quiz.mode === 'football_iq') {
+    const formats = [...new Set(quiz.rounds.map((r) => FORMAT_LABELS[r.template]).filter(Boolean))];
+    if (formats.length) recapBits.push(formats.join(' · '));
+  } else if (summary.clueFamilies > 1) {
     recapBits.push(`${summary.clueFamilies} kinds of clue`);
   }
   if (summary.hardestRound) recapBits.push(`hardest round: ${summary.hardestRound}`);
   const recap = recapBits.join(' · ');
   const recapText = recap ? recap[0].toUpperCase() + recap.slice(1) : '';
+  const playedMode = modeLabel(quiz.mode ?? store.state.gameMode);
 
   const share = el('button', {
     className: 'btn',
@@ -79,6 +84,7 @@ export function render(root) {
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Your quiz' }),
+      el('p', { className: 'muted-note', attrs: { id: 'results-mode' }, text: playedMode }),
       el('p', { className: 'muted-note', text: recapText || 'A fresh quiz is written every time you play.' }),
       el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: 'Points possible' }),
@@ -151,6 +157,7 @@ function renderRoom(root, roomState) {
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'The room' }),
+      el('p', { className: 'muted-note', attrs: { id: 'results-mode' }, text: modeLabel(roomState.gameMode) }),
       ...board.map((m, i) => el('div', { className: 'rank-row' }, [
         el('span', { className: 'rank-row__name', text: `${i + 1}. ${labelFor(roomState, m.user_id)}` }),
         el('span', { className: 'rank-row__points', text: pointsLabel(m.total_score) }),

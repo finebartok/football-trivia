@@ -1,5 +1,5 @@
 import { el, mount, jerseyTile, pointsLabel } from '../ui.js';
-import { careerClubs, scoreBreakdown } from '/js/engine/index.js';
+import { careerClubs, scoreBreakdown, FORMAT_LABELS, formatMetric } from '/js/engine/index.js';
 import { store } from '../store.js';
 import { sounds, haptic } from '../sound.js';
 
@@ -19,6 +19,65 @@ function breakdownText({ stage, multiplier, timeFactor, elapsedMs }) {
   const bits = [`×${shown.multiplier} clue stage`];
   if (Number.isFinite(shown.timeFactor)) bits.push(`${shown.timeFactor.toFixed(2)}× speed`);
   return bits.join(' · ');
+}
+
+/** The format-specific block. Guess-the-player has no reveal payload. */
+function iqRevealBlock(reveal) {
+  if (!reveal?.format) return null;
+  const title = FORMAT_LABELS[reveal.format];
+  if (!title) return null;
+
+  const children = [el('h2', { className: 'section-title', text: title })];
+
+  if (reveal.format === 'club') {
+    const league = reveal.league ? ` (${reveal.league})` : '';
+    children.push(el('p', {
+      className: 'iq-reveal__line',
+      text: `${reveal.player.name} played for ${reveal.club} in ${reveal.season}${league}.`,
+    }));
+    if (reveal.goals !== null && reveal.goals !== undefined) {
+      children.push(el('p', {
+        className: 'muted-note',
+        text: `${reveal.goals} ${reveal.goals === 1 ? 'goal' : 'goals'} in that season.`,
+      }));
+    }
+  } else if (reveal.format === 'teammate') {
+    children.push(el('p', {
+      className: 'iq-reveal__line',
+      text: `${reveal.teammate.name} was at ${reveal.club} with ${reveal.player.name} in ${reveal.season}.`,
+    }));
+    const meta = [reveal.position, reveal.nationality].filter(Boolean).join(' · ');
+    if (meta) children.push(el('p', { className: 'muted-note', text: meta }));
+  } else if (reveal.format === 'comparison') {
+    children.push(el('p', {
+      className: 'muted-note',
+      text: `Most ${reveal.metricLabel} in this pool.`,
+    }));
+    for (const [i, row] of (reveal.values ?? []).entries()) {
+      const valueText = reveal.unit
+        ? withUnit(row.value, reveal.unit)
+        : formatMetric(reveal.metric, row.value);
+      children.push(el('div', {
+        className: `rank-row${i === 0 ? ' is-answer' : ''}`,
+      }, [
+        el('span', { className: 'rank-row__name', text: `${i + 1}. ${row.player.name}` }),
+        el('span', { className: 'rank-row__points', text: valueText }),
+      ]));
+    }
+  } else if (reveal.format === 'range') {
+    const valueText = reveal.valueText ?? formatMetric(reveal.metric, reveal.value);
+    children.push(el('p', {
+      className: 'iq-reveal__line',
+      text: `${reveal.player.name} had ${valueText} — the ${reveal.range} range.`,
+    }));
+    if (reveal.window) {
+      children.push(el('p', { className: 'muted-note', text: reveal.window }));
+    }
+  } else {
+    return null;
+  }
+
+  return el('section', { className: 'card iq-reveal', attrs: { id: 'iq-reveal' } }, children);
 }
 
 export function render(root) {
@@ -118,6 +177,8 @@ export function render(root) {
       el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
       breakdown ? el('p', { className: 'verdict__breakdown', text: breakdown }) : null,
     ]),
+
+    iqRevealBlock(round.reveal),
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),
@@ -327,6 +388,8 @@ function renderRoom(root, roomState) {
       el('span', { className: 'verdict__points', text: pointsLabel(answer?.points ?? 0, { signed: true }) }),
       breakdown ? el('p', { className: 'verdict__breakdown', text: breakdown }) : null,
     ]),
+
+    iqRevealBlock(result?.reveal),
 
     effectsCard,
 

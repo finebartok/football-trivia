@@ -2,7 +2,7 @@ import { el, mount } from '../ui.js';
 import { store, notify } from '../store.js';
 import { room } from '../room.js';
 import { labelFor } from '../room-state.js';
-import { answerRound, STAGE_MULTIPLIERS, resolveWindow, CLUE_FAMILY_LABELS } from '/js/engine/index.js';
+import { answerRound, STAGE_MULTIPLIERS, resolveWindow, CLUE_FAMILY_LABELS, FORMAT_LABELS } from '/js/engine/index.js';
 import { sounds, soundToggle, haptic } from '../sound.js';
 
 const ROUND_MS = 20000;
@@ -473,6 +473,15 @@ export function render(root) {
           : `Round ${round.stage} of ${quiz.rounds.length}`,
       }),
       (() => {
+        // A Football IQ round is labelled by its format. Guess-the-player
+        // keeps the clue-family chip.
+        if (FORMAT_LABELS[round.template]) {
+          return el('span', {
+            className: 'round-meta__chip',
+            text: FORMAT_LABELS[round.template],
+            attrs: { id: 'round-format' },
+          });
+        }
         const family = inRoom ? roomState.round.clue_family : round.clueFamily;
         return CLUE_FAMILY_LABELS[family]
           ? el('span', { className: 'round-meta__chip', text: CLUE_FAMILY_LABELS[family] })

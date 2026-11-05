@@ -190,6 +190,8 @@ a { color: var(--gold); }
   padding: 8px 12px;
   border-bottom: var(--border);
 }
+.iq-reveal .rank-row.is-answer { font-weight: 700; color: var(--gold); }
+.iq-reveal__line { margin: 0 0 8px; font-size: 14px; line-height: 1.45; }
 
 .vibe-card {
   background: var(--surface);

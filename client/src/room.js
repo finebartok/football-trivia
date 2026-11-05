@@ -20,6 +20,7 @@ const state = {
   scopeId: null,
   scopeName: null,
   scopeIcon: null,
+  gameMode: 'guess_player',
   // How far this device's clock is from the server's, in milliseconds.
   clockOffset: 0,
   members: [],
@@ -153,6 +154,10 @@ async function sync() {
     state.scopeIcon = data.scope_icon ?? preset?.icon ?? null;
   }
 
+  // A room's mode is the room's, not this device's. Old servers do not
+  // send one, so guess-the-player stays the default.
+  state.gameMode = data.game_mode ?? state.gameMode ?? 'guess_player';
+
   // The server's clock travels with the state: a phone whose own clock
   // has drifted must still see the clues at the same moment as everybody
   // else.
@@ -211,7 +216,7 @@ export const room = {
     notify();
   },
 
-  async create({ scope }) {
+  async create({ scope, gameMode = 'guess_player' }) {
     const supabase = await ensure();
     if (!supabase) {
       state.error = 'Multiplayer is unavailable right now.';
@@ -231,6 +236,7 @@ export const room = {
       p_display_name: scope.displayName ?? 'Host',
       p_scope_name: scope.name ?? null,
       p_scope_icon: scope.icon ?? null,
+      p_game_mode: gameMode,
     });
     if (error) {
       state.error = friendly(error.message);
@@ -243,6 +249,7 @@ export const room = {
     state.scopeId = scope.id;
     state.scopeName = scope.name;
     state.scopeIcon = scope.icon ?? null;
+    state.gameMode = data.game_mode ?? gameMode ?? 'guess_player';
     void 0;
     state.status = data.status;
     state.error = null;
@@ -274,6 +281,9 @@ export const room = {
     state.active = true;
     state.code = data.code;
     state.status = data.status;
+    // join_room returns the room row, so a guest learns the mode before
+    // the first sync.
+    state.gameMode = data.game_mode ?? 'guess_player';
     state.error = null;
     persist();
     await subscribe(data.id);

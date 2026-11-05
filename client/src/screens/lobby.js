@@ -1,5 +1,5 @@
 import { el, mount } from '../ui.js';
-import { store } from '../store.js';
+import { store, GAME_MODES } from '../store.js';
 import { countFor } from '../pool.js';
 import { room } from '../room.js';
 
@@ -19,6 +19,7 @@ export function render(root) {
     ? countFor({ clauses: scope.clauses })
     : store.state.poolCounts?.[poolKey];
   const countLabel = count != null ? `${count} players in the pool` : 'Loading players…';
+  const mode = GAME_MODES.find((entry) => entry.id === store.state.gameMode) ?? GAME_MODES[0];
 
   const start = el('button', {
     className: 'btn btn--primary',
@@ -50,6 +51,7 @@ export function render(root) {
       el('div', { className: 'vibe-summary__body' }, [
         el('h1', { className: 'page-title', text: scope.name }),
         el('p', { className: 'muted-note', text: countLabel }),
+        el('p', { className: 'muted-note', attrs: { id: 'lobby-mode' }, text: `${mode.label} · ${mode.desc}` }),
       ]),
     ]),
 
@@ -81,7 +83,7 @@ export function render(root) {
             const button = e.currentTarget;
             button.disabled = true;
             button.textContent = 'Creating…';
-            const created = await room.create({ scope });
+            const created = await room.create({ scope, gameMode: store.state.gameMode });
             if (created) {
               location.hash = '#room-lobby';
             } else {

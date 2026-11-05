@@ -1,5 +1,5 @@
 import { el, mount } from '../ui.js';
-import { store } from '../store.js';
+import { store, GAME_MODES, modeLabel } from '../store.js';
 import { room } from '../room.js';
 import { labelFor } from '../room-state.js';
 
@@ -18,6 +18,7 @@ export function render(root) {
   }
 
   const isHost = roomState.members.some((m) => m.user_id === roomState.me && m.is_host);
+  const mode = GAME_MODES.find((entry) => entry.id === roomState.gameMode) ?? GAME_MODES[0];
 
   const me = roomState.members.find((m) => m.user_id === roomState.me);
   const nameInput = el('input', {
@@ -91,6 +92,7 @@ export function render(root) {
       el('div', { className: 'vibe-summary__body' }, [
         el('h1', { className: 'page-title', text: roomState.scopeName || 'Your vibe' }),
         el('p', { className: 'muted-note', text: 'A quiz is written around your vibe' }),
+        el('p', { className: 'muted-note', attrs: { id: 'room-mode' }, text: modeLabel(mode.id) }),
       ]),
     ]),
 
