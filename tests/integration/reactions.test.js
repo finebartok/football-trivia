@@ -158,6 +158,24 @@ test('a reaction is refused while the round is open and stored after the deadlin
   assert.equal(rows[0].reaction, 'knew_it');
 });
 
+test('a report is refused while the round is open and stored after the deadline', { skip }, async () => {
+  const { room, round, players, server } = await setupRoom();
+  const [alex] = players;
+
+  const early = await report(alex, room.id, 1, 'ambiguous');
+  assert.match(early.error.message, /the round is still open/);
+
+  await expireRound(server, round);
+  const late = await report(alex, room.id, 1, 'ambiguous');
+  assert.equal(late.error, null, late.error?.message);
+  assert.equal(late.data.ok, true);
+
+  const { data: rows } = await server.from('round_reports')
+    .select('reason')
+    .eq('round_id', round.id);
+  assert.deepEqual(rows, [{ reason: 'ambiguous' }]);
+});
+
 test('a duplicate reaction returns the first choice and does not change it', { skip }, async () => {
   const { room, round, players, server } = await setupRoom();
   const [alex] = players;
