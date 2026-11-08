@@ -611,5 +611,10 @@ function friendly(message) {
   if (m.includes('has nothing in it')) return m;
   if (m.includes('is not something we can play')) return m;
   if (m.includes('unknown vibe')) return 'That vibe cannot be played in a room yet.';
+  if (m.includes('the round is still open')) return 'The result is not ready yet.';
+  if (m.includes('unknown reaction')) return 'That reaction is not one we know.';
+  if (m.includes('unknown reason')) return 'Pick a reason for the report.';
+  if (m.includes('note is too long')) return 'That note is too long.';
+  if (m.includes('no such round')) return 'That round is gone.';
   return 'Something went wrong. Try again.';
 }
