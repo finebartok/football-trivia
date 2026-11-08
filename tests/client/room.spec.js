@@ -612,3 +612,69 @@ test('a press that spans a round advance does not answer the new round', async (
 
   expect([...hostErrors, ...guestErrors]).toEqual([]);
 });
+
+test('two players react to a closed round and both see both names', async ({ browser }) => {
+  const { host, guest } = await roomWithOneRound(browser);
+  const hostErrors = watchErrors(host);
+  const guestErrors = watchErrors(guest);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+
+  await expect(host.locator('#reactions')).toBeVisible({ timeout: 30000 });
+  await expect(guest.locator('#reactions')).toBeVisible({ timeout: 30000 });
+
+  await host.locator('[data-reaction="knew_it"]').click();
+  await expect(host.locator('[data-reaction="knew_it"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(host.locator('[data-reaction="no_chance"]')).toBeDisabled();
+
+  await guest.locator('[data-reaction="no_chance"]').click();
+  await expect(guest.locator('[data-reaction="no_chance"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(guest.locator('[data-reaction="fair_play"]')).toBeDisabled();
+
+  // The next polls carry the names across the room.
+  await expect(host.locator('[data-reaction="no_chance"]')).toContainText('Sam', { timeout: 20000 });
+  await expect(guest.locator('[data-reaction="knew_it"]')).toContainText('Host', { timeout: 20000 });
+
+  expect(hostErrors).toEqual([]);
+  expect(guestErrors).toEqual([]);
+});
+
+test('the reaction strip stays on the closed round when the next round starts', async ({ browser }) => {
+  const { host, guest } = await roomWithTwoPlayers(browser);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+
+  await expect(host.locator('#reactions')).toBeVisible({ timeout: 30000 });
+  await host.locator('[data-reaction="knew_it"]').click();
+  await expect(host.locator('[data-reaction="knew_it"]')).toHaveAttribute('aria-pressed', 'true');
+
+  // Force a sync and let the room move on to round two. The reveal is
+  // still showing round one, and its reactions must not disappear when
+  // answeredRound is cleared for the new round.
+  await expect.poll(async () => host.evaluate(async () => {
+    const { room } = await import('/src/room.js');
+    await room.sync();
+    return room.state.currentRound;
+  }), { timeout: 30000 }).toBeGreaterThan(1);
+
+  await expect(host.locator('.topbar')).toContainText('Round 1');
+  await expect(host.locator('#reactions')).toBeVisible();
+  await expect(host.locator('[data-reaction="knew_it"]')).toHaveAttribute('aria-pressed', 'true');
+
+  // The player can still go on to the new round.
+  await host.locator('#btn-next').click();
+  await expect(host).toHaveURL(/#round/);
+});

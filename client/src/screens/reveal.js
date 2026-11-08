@@ -7,7 +7,7 @@ import { sounds, haptic } from '../sound.js';
 // redraw, and a player reading the answer should not hear it again.
 let saidFor = null;
 import { room } from '../room.js';
-import { labelFor } from '../room-state.js';
+import { labelFor, reactionName } from '../room-state.js';
 
 function findPlayer(id) {
   return (store.state.pool?.players ?? []).find((p) => p.id === id) ?? null;
@@ -200,6 +200,53 @@ function namesFor(roomState, ids) {
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
+const REACTIONS = [
+  { key: 'knew_it', label: 'Knew it' },
+  { key: 'no_chance', label: 'No chance' },
+  { key: 'fair_play', label: 'Fair play' },
+];
+
+/** The Collective Groan: one tap, and the room sees who felt what. */
+function reactionStrip(roomState, roundNumber) {
+  const rows = roomState.reactionsRound === roundNumber
+    ? (roomState.reactions ?? [])
+    : [];
+  const mine = rows.find((r) => r.user_id === roomState.me);
+
+  const chips = REACTIONS.map(({ key, label }) => {
+    const names = rows
+      .filter((r) => r.reaction === key)
+      .map((r) => reactionName(roomState, r));
+    const attrs = {
+      type: 'button',
+      'data-reaction': key,
+      'aria-pressed': String(mine?.reaction === key),
+    };
+    if (mine) attrs.disabled = '';
+    return el('button', {
+      className: 'reaction-chip',
+      attrs,
+      on: {
+        click: async () => {
+          if (mine) return;
+          sounds.click();
+          await room.react(roundNumber, key);
+        },
+      },
+    }, [
+      el('span', { className: 'reaction-chip__label', text: label }),
+      names.length
+        ? el('span', { className: 'reaction-chip__names', text: names.join(', ') })
+        : null,
+    ]);
+  });
+
+  return el('section', { className: 'card reactions', attrs: { id: 'reactions' } }, [
+    el('h2', { className: 'section-title', text: 'How did that feel?' }),
+    el('div', { className: 'reaction-chips' }, chips),
+  ]);
+}
+
 /** Why the player is waiting, from their own effect rows. */
 function waitingEffectLines(roomState, roundNumber) {
   const effects = (roomState.myEffects ?? [])
@@ -335,6 +382,11 @@ function renderRoom(root, roomState) {
   const board = result?.leaderboard ?? [];
   const me = board.find((m) => m.user_id === roomState.me);
 
+  // The result is the proof the round closed. Do not use showResult:
+  // applyRound clears answeredRound when the next round starts, but it
+  // keeps lastResult so the player can finish reading the closed round.
+  const closedRound = Boolean(result);
+
   // The room's reveal says it out loud too - the chime and the thud are
   // the cue, and the cue does not depend on who is playing.
   const roomKey = `room-${roomState.answeredRound ?? roomState.currentRound}`;
@@ -361,7 +413,7 @@ function renderRoom(root, roomState) {
       ...ordered.map((e) => el('p', { className: 'effect-line', text: effectStory(roomState, e, answer) })),
     ])
     : null;
-  
+
   let verdictHeadline;
   if (mySteal) {
     const target = labelFor(roomState, mySteal.target_id);
@@ -378,6 +430,13 @@ function renderRoom(root, roomState) {
       el('span', { className: 'muted-note', text: `Round ${roundNumber}` }),
     ]),
 
+    roomState.error
+      ? el('p', {
+        className: 'notice notice--warn',
+        attrs: { id: 'room-error' },
+      }, roomState.error)
+      : null,
+
     el('section', { className: 'reveal-card' }, [
       el('div', { className: 'tile', text: '?' }),
       el('h1', { className: 'reveal-card__name', text: answerText || '…' }),
@@ -392,6 +451,8 @@ function renderRoom(root, roomState) {
     iqRevealBlock(result?.reveal),
 
     effectsCard,
+
+    closedRound ? reactionStrip(roomState, roundNumber) : null,
 
     el('section', { className: 'card' }, [
       el('h2', { className: 'section-title', text: 'Running score' }),

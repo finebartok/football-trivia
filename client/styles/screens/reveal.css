@@ -18,3 +18,35 @@
   margin: 0;
 }
 .effect-line:last-child { border-bottom: 0; }
+
+/* The Collective Groan */
+.reactions { text-align: center; }
+.reactions .section-title { margin-bottom: 10px; }
+.reaction-chips { display: flex; gap: 8px; }
+.reaction-chip {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.reaction-chip:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.reaction-chip[aria-pressed="true"] { background: var(--highlight); box-shadow: var(--shadow); }
+.reaction-chip:disabled { cursor: default; opacity: .72; }
+.reaction-chip[aria-pressed="true"]:disabled { opacity: 1; }
+.reaction-chip__names {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.reaction-chip[aria-pressed="true"] .reaction-chip__names { color: var(--ink); }
