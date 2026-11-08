@@ -247,6 +247,149 @@ function reactionStrip(roomState, roundNumber) {
   ]);
 }
 
+const REPORT_REASONS = [
+  { key: 'ambiguous', label: 'Ambiguous' },
+  { key: 'two_answers', label: 'Two right answers' },
+  { key: 'looks_wrong', label: 'Answer looks wrong' },
+  { key: 'other', label: 'Other' },
+];
+
+// The dialog lives outside the reveal root so the two-second poll cannot
+// replace the field the player is typing in.
+let reportDialog = null;
+
+/** The report link, or the thanks note once this round is reported. */
+function reportLine(roomState, roundNumber) {
+  if (roomState.reportedRound === roundNumber) {
+    return el('p', {
+      className: 'report-thanks',
+      attrs: { id: 'report-thanks' },
+      text: 'Thanks — flagged.',
+    });
+  }
+
+  return el('p', { className: 'report-line' }, [
+    el('button', {
+      className: 'report-link',
+      attrs: { type: 'button', id: 'btn-report-question' },
+      text: 'Something off with this question?',
+      on: { click: () => openReportDialog(roundNumber) },
+    }),
+  ]);
+}
+
+function openReportDialog(roundNumber) {
+  if (reportDialog) {
+    if (!reportDialog.open) reportDialog.showModal();
+    return;
+  }
+
+  let reason = null;
+  let sending = false;
+
+  const error = el('p', {
+    className: 'report-dialog__error',
+    attrs: { role: 'alert' },
+  });
+
+  const reasonButtons = REPORT_REASONS.map(({ key, label }) => el('button', {
+    className: 'report-dialog__reason',
+    attrs: { type: 'button', 'data-reason': key, 'aria-pressed': 'false' },
+    text: label,
+    on: {
+      click: () => {
+        reason = key;
+        for (const each of reasonButtons) {
+          each.setAttribute('aria-pressed', String(each.dataset.reason === key));
+        }
+        send.disabled = false;
+      },
+    },
+  }));
+
+  const note = el('textarea', {
+    className: 'report-dialog__note',
+    attrs: {
+      id: 'report-note',
+      rows: '3',
+      maxlength: '280',
+      placeholder: 'What was off? (optional)',
+    },
+  });
+
+  const send = el('button', {
+    className: 'btn btn--primary',
+    attrs: { type: 'submit', id: 'btn-send-report' },
+    text: 'Send report',
+  });
+  send.disabled = true;
+
+  const cancel = el('button', {
+    className: 'btn btn--secondary',
+    attrs: { type: 'button', id: 'btn-cancel-report' },
+    text: 'Cancel',
+    on: { click: () => dialog.close() },
+  });
+
+  const form = el('form', { className: 'report-dialog__form' }, [
+    el('h2', {
+      className: 'section-title',
+      attrs: { id: 'report-title' },
+      text: 'Something off with this question?',
+    }),
+    el('p', {
+      className: 'muted-note',
+      text: 'One report per player per round. Only the team sees it.',
+    }),
+    el('div', { className: 'report-dialog__reasons' }, reasonButtons),
+    el('label', {
+      className: 'report-dialog__label',
+      attrs: { for: 'report-note' },
+      text: 'Note (optional)',
+    }),
+    note,
+    error,
+    el('div', { className: 'report-dialog__actions' }, [cancel, send]),
+  ]);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!reason || sending) return;
+    sending = true;
+    send.disabled = true;
+    error.textContent = '';
+    const result = await room.reportQuestion(roundNumber, reason, note.value);
+    sending = false;
+    if (!result?.ok) {
+      error.textContent = result?.message ?? 'Something went wrong. Try again.';
+      send.disabled = false;
+      return;
+    }
+    dialog.close();
+  });
+
+  const dialog = el('dialog', {
+    className: 'report-dialog',
+    attrs: { id: 'report-dialog', 'aria-labelledby': 'report-title' },
+  }, [form]);
+
+  const onHashChange = () => {
+    if (dialog.open) dialog.close();
+  };
+
+  dialog.addEventListener('close', () => {
+    dialog.remove();
+    reportDialog = null;
+    window.removeEventListener('hashchange', onHashChange);
+  });
+  window.addEventListener('hashchange', onHashChange);
+
+  document.body.appendChild(dialog);
+  reportDialog = dialog;
+  dialog.showModal();
+  reasonButtons[0]?.focus();
+}
+
 /** Why the player is waiting, from their own effect rows. */
 function waitingEffectLines(roomState, roundNumber) {
   const effects = (roomState.myEffects ?? [])
@@ -462,6 +605,8 @@ function renderRoom(root, roomState) {
       ])),
       el('p', { className: 'muted-note', text: me ? `You have ${pointsLabel(me.total_score)} points` : '' }),
     ]),
+
+    closedRound ? reportLine(roomState, roundNumber) : null,
 
     next,
   ].filter(Boolean));

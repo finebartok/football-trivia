@@ -678,3 +678,53 @@ test('the reaction strip stays on the closed round when the next round starts', 
   await host.locator('#btn-next').click();
   await expect(host).toHaveURL(/#round/);
 });
+
+test('a player reports a bad question and the row keeps the question snapshot', async ({ browser }) => {
+  const { host, guest, code } = await roomWithTwoPlayers(browser);
+  const errors = watchErrors(host);
+
+  await host.locator('#btn-start').click();
+  await expect(host).toHaveURL(/#round/);
+  await expect(guest).toHaveURL(/#round/);
+
+  await host.locator('.option').first().click();
+  await guest.locator('.option').first().click();
+  await expect(host).toHaveURL(/#reveal/);
+  await expect(guest).toHaveURL(/#reveal/);
+
+  await expect(host.locator('#btn-report-question')).toBeVisible({ timeout: 30000 });
+  await host.locator('#btn-report-question').click();
+  await expect(host.locator('#report-dialog')).toBeVisible();
+
+  await host.locator('[data-reason="ambiguous"]').click();
+  await host.locator('#report-note').fill('Too many Messis');
+
+  // The room poll redraws the reveal every two seconds. The dialog is
+  // mounted outside #app, so the note must still be there.
+  await host.waitForTimeout(6000);
+  await expect(host.locator('#report-dialog')).toBeVisible();
+  await expect(host.locator('#report-note')).toHaveValue('Too many Messis');
+
+  await host.locator('#btn-send-report').click();
+  await expect(host.locator('#report-dialog')).toHaveCount(0);
+  await expect(host.locator('#report-thanks')).toContainText('Thanks — flagged.');
+
+  const server = serverClient();
+  const { data: roomRow, error: roomError } = await server.from('rooms')
+    .select('id')
+    .eq('code', code)
+    .single();
+  if (roomError) throw roomError;
+
+  const { data: reports, error } = await server.from('round_reports')
+    .select('*')
+    .eq('room_id', roomRow.id);
+  expect(error).toBeNull();
+  expect(reports).toHaveLength(1);
+  expect(reports[0].reason).toBe('ambiguous');
+  expect(reports[0].note).toBe('Too many Messis');
+  expect(reports[0].question.prompt).toBeTruthy();
+  expect(reports[0].question.answer).toBeTruthy();
+  expect(reports[0].question.scope_id).toBeTruthy();
+  expect(errors).toEqual([]);
+});
