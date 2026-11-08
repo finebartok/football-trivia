@@ -20,6 +20,9 @@ export function applyRound(state, payload) {
     state.lastResultAskedAt = null;
     state.fetchingResult = false;
     state.myEffects = [];
+    state.reactionsRound = null;
+    state.reactions = [];
+    state.reportedRound = null;
   }
 
   // A new round means the last answer is spent: the player has to be
@@ -48,6 +51,7 @@ export function applyRound(state, payload) {
     state.answeredRound = null;
     state.lastResult = keep;
     state.fetchingResult = false;
+    if (next.round_number === 1) state.reportedRound = null;
   }
 
   // Progress within a round only increases. A poll can race a reveal; the
@@ -85,6 +89,21 @@ export function applyEffects(state, effects) {
   return state;
 }
 
+/**
+ * Fold the caller's reactions in. The room poll carries the reaction
+ * round even when the list is empty, so a present key is authoritative.
+ * A payload without the keys (an older server) leaves the state alone.
+ */
+export function applyReactions(state, payload) {
+  if (payload?.reactions_round !== undefined) {
+    state.reactionsRound = payload.reactions_round ?? null;
+  }
+  if (payload?.reactions !== undefined) {
+    state.reactions = [...(payload.reactions ?? [])];
+  }
+  return state;
+}
+
 /** Fold the leaderboard in, ranked the way the game ranks it. */
 export function applyLeaderboard(state, board) {
   state.leaderboard = [...(board ?? [])].sort((a, b) => {
@@ -113,4 +132,17 @@ export function labelFor(state, userId) {
   // The first player to take a name keeps it plain: "Alex", "Alex #2".
   if (index <= 0) return name;
   return `${name} #${index + 1}`;
+}
+
+/**
+ * What to call a player under a reaction.
+ *
+ * The live label keeps duplicate names consistent ("Alex #2"). A player
+ * who left the room is gone from members and the leaderboard, so the
+ * name stored on the reaction is the only one left.
+ */
+export function reactionName(state, reaction) {
+  const known = [...(state.members ?? []), ...(state.leaderboard ?? [])]
+    .some((m) => m.user_id === reaction.user_id);
+  return known ? labelFor(state, reaction.user_id) : (reaction.display_name ?? 'Player');
 }

@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyRound, applyMembers, applyLeaderboard, applyEffects, labelFor } from '../../client/src/room-state.js';
+import {
+  applyRound,
+  applyMembers,
+  applyLeaderboard,
+  applyEffects,
+  applyReactions,
+  labelFor,
+  reactionName,
+} from '../../client/src/room-state.js';
 
 test('the room round replaces the previous one', () => {
   const state = { round: null };
@@ -202,4 +210,75 @@ test('a higher clue index from the server wins', () => {
   });
   assert.equal(state.round.clue_index, 1);
   assert.equal(state.round.clues[1].value, 'two');
+});
+
+test('reactions are folded in with the round they belong to', () => {
+  const state = {};
+  applyReactions(state, {
+    reactions_round: 3,
+    reactions: [{ user_id: 'a', display_name: 'Alex', reaction: 'knew_it' }],
+  });
+  assert.equal(state.reactionsRound, 3);
+  assert.equal(state.reactions.length, 1);
+  assert.equal(state.reactions[0].reaction, 'knew_it');
+});
+
+test('a lobby reset clears reactions and the reaction round', () => {
+  const state = {
+    round: { round_number: 1 },
+    reactionsRound: 1,
+    reactions: [{ user_id: 'a', reaction: 'knew_it' }],
+    reportedRound: 1,
+  };
+  applyRound(state, {
+    status: 'lobby',
+    current_round: 0,
+    total_rounds: 10,
+    round: null,
+  });
+  assert.equal(state.reactionsRound, null);
+  assert.deepEqual(state.reactions, []);
+  assert.equal(state.reportedRound, null);
+});
+
+test('a new game round one clears a stale report state', () => {
+  const state = {
+    round: { id: 'old', round_number: 10 },
+    answeredRound: 10,
+    reportedRound: 10,
+    lastResult: { round_number: 10 },
+  };
+  applyRound(state, {
+    current_round: 1,
+    round: { id: 'new', round_number: 1 },
+  });
+  assert.equal(state.reportedRound, null);
+});
+
+test('a payload without reaction keys leaves the reactions alone', () => {
+  const state = {
+    reactionsRound: 2,
+    reactions: [{ user_id: 'a', reaction: 'fair_play' }],
+  };
+  applyReactions(state, { my_answered_round: 2 });
+  assert.equal(state.reactionsRound, 2);
+  assert.equal(state.reactions[0].reaction, 'fair_play');
+});
+
+test('a reaction name follows the live room and falls back to the stored name', () => {
+  const state = {
+    members: [
+      { user_id: 'a', joined_seq: 1, display_name: 'Alex' },
+      { user_id: 'b', joined_seq: 2, display_name: 'Alex' },
+    ],
+    leaderboard: [],
+  };
+  assert.equal(
+    reactionName(state, { user_id: 'b', display_name: 'Alex', reaction: 'knew_it' }),
+    'Alex #2',
+  );
+  assert.equal(
+    reactionName(state, { user_id: 'gone', display_name: 'Sam', reaction: 'no_chance' }),
+    'Sam',
+  );
 });

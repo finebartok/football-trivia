@@ -6,7 +6,13 @@
  */
 import { connect, myUserId, invokeFunction } from './supabase.js';
 import { presetById } from '/js/presets.js';
-import { applyRound, applyMembers, applyLeaderboard, applyEffects } from './room-state.js';
+import {
+  applyRound,
+  applyMembers,
+  applyLeaderboard,
+  applyEffects,
+  applyReactions,
+} from './room-state.js';
 
 const POLL_MS = 2000;
 
@@ -34,6 +40,9 @@ const state = {
   fetchingResult: false,
   lastResult: null,
   myEffects: [],
+  reactionsRound: null,
+  reactions: [],
+  reportedRound: null,
   error: null,
 };
 
@@ -94,6 +103,7 @@ function applyPayload(payload) {
   if (payload.members) applyMembers(state, payload.members);
   if (payload.leaderboard) applyLeaderboard(state, payload.leaderboard);
   if (payload.my_effects) applyEffects(state, payload.my_effects);
+  applyReactions(state, payload);
 }
 
 async function subscribe(roomId) {
@@ -250,7 +260,9 @@ export const room = {
     state.scopeName = scope.name;
     state.scopeIcon = scope.icon ?? null;
     state.gameMode = data.game_mode ?? gameMode ?? 'guess_player';
-    void 0;
+    state.reactionsRound = null;
+    state.reactions = [];
+    state.reportedRound = null;
     state.status = data.status;
     state.error = null;
     persist();
@@ -284,6 +296,9 @@ export const room = {
     // join_room returns the room row, so a guest learns the mode before
     // the first sync.
     state.gameMode = data.game_mode ?? 'guess_player';
+    state.reactionsRound = null;
+    state.reactions = [];
+    state.reportedRound = null;
     state.error = null;
     persist();
     await subscribe(data.id);
@@ -353,6 +368,9 @@ export const room = {
     state.answeredRound = null;
     state.lastResult = null;
     state.myEffects = [];
+    state.reactionsRound = null;
+    state.reactions = [];
+    state.reportedRound = null;
     state.lastResultAskedAt = null;
     try {
       localStorage.removeItem(ROOM_KEY);
@@ -473,6 +491,64 @@ export const room = {
     await sync();
     notify();
     return data;
+  },
+
+  /**
+   * One reaction per player per round. The server keeps the first tap;
+   * a retry returns the stored choice. The local row makes the chip lock
+   * immediately, before the next poll confirms it.
+   */
+  async react(roundNumber, reaction) {
+    const supabase = await ensure();
+    if (!supabase || !state.roomId) return null;
+    const { data, error } = await supabase.rpc('react_to_round', {
+      p_room_id: state.roomId,
+      p_round_number: roundNumber,
+      p_reaction: reaction,
+    });
+    if (error) {
+      state.error = friendly(error.message);
+      notify();
+      return null;
+    }
+    state.error = null;
+    const stored = data?.reaction ?? reaction;
+    const current = state.reactionsRound === roundNumber ? state.reactions : [];
+    const me = state.members.find((m) => m.user_id === state.me);
+    state.reactions = [
+      ...current.filter((r) => r.user_id !== state.me),
+      {
+        user_id: state.me,
+        display_name: me?.display_name ?? 'You',
+        reaction: stored,
+      },
+    ];
+    state.reactionsRound = roundNumber;
+    notify();
+    return data;
+  },
+
+  /**
+   * One report per player per round. The dialog owns the error so it can
+   * stay open with the player's reason and note intact; this method does
+   * not write state.error for a failed report.
+   */
+  async reportQuestion(roundNumber, reason, note = '') {
+    const supabase = await ensure();
+    if (!supabase || !state.roomId) {
+      return { ok: false, message: 'Multiplayer is unavailable right now.' };
+    }
+    const { error } = await supabase.rpc('report_round', {
+      p_room_id: state.roomId,
+      p_round_number: roundNumber,
+      p_reason: reason,
+      p_note: note ?? '',
+    });
+    if (error) return { ok: false, message: friendly(error.message) };
+    state.reportedRound = roundNumber;
+    state.error = null;
+    notify();
+    return { ok: true };
   },
 
   /** The finished round: the answer and the leaderboard. */
