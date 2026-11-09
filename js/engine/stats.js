@@ -1,16 +1,36 @@
+import { seasonLabel } from '../../lib/seasons.js';
+
 function millions(v) {
   const n = Number(v);
   if (!Number.isFinite(n)) return '—';
   return `€${(n / 1e6).toFixed(n % 1e6 === 0 ? 0 : 1)}M`;
 }
 
-function withWindow(text, window) {
+function withWindow(text, window, ownWindow) {
   if (!window) return text;
   if (window.kind === 'since') {
     return `${text} (since ${window.seasonStart})`;
   }
   if (window.kind === 'season_range') {
-    return `${text} (${window.seasonStart ?? ''}–${window.seasonEnd ?? ''})`;
+    // The value covers the seasons the dataset actually holds inside the
+    // era, so the label says that span instead of the scope's outer edge.
+    const ownStart = ownWindow?.kind === 'since' ? ownWindow.seasonStart : null;
+    const start = [window.seasonStart, ownStart]
+      .filter((v) => Number.isFinite(v))
+      .reduce((a, b) => Math.max(a, b), -Infinity);
+    const end = window.seasonEnd;
+    if (Number.isFinite(start) && end != null) {
+      return start === end
+        ? `${text} (${seasonLabel(start)})`
+        : `${text} (${seasonLabel(start)}–${seasonLabel(end)})`;
+    }
+    if (end != null) return `${text} (up to ${seasonLabel(end)})`;
+    return text;
+  }
+  if (window.kind === 'season') {
+    const label = window.label
+      ?? (window.seasonStart != null ? seasonLabel(window.seasonStart) : null);
+    return label ? `${text} — ${label}` : text;
   }
   if (window.seasonStart != null && window.kind !== 'career') {
     return `${text} (since ${window.seasonStart})`;
@@ -72,7 +92,7 @@ export function formatMetric(id, value, window) {
   if (m.exact) return text;
   // The window that came with the reading wins over the metric's own: a
   // season's goals are that season's, whatever the metric's window is.
-  return withWindow(text, window ?? m.window);
+  return withWindow(text, window ?? m.window, m.window);
 }
 
 // For these metrics a 0 means "the source recorded nothing", not "the value

@@ -10,7 +10,7 @@ import { formatMetric, metricDescriptor } from './stats.js';
 import { profileHints } from './hints.js';
 import { nameDistractors, buildOptions, withUnit } from './distractors.js';
 import { metricValue } from './questions.js';
-import { careerTeams } from './career.js';
+import { careerTeams, seasonWindowKey } from './career.js';
 import { seasonLabel } from '../../lib/seasons.js';
 import { pick, shuffle } from './rng.js';
 
@@ -31,12 +31,20 @@ function playerRef(player) {
   return { id: player.id, name: player.name };
 }
 
-function seasonKey(team, season) {
-  // The pool's window keys are short seasons ("FC Barcelona 12/13"), not
-  // the full labels the prompt uses.
-  const start = String(season).slice(-2).padStart(2, '0');
-  const end = String(season + 1).slice(-2).padStart(2, '0');
-  return `${team.clubName} ${start}/${end}`;
+// Club-window data starts in 2012/13; an era that reaches further back can
+// only measure the seasons the dataset actually holds.
+const CLUB_DATA_START = metricDescriptor('club_goals')?.window?.seasonStart ?? 2012;
+
+function eraSpan(window) {
+  const from = Math.max(window?.seasonStart ?? CLUB_DATA_START, CLUB_DATA_START);
+  const to = window?.seasonEnd;
+  if (to == null) return `since ${seasonLabel(from)}`;
+  if (from === to) return `in ${seasonLabel(from)}`;
+  return `from ${seasonLabel(from)} to ${seasonLabel(to)}`;
+}
+
+function leagueNameFor(window, registry) {
+  return window?.leagueName ?? registry?.leagues?.[window?.leagueId] ?? 'the league';
 }
 
 function inWindow(season, window) {
@@ -126,7 +134,7 @@ function leagueSeasonIndex(index) {
   return out;
 }
 
-function clubCandidateEntries(subject, index, byLeagueSeason) {
+function clubCandidateEntries(subject, byLeagueSeason) {
   const bySeason = new Map();
   for (const team of subject.teams ?? []) {
     for (const season of team.seasons ?? []) {
@@ -135,38 +143,42 @@ function clubCandidateEntries(subject, index, byLeagueSeason) {
     }
   }
 
-  const career = careerTeams(subject);
+  const career = careerTeams(subject).filter((team) => (team.seasons ?? []).length);
   const entries = [];
   for (const [season, teams] of bySeason) {
     if (teams.length !== 1) continue;
     const team = teams[0];
-    const bucket = index.get(`${team.clubId}|${season}`);
-    const goals = subject.windows?.[seasonKey(team, season)]?.goals;
+    const goals = subject.windows?.[seasonWindowKey(team, season)]?.goals;
     const positiveGoals = typeof goals === 'number' && goals > 0;
-    const hasTeammate = (bucket?.players.size ?? 0) > 1;
     const sameLeague = (byLeagueSeason.get(`${team.leagueId}|${season}`) ?? [])
       .filter((other) => other.clubId !== team.clubId);
-    const optionNames = [...new Set(sameLeague.map((club) => club.clubName))];
+    const sameLeagueNames = [...new Set(sameLeague.map((club) => club.clubName))];
+
+    // The subject's real former clubs are the plausible wrong answers: a
+    // club he never played for is not a question, it is a coin flip.
+    const careerEntries = career
+      .filter((other) => other.clubId !== team.clubId)
+      .map((other) => ({
+        name: other.clubName,
+        leagueId: other.leagueId,
+        season: Math.min(...(other.seasons ?? [])),
+      }))
+      .filter((entry) => Number.isFinite(entry.season));
+    const optionNames = [...new Set([...careerEntries.map((e) => e.name), ...sameLeagueNames])];
     if (optionNames.length < 3) continue;
 
-    const careerTeam = career.find((other) => other.clubId !== team.clubId
-      && (other.seasons ?? []).length > 0
-      && sameLeague.some((option) => option.clubId === other.clubId));
-    const careerEntry = careerTeam
-      ? {
-        name: sameLeague.find((option) => option.clubId === careerTeam.clubId).clubName,
-        season: Math.min(...careerTeam.seasons),
-      }
-      : null;
-    const facts = (positiveGoals ? 1 : 0) + (hasTeammate ? 1 : 0) + (careerEntry ? 1 : 0);
+    const crossLeague = careerEntries
+      .some((entry) => entry.leagueId && entry.leagueId !== team.leagueId);
+    const facts = (positiveGoals ? 1 : 0) + (careerEntries.length ? 1 : 0) + (crossLeague ? 1 : 0);
     if (facts < 2) continue;
 
     entries.push({
       team,
       season,
       goals: positiveGoals ? goals : null,
-      optionNames,
-      careerEntry,
+      sameLeagueNames,
+      careerEntries,
+      crossLeague,
     });
   }
   return entries;
@@ -177,50 +189,51 @@ function leagueName(team, registry) {
 }
 
 export function buildClubRound({ pool, registry, window, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
-  const { index, byId } = clubSeasonIndex(pool);
+  const { index } = clubSeasonIndex(pool);
   const byLeagueSeason = leagueSeasonIndex(index);
   const candidates = [];
   for (const subject of pool) {
     if (excludeSubjectIds.has(subject.id)) continue;
-    const entries = clubCandidateEntries(subject, index, byLeagueSeason);
+    const entries = clubCandidateEntries(subject, byLeagueSeason);
     if (entries.length) candidates.push({ subject, entries });
   }
   if (!candidates.length) return null;
 
   const chosen = pick(rng, candidates);
   const entry = preferredFirst(chosen.entries, window, rng)[0];
-  const { team, season, goals, optionNames, careerEntry } = entry;
+  const { team, season, goals, sameLeagueNames, careerEntries } = entry;
   const league = leagueName(team, registry);
-  const bucket = index.get(`${team.clubId}|${season}`);
-  const teammates = [...(bucket?.players ?? [])]
-    .filter((id) => id !== chosen.subject.id)
-    .map((id) => byId.get(id))
-    .filter(Boolean);
-  const teammate = teammates.length ? pick(rng, teammates) : null;
 
-  const clues = [
-    goals
-      ? { id: 'club-goals', label: 'The season', value: `They scored ${goals} ${goals === 1 ? 'goal' : 'goals'} in ${seasonLabel(season)}.`, iconKey: 'honors' }
-      : teammate
-        ? { id: 'club-squad', label: 'The squad', value: `${teammate.name} was in the squad that season.`, iconKey: 'team' }
-        : null,
-    goals && teammate
-      ? { id: 'club-squad', label: 'The squad', value: `${teammate.name} was in the squad that season.`, iconKey: 'team' }
-      : null,
-    careerEntry
-      ? { id: 'club-other', label: 'The career', value: `Also played for ${careerEntry.name} in ${seasonLabel(careerEntry.season)}.`, iconKey: 'path' }
-      : null,
-    ...profileHints(chosen.subject).slice(0, 1),
+  // Cross-league former clubs go first: they make the league clue mean
+  // something, and they are the most plausible wrong answers.
+  const careerPool = shuffle(rng, careerEntries);
+  const orderedCareer = [
+    ...careerPool.filter((other) => other.leagueId && other.leagueId !== team.leagueId),
+    ...careerPool.filter((other) => !other.leagueId || other.leagueId === team.leagueId),
   ];
-
-  const distractors = careerEntry
-    ? [careerEntry.name, ...shuffle(rng, optionNames.filter((name) => name !== careerEntry.name))]
-    : shuffle(rng, optionNames);
+  const careerClaim = orderedCareer[0] ?? null;
+  const distractors = [
+    ...orderedCareer.map((other) => other.name),
+    ...shuffle(rng, sameLeagueNames.filter((name) => name !== team.clubName
+      && !orderedCareer.some((other) => other.name === name))),
+  ];
   const options = buildOptions({
     answer: team.clubName,
     distractors,
     rng,
   });
+
+  const clues = [
+    goals
+      ? { id: 'club-goals', label: 'The season', value: `${chosen.subject.name} scored ${goals} ${goals === 1 ? 'goal' : 'goals'} in ${seasonLabel(season)}.`, iconKey: 'honors' }
+      : null,
+    careerClaim
+      ? { id: 'club-other', label: 'The career', value: `Also played for ${careerClaim.name} in ${seasonLabel(careerClaim.season)}.`, iconKey: 'path' }
+      : null,
+    entry.crossLeague && league
+      ? { id: 'club-league', label: 'The league', value: `The club was in the ${league}.`, iconKey: 'league' }
+      : null,
+  ].filter(Boolean);
 
   return roundShape({
     format: 'club',
@@ -342,7 +355,7 @@ export function buildTeammateRound({ pool, registry, window, rng, difficulty, st
 // Most in the pool
 // ---------------------------------------------------------------------------
 
-const COMPARISON_METRICS = Object.freeze([
+const CAREER_COMPARISON_METRICS = Object.freeze([
   { id: 'club_goals', label: 'club goals', unit: 'goals', value: (p) => p.stats?.club_goals },
   { id: 'international_goals', label: 'international goals', unit: 'goals', value: (p) => p.internationalGoals },
   { id: 'international_caps', label: 'international caps', unit: 'caps', value: (p) => p.internationalCaps },
@@ -350,6 +363,53 @@ const COMPARISON_METRICS = Object.freeze([
   { id: 'goals_after_age_30', label: 'goals after turning 30', unit: 'goals', value: (p) => p.stats?.goals_after_age_30 },
   { id: 'club_appearances', label: 'club appearances', unit: 'apps', value: (p) => p.stats?.club_appearances },
 ]);
+
+// A comparison only compares what the vibe is about. A career figure in a
+// World Cup or league-era pack is a different question wearing its label.
+function comparisonMetricsFor(window, registry) {
+  if (window?.kind === 'tournament') {
+    return [{
+      id: 'tournament_goals',
+      label: `goals at the ${window.label ?? 'tournament'}`,
+      unit: 'goals',
+      prompt: `Who scored the most goals at the ${window.label ?? 'tournament'}?`,
+      value: (p) => p.windows?.[window.id]?.goals,
+    }];
+  }
+  if (window?.kind === 'season_range') {
+    const league = leagueNameFor(window, registry);
+    const span = eraSpan(window);
+    return [{
+      id: 'club_goals',
+      label: `${league} goals ${span}`,
+      unit: 'goals',
+      prompt: `Who scored the most ${league} goals ${span}?`,
+      value: (p) => metricValue(p, 'club_goals', window),
+    }];
+  }
+  if (window?.kind === 'season' && window.id) {
+    return [{
+      id: 'club_goals',
+      label: `goals in ${window.label ?? 'that season'}`,
+      unit: 'goals',
+      prompt: `Who scored the most goals in ${window.label ?? 'that season'}?`,
+      value: (p) => p.windows?.[window.id]?.goals,
+    }];
+  }
+  if (window?.kind === 'age_band') {
+    return [{
+      id: 'goals_after_age_30',
+      label: 'goals after turning 30',
+      unit: 'goals',
+      prompt: 'Who has the most goals after turning 30?',
+      value: (p) => p.stats?.goals_after_age_30,
+    }];
+  }
+  return CAREER_COMPARISON_METRICS.map((metric) => ({
+    ...metric,
+    prompt: `Who has the most ${metric.label}?`,
+  }));
+}
 
 function distinctTop(metric, pool) {
   const rows = pool
@@ -370,36 +430,43 @@ function distinctTop(metric, pool) {
   return distinct.slice(0, 4);
 }
 
-export function buildComparisonRound({ pool, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
-  const metrics = shuffle(rng, [...COMPARISON_METRICS]);
+// A profile fact is useful when it separates the answer from the other
+// options. Facts shared by everyone narrow nothing; sort them last.
+function profileClues(player, others) {
+  const theirs = new Map(others.map((other) => [other.id, profileHints(other)]));
+  return profileHints(player)
+    .map((clue) => ({
+      clue,
+      matches: [...theirs.values()].filter((hints) => hints
+        .some((other) => other.role === clue.role && other.value === clue.value)).length,
+    }))
+    .sort((a, b) => a.matches - b.matches)
+    .map((entry) => entry.clue);
+}
+
+export function buildComparisonRound({ pool, registry, window, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
+  const metrics = shuffle(rng, comparisonMetricsFor(window, registry));
   for (const metric of metrics) {
     const rows = distinctTop(metric, pool);
     if (!rows) continue;
     const answer = rows[0];
     if (excludeSubjectIds.has(answer.player.id)) continue;
 
+    const profile = profileClues(answer.player, rows.slice(1).map((row) => row.player));
+    if (!profile.length) continue;
+
+    // One benchmark at the top of the field, then facts about the answer.
+    // Repeating "more than X" three times just eliminates the options by
+    // name; it never asks what the player actually knows.
     const clues = [
       {
-        id: `comparison-${metric.id}-0`,
-        label: 'The field',
-        value: `The answer has more than ${rows[3].player.name}.`,
-        iconKey: 'honors',
-      },
-      {
-        id: `comparison-${metric.id}-1`,
-        label: 'The shortlist',
-        value: `The answer has more than ${rows[2].player.name}.`,
-        iconKey: 'honors',
-      },
-      {
-        id: `comparison-${metric.id}-2`,
-        label: 'The runner-up',
+        id: `comparison-${metric.id}-benchmark`,
+        label: 'The benchmark',
         value: `The answer has more than ${rows[1].player.name}.`,
         iconKey: 'honors',
       },
+      ...profile.slice(0, Math.max(1, stages - 1)),
     ];
-    const profile = profileHints(answer.player)[0];
-    if (profile) clues.push(profile);
 
     const options = buildOptions({
       answer: answer.player.name,
@@ -410,7 +477,7 @@ export function buildComparisonRound({ pool, rng, difficulty, stages = 4, exclud
     return roundShape({
       format: 'comparison',
       subject: answer.player,
-      prompt: `Who has the most ${metric.label}?`,
+      prompt: metric.prompt,
       context: null,
       answer: answer.player.name,
       answerPlayerId: answer.player.id,
@@ -422,7 +489,7 @@ export function buildComparisonRound({ pool, rng, difficulty, stages = 4, exclud
       reveal: {
         format: 'comparison',
         metric: metric.id,
-        metricLabel: metricDescriptor(metric.id)?.label ?? metric.label,
+        metricLabel: metric.label,
         unit: metric.unit,
         values: rows.map((row) => ({ player: playerRef(row.player), value: row.value })),
       },
@@ -481,6 +548,8 @@ function bucketFor(buckets, value) {
 function rangeMetricsFor(window) {
   if (window?.kind === 'tournament') return ['tournament_goals'];
   if (window?.kind === 'season') return ['club_goals'];
+  if (window?.kind === 'season_range') return ['club_goals'];
+  if (window?.kind === 'age_band') return ['goals_after_age_30'];
   return ['international_caps', 'international_goals', 'goals_after_age_30', 'highest_market_value_eur', 'club_appearances', 'club_goals'];
 }
 
@@ -505,12 +574,16 @@ function rangeValue(player, metric, window, registry) {
   return metricValue(player, metric, window);
 }
 
-function rangePrompt(subject, metric, window) {
+function rangePrompt(subject, metric, window, registry) {
   if (metric === 'tournament_goals') {
     return `How many goals did ${subject.name} score at the ${window?.label ?? 'tournament'}?`;
   }
   if (metric === 'club_goals' && window?.kind === 'season') {
     return `How many goals did ${subject.name} score for ${window.teamName ?? 'that club'} in ${window.label ?? 'that season'}?`;
+  }
+  if (metric === 'club_goals' && window?.kind === 'season_range') {
+    const league = leagueNameFor(window, registry);
+    return `How many ${league} goals did ${subject.name} score ${eraSpan(window)}?`;
   }
   if (metric === 'international_caps') return `How many international caps did ${subject.name} have?`;
   if (metric === 'international_goals') return `How many international goals did ${subject.name} score?`;
@@ -583,7 +656,7 @@ export function buildRangeRound({ pool, window, registry, rng, difficulty, stage
     return roundShape({
       format: 'range',
       subject: chosen.player,
-      prompt: rangePrompt(chosen.player, metricId, window),
+      prompt: rangePrompt(chosen.player, metricId, window, registry),
       context: window?.label ?? null,
       answer: bucket.label,
       unit: descriptor.unit,

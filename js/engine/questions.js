@@ -1,6 +1,7 @@
 import { buildHints, hintOrder, identityHook, familyClues } from './hints.js';
 import { metricDescriptor, metricsFor } from './stats.js';
 import { RECIPES } from './recipes.js';
+import { seasonWindowKey } from './career.js';
 import { numericDistractors, nameDistractors, buildOptions } from './distractors.js';
 
 export function informativeness(value, values) {
@@ -10,6 +11,30 @@ export function informativeness(value, values) {
   // Share of the pool whose value differs from this one: a value everybody
   // shares scores 0; a value only this player has scores ~1.
   return present.filter(v => v !== value).length / present.length;
+}
+
+// A season-range window has no window id of its own: it is the SUM of the
+// seasons the player actually has inside the scope. A career total here would
+// be a different, much larger number wearing the era's label.
+function seasonRangeValue(subject, window, metric) {
+  let total = 0;
+  let found = false;
+  for (const team of subject.teams ?? []) {
+    if (window.leagueId && team.leagueId !== window.leagueId) continue;
+    for (const season of team.seasons ?? []) {
+      if (window.seasonStart != null && season < window.seasonStart) continue;
+      if (window.seasonEnd != null && season > window.seasonEnd) continue;
+      const entry = subject.windows?.[seasonWindowKey(team, season)];
+      const value = metric === 'club_goals'
+        ? (entry?.goals ?? entry?.club_goals)
+        : (entry?.appearances ?? entry?.club_appearances);
+      if (typeof value === 'number') {
+        total += value;
+        found = true;
+      }
+    }
+  }
+  return found ? total : undefined;
 }
 
 export function metricValue(subject, metric, window) {
@@ -22,10 +47,14 @@ export function metricValue(subject, metric, window) {
     return window?.id ? (subject.windows?.[window.id]?.goals) : undefined;
   }
   if (metric === 'club_goals') {
-    // A season reads that season's window. A career reading is the
-    // dataset's own total, which starts in 2012/13.
+    // A season reads that season's window. An era reads the seasons the
+    // player actually has inside it. A career reading is the dataset's own
+    // total, which starts in 2012/13.
     if (window?.kind === 'season') {
       return subject.windows?.[window.id]?.goals;
+    }
+    if (window?.kind === 'season_range') {
+      return seasonRangeValue(subject, window, metric);
     }
     if (window?.kind === 'tournament') return undefined;
     return subject.stats?.club_goals;
@@ -34,6 +63,9 @@ export function metricValue(subject, metric, window) {
     if (window?.kind === 'season') {
       const entry = subject.windows?.[window.id];
       return entry?.appearances ?? entry?.club_appearances;
+    }
+    if (window?.kind === 'season_range') {
+      return seasonRangeValue(subject, window, metric);
     }
     if (window?.kind === 'tournament') return undefined;
     return subject.stats?.club_appearances;

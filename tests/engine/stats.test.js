@@ -8,6 +8,24 @@ test('a windowed metric always states its window', () => {
   assert.match(s, /2014|since/i, 'a windowed value must name its window');
 });
 
+test('a season is a season, not a since-window', () => {
+  assert.equal(
+    formatMetric('club_goals', 61, { kind: 'season', seasonStart: 2014, seasonEnd: 2014, label: 'Real Madrid 2014/15' }),
+    '61 — Real Madrid 2014/15',
+  );
+});
+
+test('an era value states the seasons the data actually holds', () => {
+  assert.equal(
+    formatMetric('club_goals', 381, { kind: 'season_range', seasonStart: 2010, seasonEnd: 2019 }),
+    '381 (2012/13–2019/20)',
+  );
+  assert.equal(
+    formatMetric('club_goals', 20, { kind: 'season_range', seasonStart: 2024, seasonEnd: 2024 }),
+    '20 (2024/25)',
+  );
+});
+
 test('an exact metric never gets a window qualifier', () => {
   const s = formatMetric('international_caps', 204, { kind: 'season', seasonStart: 2014, label: 'x' });
   assert.equal(s, '204');

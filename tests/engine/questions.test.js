@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { composeRound, candidateSubjects, informativeness } from '../../js/engine/questions.js';
+import { composeRound, candidateSubjects, informativeness, metricValue } from '../../js/engine/questions.js';
 import { metricsFor } from '../../js/engine/stats.js';
 import { makeRng } from '../../js/engine/rng.js';
 import { loadFixture } from '../../js/engine/fixture.js';
@@ -19,6 +19,24 @@ test('candidate subjects carry a score and only subjects with a real value', () 
     assert.ok(typeof c.score === 'number');
     assert.ok(c.value > 0, 'a candidate with no value must not be offered');
   }
+});
+
+test('a club-goal reading for an era sums the seasons inside it', () => {
+  const { players } = loadFixture();
+  const messi = players.find((p) => p.name === 'Lionel Messi');
+  const era = {
+    kind: 'season_range', leagueId: 'ES1',
+    seasonStart: 2010, seasonEnd: 2019,
+  };
+
+  // 2012/13 through 2019/20, only his La Liga windows.
+  assert.equal(metricValue(messi, 'club_goals', era), 381);
+  // The post-2020 seasons are outside the era.
+  assert.equal(metricValue(messi, 'club_goals', { ...era, seasonStart: 2020, seasonEnd: 2021 }), 38);
+  // A single season is that season, not the era.
+  assert.equal(metricValue(messi, 'club_goals', { ...era, seasonStart: 2018, seasonEnd: 2018 }), 51);
+  // A tournament window is never a club season.
+  assert.equal(metricValue(messi, 'club_goals', { kind: 'tournament', id: 'wc-2022' }), undefined);
 });
 
 test('an identify round tells a story and carries a true hook', () => {

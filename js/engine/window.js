@@ -1,7 +1,14 @@
+import { seasonLabel } from '../../lib/seasons.js';
+
 export function windowLabel(window) {
   if (!window) return '';
   if (window.label) return window.label;
-  if (window.kind === 'season_range') return `${window.leagueName ?? ''} ${window.seasonStart}-${window.seasonEnd}`.trim();
+  if (window.kind === 'season_range') {
+    const span = window.seasonStart != null && window.seasonStart === window.seasonEnd
+      ? seasonLabel(window.seasonStart)
+      : `${window.seasonStart ?? ''}-${window.seasonEnd ?? ''}`;
+    return `${window.leagueName ?? ''} ${span}`.trim();
+  }
   return window.id ?? '';
 }
 
@@ -27,10 +34,15 @@ export function resolveWindow(scope, registry) {
     if (clause.leagues?.length && (clause.seasonStart != null || clause.seasonEnd != null)) {
       const leagueId = clause.leagues[0];
       const leagueName = registry?.leagues?.[leagueId] ?? leagueId;
+      const start = clause.seasonStart ?? null;
+      const end = clause.seasonEnd ?? null;
+      const span = start != null && start === end
+        ? seasonLabel(start)
+        : `${start ?? ''}${end != null ? `-${end}` : ''}`;
       return {
-        id: `range-${leagueId}-${clause.seasonStart ?? '*'}-${clause.seasonEnd ?? '*'}`,
+        id: `range-${leagueId}-${start ?? '*'}-${end ?? '*'}`,
         kind: 'season_range',
-        label: `${leagueName} ${clause.seasonStart ?? ''}${clause.seasonEnd != null ? `-${clause.seasonEnd}` : ''}`.trim(),
+        label: `${leagueName} ${span}`.trim(),
         detail: 'the era', seasonStart: clause.seasonStart ?? null, seasonEnd: clause.seasonEnd ?? null,
         tournamentId: null, clubId: null, teamName: null, ageFrom: null, ageTo: null,
         leagueId, leagueName,

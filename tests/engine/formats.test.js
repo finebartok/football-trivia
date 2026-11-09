@@ -136,22 +136,27 @@ test('a club round asks about a season with exactly one club', () => {
 
   const ids = round.clues.map((clue) => clue.id);
   assert.ok(
-    ['club-goals', 'club-squad', 'club-other'].includes(ids[0]),
-    'the first clue describes the club-season',
+    ['club-goals', 'club-other'].includes(ids[0]),
+    'the first clue describes the club-season or the career',
   );
   assert.ok(
-    ids.filter((id) => ['club-goals', 'club-squad', 'club-other'].includes(id)).length >= 2,
-    'two clues describe the club-season',
+    ids.filter((id) => ['club-goals', 'club-other', 'club-league'].includes(id)).length >= 2,
+    'the club-season clues are facts, not the subject profile',
   );
-  assert.ok(!ids.includes('club-league'), 'the league shared by every option is not a clue');
+  assert.ok(!ids.includes('club-squad'), 'the teammate is not a clue');
+  assert.ok(!ids.some((id) => ['role', 'born', 'home', 'height'].includes(id)),
+    'the subject profile is not a club clue');
 
+  const subjectClubs = new Set((subject.teams ?? []).map((team) => team.clubName));
   for (const name of valuesOf(round, 'value')) {
-    const clubSeasons = players
+    const inLeagueThatSeason = players
       .flatMap((player) => player.teams ?? [])
-      .filter((team) => team.clubName === name && (team.seasons ?? []).includes(start));
+      .some((team) => team.clubName === name
+        && (team.seasons ?? []).includes(start)
+        && team.leagueId === entries[0].leagueId);
     assert.ok(
-      clubSeasons.some((team) => team.leagueId === entries[0].leagueId),
-      `${name} was not in ${entries[0].leagueId} in ${round.reveal.season}`,
+      subjectClubs.has(name) || inLeagueThatSeason,
+      `${name} was not a club of ${subject.name} or in ${entries[0].leagueId} in ${round.reveal.season}`,
     );
   }
 });
@@ -204,16 +209,20 @@ test('a comparison round has four distinct values and a unique maximum', () => {
   assert.ok(optionNames.includes(round.answer));
   for (const row of ranked) assert.ok(optionNames.includes(row.player.name));
 
-  const comparators = round.clues.filter((clue) => /^The (field|shortlist|runner-up)$/.test(clue.label));
-  assert.equal(comparators.length, 3, 'three named comparators narrow the field');
-  const named = comparators.map((clue) => {
-    const match = clue.value.match(/^The answer has more than (.+)\.$/);
-    assert.ok(match, clue.value);
-    assert.doesNotMatch(clue.value, /\d/);
-    return match[1];
-  });
-  assert.deepEqual(named, ranked.slice(1).reverse().map((row) => row.player.name));
-  assert.ok(named.every((name) => optionNames.includes(name)));
+  const benchmark = round.clues.find((clue) => clue.label === 'The benchmark');
+  assert.ok(benchmark, 'one benchmark names the runner-up');
+  const match = benchmark.value.match(/^The answer has more than (.+)\.$/);
+  assert.ok(match, benchmark.value);
+  assert.doesNotMatch(benchmark.value, /\d/);
+  assert.equal(match[1], ranked[1].player.name);
+  assert.ok(optionNames.includes(match[1]), 'the runner-up is an option');
+
+  const profiles = round.clues.filter((clue) => clue !== benchmark);
+  assert.ok(profiles.length >= 1, 'independent profile facts narrow the answer');
+  for (const clue of profiles) {
+    assert.ok(['The role', 'The birth year', 'The home', 'The height'].includes(clue.label),
+      `unexpected comparison clue: ${clue.label}`);
+  }
 });
 
 test('a range round buckets the exact value and never prints it in a clue', () => {

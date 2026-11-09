@@ -43,3 +43,10 @@ export function careerTeams(player) {
 export function careerClubs(player) {
   return careerTeams(player).map((team) => team.clubName);
 }
+
+/** The pool's window key for a club-season: "FC Barcelona 12/13". */
+export function seasonWindowKey(team, season) {
+  const start = String(season).slice(-2).padStart(2, '0');
+  const end = String(season + 1).slice(-2).padStart(2, '0');
+  return `${team.clubName} ${start}/${end}`;
+}

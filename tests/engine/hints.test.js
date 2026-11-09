@@ -33,6 +33,20 @@ test('the stage names the vibe’s own number and its window', () => {
   assert.equal(stage.metric, 'tournament_goals');
 });
 
+test('an era stage counts seasons without faking the player’s stint', () => {
+  const { messi, players, registry } = messiAndPool();
+  const scope = { clauses: [{ leagues: ['ES1'], seasonStart: 2010, seasonEnd: 2019 }] };
+  const stage = buildHints(messi, null, registry, { pool: players, scope })
+    .find((h) => h.role === 'stage');
+  assert.equal(stage.value, 'Eight seasons in La Liga in the 2010s.');
+  assert.doesNotMatch(stage.value, /2012|2019/);
+
+  const clubScope = { clauses: [{ teams: [8], seasonStart: 2010, seasonEnd: 2019 }] };
+  const clubStage = buildHints(messi, null, registry, { pool: players, scope: clubScope })
+    .find((h) => h.role === 'stage');
+  assert.equal(clubStage.value, 'Eight seasons at FC Barcelona in the 2010s.');
+});
+
 test('the trail is the same chronological path the reveal shows', () => {
   const { players, registry } = loadFixture();
   const salah = players.find((p) => p.name === 'Mohamed Salah');

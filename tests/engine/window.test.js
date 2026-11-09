@@ -26,6 +26,12 @@ test('a league and era clause resolves to a season_range window', () => {
   assert.match(windowLabel(w), /2010.*2019/);
 });
 
+test('a one-season clause is named as a season, not a two-year span', () => {
+  const w = resolveWindow({ clauses: [{ leagues: ['GB1'], seasonStart: 2024, seasonEnd: 2024 }] }, registry);
+  assert.equal(w.kind, 'season_range');
+  assert.equal(windowLabel(w), 'Premier League 2024/25');
+});
+
 test('an explicit scope window wins over the derived one', () => {
   const w = resolveWindow({ clauses: [{ tournaments: ['wc-2022'] }], window: 'wc-2022' }, registry);
   assert.equal(w.id, 'wc-2022');
