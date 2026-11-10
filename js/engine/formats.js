@@ -47,20 +47,36 @@ function leagueNameFor(window, registry) {
   return window?.leagueName ?? registry?.leagues?.[window?.leagueId] ?? 'the league';
 }
 
-function inWindow(season, window) {
+// A windowed vibe asks about its own window, not whatever season the subject
+// happened to play elsewhere. A club-season round in a La Liga 2010s pack is
+// a La Liga 2010s club-season; a World Cup pack asks about the season around
+// the tournament. If the subject has no such season, the format is skipped.
+function inWindow(team, season, window) {
   if (!window) return true;
-  if (window.kind === 'season') return season === window.seasonStart;
+  if (window.kind === 'season') {
+    if (season !== window.seasonStart) return false;
+    if (window.clubId && team.clubId !== window.clubId) return false;
+    return true;
+  }
   if (window.kind === 'season_range') {
-    return (window.seasonStart == null || season >= window.seasonStart)
-      && (window.seasonEnd == null || season <= window.seasonEnd);
+    if (window.seasonStart != null && season < window.seasonStart) return false;
+    if (window.seasonEnd != null && season > window.seasonEnd) return false;
+    if (window.leagueId && team.leagueId !== window.leagueId) return false;
+    return true;
+  }
+  if (window.kind === 'tournament') {
+    // Registry tournament windows carry the year in the id, not always in
+    // seasonStart. The season it interrupted and the one before it are both
+    // fair answers for "where was he then".
+    const year = window.seasonStart ?? Number(String(window.id).match(/\d{4}/)?.[0]);
+    if (!Number.isFinite(year)) return true;
+    return season >= year - 1 && season <= year;
   }
   return true;
 }
 
-function preferredFirst(entries, window, rng) {
-  const shuffled = shuffle(rng, entries);
-  const inside = shuffled.filter((entry) => inWindow(entry.season, window));
-  return inside.length ? [...inside, ...shuffled.filter((entry) => !inside.includes(entry))] : shuffled;
+function entriesInWindow(entries, window) {
+  return entries.filter((entry) => inWindow(entry.team, entry.season, window));
 }
 
 function scheduleFor(clues) {
@@ -188,19 +204,23 @@ function leagueName(team, registry) {
   return team.leagueName ?? registry?.leagues?.[team.leagueId] ?? null;
 }
 
+function leagueArticle(league) {
+  return /^(?:[AEIOU]|MLS)/.test(league ?? '') ? 'an' : 'a';
+}
+
 export function buildClubRound({ pool, registry, window, rng, difficulty, stages = 4, excludeSubjectIds = new Set() }) {
   const { index } = clubSeasonIndex(pool);
   const byLeagueSeason = leagueSeasonIndex(index);
   const candidates = [];
   for (const subject of pool) {
     if (excludeSubjectIds.has(subject.id)) continue;
-    const entries = clubCandidateEntries(subject, byLeagueSeason);
+    const entries = entriesInWindow(clubCandidateEntries(subject, byLeagueSeason), window);
     if (entries.length) candidates.push({ subject, entries });
   }
   if (!candidates.length) return null;
 
   const chosen = pick(rng, candidates);
-  const entry = preferredFirst(chosen.entries, window, rng)[0];
+  const entry = pick(rng, chosen.entries);
   const { team, season, goals, sameLeagueNames, careerEntries } = entry;
   const league = leagueName(team, registry);
 
@@ -231,7 +251,7 @@ export function buildClubRound({ pool, registry, window, rng, difficulty, stages
       ? { id: 'club-other', label: 'The career', value: `Also played for ${careerClaim.name} in ${seasonLabel(careerClaim.season)}.`, iconKey: 'path' }
       : null,
     entry.crossLeague && league
-      ? { id: 'club-league', label: 'The league', value: `The club was in the ${league}.`, iconKey: 'league' }
+      ? { id: 'club-league', label: 'The league', value: `The club was ${leagueArticle(league)} ${league} side.`, iconKey: 'league' }
       : null,
   ].filter(Boolean);
 
@@ -279,6 +299,7 @@ export function buildTeammateRound({ pool, registry, window, rng, difficulty, st
     const entries = [];
     for (const team of subject.teams ?? []) {
       for (const season of team.seasons ?? []) {
+        if (!inWindow(team, season, window)) continue;
         const bucket = index.get(`${team.clubId}|${season}`);
         if (bucket && bucket.players.size >= 2) {
           entries.push({ team, season, bucket });
@@ -290,7 +311,7 @@ export function buildTeammateRound({ pool, registry, window, rng, difficulty, st
   if (!candidates.length) return null;
 
   const chosen = pick(rng, candidates);
-  const entry = preferredFirst(chosen.entries, window, rng)[0];
+  const entry = pick(rng, chosen.entries);
   const { team, season, bucket } = entry;
   const teammates = [...bucket.players]
     .filter((id) => id !== chosen.subject.id)
@@ -313,18 +334,21 @@ export function buildTeammateRound({ pool, registry, window, rng, difficulty, st
   ].filter(Boolean);
   if (clues.length < 2) return null;
 
-  const sameSeason = shuffle(rng, teammates.filter((p) => p.id !== teammate.id).map((p) => p.name));
-  const fallback = nameDistractors({
+  // The four options must not all be teammates: "Who was a teammate?" has
+  // one true answer, so the other three names come from outside that
+  // club-season. They stay plausible by sharing the subject's role and era.
+  const bucketIds = [...bucket.players];
+  const distractors = nameDistractors({
     pool,
     subject: chosen.subject,
     rng,
     count: 3,
-    excludeIds: [teammate.id],
+    excludeIds: bucketIds,
   }).map((p) => p.name);
 
   const options = buildOptions({
     answer: teammate.name,
-    distractors: [...sameSeason, ...fallback],
+    distractors,
     rng,
   });
 
@@ -356,12 +380,13 @@ export function buildTeammateRound({ pool, registry, window, rng, difficulty, st
 // ---------------------------------------------------------------------------
 
 const CAREER_COMPARISON_METRICS = Object.freeze([
-  { id: 'club_goals', label: 'club goals', unit: 'goals', value: (p) => p.stats?.club_goals },
+  // Club data starts in 2012/13: these are not career totals and must say so.
+  { id: 'club_goals', label: 'club goals since 2012', unit: 'goals', value: (p) => p.stats?.club_goals },
   { id: 'international_goals', label: 'international goals', unit: 'goals', value: (p) => p.internationalGoals },
   { id: 'international_caps', label: 'international caps', unit: 'caps', value: (p) => p.internationalCaps },
   { id: 'highest_market_value_eur', label: 'peak market value', unit: null, value: (p) => p.highestMarketValueEur },
-  { id: 'goals_after_age_30', label: 'goals after turning 30', unit: 'goals', value: (p) => p.stats?.goals_after_age_30 },
-  { id: 'club_appearances', label: 'club appearances', unit: 'apps', value: (p) => p.stats?.club_appearances },
+  { id: 'goals_after_age_30', label: 'goals after turning 30 since 2012', unit: 'goals', value: (p) => p.stats?.goals_after_age_30 },
+  { id: 'club_appearances', label: 'club appearances since 2012', unit: 'apps', value: (p) => p.stats?.club_appearances },
 ]);
 
 // A comparison only compares what the vibe is about. A career figure in a
@@ -381,9 +406,9 @@ function comparisonMetricsFor(window, registry) {
     const span = eraSpan(window);
     return [{
       id: 'club_goals',
-      label: `${league} goals ${span}`,
+      label: `goals for ${league} clubs ${span}`,
       unit: 'goals',
-      prompt: `Who scored the most ${league} goals ${span}?`,
+      prompt: `Who scored the most goals for ${league} clubs ${span}?`,
       value: (p) => metricValue(p, 'club_goals', window),
     }];
   }
@@ -399,9 +424,9 @@ function comparisonMetricsFor(window, registry) {
   if (window?.kind === 'age_band') {
     return [{
       id: 'goals_after_age_30',
-      label: 'goals after turning 30',
+      label: 'goals after turning 30 since 2012',
       unit: 'goals',
-      prompt: 'Who has the most goals after turning 30?',
+      prompt: 'Who has the most goals after turning 30 since 2012?',
       value: (p) => p.stats?.goals_after_age_30,
     }];
   }
@@ -579,15 +604,16 @@ function rangePrompt(subject, metric, window, registry) {
     return `How many goals did ${subject.name} score at the ${window?.label ?? 'tournament'}?`;
   }
   if (metric === 'club_goals' && window?.kind === 'season') {
-    return `How many goals did ${subject.name} score for ${window.teamName ?? 'that club'} in ${window.label ?? 'that season'}?`;
+    const season = window.seasonStart != null ? seasonLabel(window.seasonStart) : (window.label ?? 'that season');
+    return `How many goals did ${subject.name} score for ${window.teamName ?? 'that club'} in ${season}?`;
   }
   if (metric === 'club_goals' && window?.kind === 'season_range') {
     const league = leagueNameFor(window, registry);
-    return `How many ${league} goals did ${subject.name} score ${eraSpan(window)}?`;
+    return `How many goals did ${subject.name} score for ${league} clubs ${eraSpan(window)}?`;
   }
   if (metric === 'international_caps') return `How many international caps did ${subject.name} have?`;
   if (metric === 'international_goals') return `How many international goals did ${subject.name} score?`;
-  if (metric === 'goals_after_age_30') return `How many goals did ${subject.name} score after turning 30?`;
+  if (metric === 'goals_after_age_30') return `Since 2012, how many goals did ${subject.name} score after turning 30?`;
   if (metric === 'highest_market_value_eur') return `What was ${subject.name}'s highest market value?`;
   if (metric === 'club_appearances') return `How many club appearances did ${subject.name} make since 2012?`;
   return `How many club goals did ${subject.name} score since 2012?`;

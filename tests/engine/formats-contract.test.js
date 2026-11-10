@@ -151,7 +151,7 @@ test('club contract: the clues describe the club-season and the options are plau
 
     const leagueClue = round.clues.find((clue) => clue.id === 'club-league');
     if (leagueClue) {
-      const match = leagueClue.value.match(/^The club was in the (.+)\.$/);
+      const match = leagueClue.value.match(/^The club was (?:a|an) (.+) side\.$/);
       assert.ok(match, `unexpected league clue: ${leagueClue.value}`);
       assert.equal(match[1], answerTeam.leagueName ?? registry.leagues[answerTeam.leagueId]);
     }
@@ -273,7 +273,7 @@ test('window contract: comparison and range measure the window, not the career',
   };
   const eraComparison = buildIn(buildComparisonRound, era);
   assert.equal(eraComparison.metric, 'club_goals');
-  assert.match(eraComparison.prompt, /La Liga goals from 2012\/13 to 2019\/20/);
+  assert.match(eraComparison.prompt, /goals for La Liga clubs from 2012\/13 to 2019\/20/);
   for (const row of eraComparison.reveal.values) {
     assert.equal(row.value, eraGoals(byId.get(row.player.id), era));
     assert.ok(row.value < byId.get(row.player.id).stats.club_goals, 'not the career total');
@@ -281,9 +281,68 @@ test('window contract: comparison and range measure the window, not the career',
 
   const eraRange = buildIn(buildRangeRound, era);
   assert.equal(eraRange.metric, 'club_goals');
-  assert.match(eraRange.prompt, /La Liga goals did .+ score from 2012\/13 to 2019\/20/);
+  assert.match(eraRange.prompt, /goals did .+ score for La Liga clubs from 2012\/13 to 2019\/20/);
   assert.equal(eraRange.reveal.value, eraGoals(byId.get(eraRange.subjectId), era));
   assert.match(eraRange.reveal.valueText, /2012\/13.*2019\/20/);
+});
+
+test('window contract: club and teammate rounds stay inside the vibe', () => {
+  const era = {
+    kind: 'season_range', leagueId: 'ES1', leagueName: 'La Liga',
+    seasonStart: 2010, seasonEnd: 2019,
+  };
+  let clubs = 0;
+  let mates = 0;
+  for (let seed = 1; seed <= 20; seed += 1) {
+    const club = buildIn(buildClubRound, era, seed);
+    if (club) {
+      clubs += 1;
+      const season = seasonStart(club.reveal.season);
+      assert.ok(season >= era.seasonStart && season <= era.seasonEnd, `${club.reveal.season} is outside the era`);
+      const team = (byId.get(club.subjectId).teams ?? [])
+        .find((entry) => entry.clubName === club.answer && (entry.seasons ?? []).includes(season));
+      assert.equal(team?.leagueId, era.leagueId, `${club.answer} in ${club.reveal.season} is not a La Liga side`);
+    }
+    const mate = buildIn(buildTeammateRound, era, seed);
+    if (mate) {
+      mates += 1;
+      const season = seasonStart(mate.reveal.season);
+      assert.ok(season >= era.seasonStart && season <= era.seasonEnd, `${mate.reveal.season} is outside the era`);
+      const team = (byId.get(mate.answerPlayerId).teams ?? [])
+        .find((entry) => entry.clubName === mate.reveal.club && (entry.seasons ?? []).includes(season));
+      assert.equal(team?.leagueId, era.leagueId, `${mate.reveal.club} in ${mate.reveal.season} is not a La Liga side`);
+    }
+  }
+  assert.ok(clubs > 0 && mates > 0, 'the era supplies both round types');
+
+  const tournament = registry.windows['wc-2022'];
+  let tournamentClubs = 0;
+  for (let seed = 1; seed <= 20; seed += 1) {
+    const club = buildIn(buildClubRound, tournament, seed);
+    if (!club) continue;
+    tournamentClubs += 1;
+    const season = seasonStart(club.reveal.season);
+    assert.ok(season >= 2021 && season <= 2022, `${club.reveal.season} is not around the 2022 World Cup`);
+  }
+  assert.ok(tournamentClubs > 0, 'the tournament supplies club rounds');
+});
+
+test('career rounds state the 2012 cut instead of calling data career totals', () => {
+  let careerRounds = 0;
+  const careerMetrics = new Set(['club_goals', 'club_appearances', 'goals_after_age_30']);
+  for (let seed = 1; seed <= 40; seed += 1) {
+    const comparison = build(buildComparisonRound, seed);
+    if (comparison && careerMetrics.has(comparison.metric)) {
+      careerRounds += 1;
+      assert.match(comparison.prompt, /since 2012/i, `${comparison.metric}: ${comparison.prompt}`);
+    }
+    const range = build(buildRangeRound, seed);
+    if (range && careerMetrics.has(range.metric)) {
+      careerRounds += 1;
+      assert.match(range.prompt, /since 2012/i, `${range.metric}: ${range.prompt}`);
+    }
+  }
+  assert.ok(careerRounds > 0, 'the career metrics are exercised');
 });
 
 test('comparison and range for a tournament only use tournament goals', () => {
@@ -361,6 +420,15 @@ test('teammate contract: the clues describe the hidden teammate, not the subject
     const optionNames = round.options.map((option) => option.value);
     assert.ok(optionNames.includes(round.answer));
     assert.ok(!optionNames.includes(round.subjectName));
+
+    // Only the answer was actually at that club in that season; the other
+    // three names are plausible outsiders, not alternative correct answers.
+    const teammatesAtClub = new Set(players
+      .filter((player) => (player.teams ?? []).some((team) => team.clubName === round.reveal.club
+        && (team.seasons ?? []).includes(season)))
+      .map((player) => player.name));
+    const teammateOptions = optionNames.filter((name) => teammatesAtClub.has(name));
+    assert.deepEqual(teammateOptions, [round.answer], 'exactly one option is a teammate');
 
     const profileValues = new Set(profileHints(teammate).map((hint) => hint.value));
     const careerClubs = new Set((teammate.teams ?? []).map((team) => team.clubName));

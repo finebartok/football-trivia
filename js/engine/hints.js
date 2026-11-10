@@ -64,16 +64,12 @@ function hint(role, value, { iconKey, family = 'career', metric = null, windowId
 // The stage: the number that put this player in the vibe.
 // ---------------------------------------------------------------------------
 
-function eraPhrase(clause) {
-  const start = clause?.seasonStart;
-  const end = clause?.seasonEnd;
-  if (start == null && end == null) return null;
-  if (start != null && end != null) {
-    if (start === end) return `in ${seasonLabel(start)}`;
-    if (start % 10 === 0 && end === start + 9) return `in the ${start}s`;
-    return `between ${start} and ${end}`;
-  }
-  return start != null ? `since ${seasonLabel(start)}` : `up to ${seasonLabel(end)}`;
+function seasonsPhrase(seasons) {
+  if (!seasons.length) return null;
+  const first = Math.min(...seasons);
+  const last = Math.max(...seasons);
+  if (first === last) return `(${seasonLabel(first)})`;
+  return `(${seasonLabel(first)}–${seasonLabel(last)})`;
 }
 
 function stageFromStat(subject, stat) {
@@ -117,8 +113,8 @@ function stageFromLeague(subject, clause, registry) {
     ?? registry?.leagues?.[clause.leagues[0]]
     ?? 'the league';
   const count = seasons.length;
-  const era = eraPhrase(clause);
-  return hint('stage', `${capitalize(numberWord(count))} ${plural(count, 'season', 'seasons')} in ${league}${era ? ` ${era}` : ''}.`, {
+  const span = seasonsPhrase(seasons);
+  return hint('stage', `${capitalize(numberWord(count))} ${plural(count, 'season', 'seasons')} in ${league}${span ? ` ${span}` : ''}.`, {
     iconKey: ICONS.league,
     windowId: `range-${clause.leagues[0]}-${clause.seasonStart ?? '*'}-${clause.seasonEnd ?? '*'}`,
   });
@@ -135,8 +131,8 @@ function stageFromClub(subject, clause) {
   if (!seasons.length) return null;
 
   const count = seasons.length;
-  const era = eraPhrase(clause);
-  return hint('stage', `${capitalize(numberWord(count))} ${plural(count, 'season', 'seasons')} at ${team.clubName}${era ? ` ${era}` : ''}.`, {
+  const span = seasonsPhrase(seasons);
+  return hint('stage', `${capitalize(numberWord(count))} ${plural(count, 'season', 'seasons')} at ${team.clubName}${span ? ` ${span}` : ''}.`, {
     iconKey: ICONS.team,
   });
 }
