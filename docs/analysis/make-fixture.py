@@ -10,13 +10,14 @@ Source: the CC0 transfermarkt-datasets dump + Wikidata squad membership.
 Every number here was measured, not invented.
 """
 import csv, gzip, json, collections, unicodedata, re, os, sys, urllib.request
+from datetime import date as _date
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 DATA = os.path.join(REPO, "data", "raw")
 
 BASE = "https://pub-e682421888d945d684bcae8890b0ec20.r2.dev/data"
-NEEDED = ["players", "transfers", "games", "clubs", "competitions", "appearances", "game_events"]
+NEEDED = ["players", "transfers", "games", "clubs", "competitions", "appearances", "game_lineups", "game_events"]
 
 os.makedirs(DATA, exist_ok=True)
 for name in NEEDED:
@@ -87,22 +88,17 @@ def league_display(league_id):
     slug_name = comps.get(league_id, {}).get("name") or league_id
     return slug_name.replace("-", " ").title()
 
-# --- clubs that appear, with ids
-club_index = {}
-def club_id_for(name):
-    if name not in club_index:
-        club_index[name] = len(club_index) + 1
-    return club_index[name]
-
-# --- per-player: teams (from transfers), tournament + window stats (from events)
-team_seasons = collections.defaultdict(lambda: collections.defaultdict(set))
+# --- selection evidence: who has a big-five stint at all. This is the same
+# club-name path the fixture has always used to pick the 1500-player pool, kept
+# separate so a data repair below cannot silently change who is in the pool.
+selection_team_seasons = collections.defaultdict(lambda: collections.defaultdict(set))
 for t in rows("transfers.csv.gz"):
     pid, s = t["player_id"], season_start(t.get("transfer_season"))
     if not pid or s is None: continue
     for k, nk in (("to_club_id", "to_club_name"), ("from_club_id", "from_club_name")):
         cid, cname = t.get(k), t.get(nk)
         if cid and cname:
-            team_seasons[pid][cname].add(s)
+            selection_team_seasons[pid][cname].add(s)
 
 # appearances carry the club a player was actually registered for, which is the
 # only way to see players who never transferred (Messi, Salah, Neymar).
@@ -113,11 +109,16 @@ for a in rows("appearances.csv.gz"):
     cname = clubs.get(cid, {}).get("name")
     if not cname: continue
     yr = int(d[:4])
-    team_seasons[pid][cname].add(season_start(str(yr)))
+    selection_team_seasons[pid][cname].add(season_start(str(yr)))
 
 win_stats = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
+goal_team_seasons = collections.defaultdict(lambda: collections.defaultdict(set))
 for e in rows("game_events.csv.gz"):
     if e.get("type") != "Goals": continue
+    # An own goal is credited to the benefiting club, not the scorer's. Counting
+    # it as the scorer's goal invents a club-season he never played (Saka at
+    # Aston Villa, Ronaldo at Granada).
+    if "own-goal" in (e.get("description") or "").lower(): continue
     pid = e.get("player_id")
     if not pid: continue
     comp, date, season = games.get(e.get("game_id"), (None, None, None))
@@ -126,6 +127,7 @@ for e in rows("game_events.csv.gz"):
     if comp == "FIWC":
         win_stats[pid][f"wc-{year}"]["goals"] += 1
     if e.get("club_id") and season:
+        goal_team_seasons[pid][e["club_id"]].add(season)
         cname = clubs.get(e["club_id"], {}).get("name")
         if cname:
             win_stats[pid][f"{cname} {str(season)[2:]}/{(int(season)+1)%100:02d}"]["goals"] += 1
@@ -160,7 +162,9 @@ def stats_for(pid):
     # career figures club_goals and club_appearances.
     # win_stats is keyed player -> window id -> counter, so sum over its values.
     windows = win_stats.get(pid, {})
-    total_goals = sum(c.get("goals", 0) for c in windows.values())
+    # club_goals is a club total. A tournament window is not a club season, so
+    # it must not leak into the "club goals since 2012" figure.
+    total_goals = sum(c.get("goals", 0) for wid, c in windows.items() if not wid.startswith("wc-"))
     total_apps = sum(c.get("appearances", 0) for c in windows.values())
     if total_goals:
         st["club_goals"] = total_goals
@@ -227,7 +231,7 @@ CAP = 1500
 
 
 def has_big5_stint(p):
-    for cname, seasons in team_seasons.get(p["player_id"], {}).items():
+    for cname, seasons in selection_team_seasons.get(p["player_id"], {}).items():
         if any(v.get("domestic_competition_id") in BIG5 for v in clubs_by_name.values() if v["name"] == cname):
             return True
     return False
@@ -247,24 +251,131 @@ for p in rest:
     seen.add(p["player_id"]); selected.append(p)
 
 print(f"selected {len(selected)} players")
+del selection_team_seasons
+
+# --- repaired club path. Raw club ids are the identity: the transfer table's
+# display names are not unique ('Sporting', 'Arsenal', 'Al-Nassr') and matching
+# them by string invents clubs or loses real ones. A season comes from the game
+# row, never the calendar year of the appearance. When the appearance and the
+# lineup disagree about the club, the row is dropped: one disputed row is not
+# evidence enough to name a club-season.
+selected_ids = {p["player_id"] for p in selected}
+team_seasons = collections.defaultdict(lambda: collections.defaultdict(set))
+
+
+def add_team(pid, cid, season):
+    if cid in clubs and season is not None:
+        team_seasons[pid][cid].add(season)
+
+
+transfer_rows = []
+for t in rows("transfers.csv.gz"):
+    pid = t.get("player_id")
+    if pid not in selected_ids: continue
+    s = season_start(t.get("transfer_season"))
+    if s is None: continue
+    try: month = int((t.get("transfer_date") or "")[5:7])
+    except ValueError: month = 7
+    transfer_rows.append({
+        "pid": pid, "season": s, "month": month,
+        "date": t.get("transfer_date") or "",
+        "from": t.get("from_club_id") or None,
+        "to": t.get("to_club_id") or None,
+    })
+
+pool_keys = set()
+pool_apps = []
+for a in rows("appearances.csv.gz"):
+    pid = a.get("player_id")
+    if pid not in selected_ids: continue
+    g = games.get(a.get("game_id"))
+    if not g or g[2] is None: continue
+    pool_keys.add((a["game_id"], pid))
+    pool_apps.append((pid, a.get("player_club_id"), a["game_id"], g[2]))
+
+lineups = {}
+for l in rows("game_lineups.csv.gz"):
+    key = (l.get("game_id"), l.get("player_id"))
+    if key in pool_keys:
+        lineups[key] = l.get("club_id")
+
+for pid, app_cid, gid, season in pool_apps:
+    lu = lineups.get((gid, pid))
+    app_club = clubs.get(app_cid) if app_cid else None
+    lineup_club = clubs.get(lu) if lu else None
+    if app_club and lineup_club and app_cid != lu:
+        continue
+    add_team(pid, app_cid if app_club else lu, season)
+
+# A goal is proof of a club-season even when the appearance table does not
+# cover that league (Austria, Saudi Arabia, Mexico). Without this, a player's
+# own club goals point at a club missing from his career.
+for pid, by_club in goal_team_seasons.items():
+    if pid not in selected_ids: continue
+    for cid, seasons in by_club.items():
+        for season in seasons:
+            add_team(pid, cid, season)
+
+# The transfer table also records bookkeeping moves: a loan return the day
+# before the permanent transfer (Gonçalo Ramos at Benfica/PSG). In a same-player
+# reverse pair inside a week, the club in the middle did not really have him.
+# Drop the return leg's destination and the permanent leg's origin; keep both
+# outer clubs.
+by_player = collections.defaultdict(list)
+for i, t in enumerate(transfer_rows):
+    by_player[t["pid"]].append(i)
+
+def transfer_day(v):
+    try: return _date.fromisoformat(v[:10]).toordinal()
+    except ValueError: return None
+
+skip_claim = set()
+for indices in by_player.values():
+    for ai, i in enumerate(indices):
+        a = transfer_rows[i]
+        da = transfer_day(a["date"])
+        if da is None: continue
+        for j in indices[ai + 1:]:
+            b = transfer_rows[j]
+            if not (a["from"] and a["to"] and b["from"] and b["to"]): continue
+            if a["from"] != b["to"] or a["to"] != b["from"]: continue
+            db = transfer_day(b["date"])
+            if db is None or abs(db - da) > 7: continue
+            first, second = (i, j) if da <= db else (j, i)
+            skip_claim.add((first, "to"))
+            skip_claim.add((second, "from"))
+
+for i, t in enumerate(transfer_rows):
+    if t["to"] and (i, "to") not in skip_claim:
+        add_team(t["pid"], t["to"], t["season"])
+    if t["from"] and (i, "from") not in skip_claim:
+        # A July/August move happens at the start of the new season, so the
+        # selling club's last season is the one before it. A move later in the
+        # season (including a December loan return) stays in that season.
+        add_team(t["pid"], t["from"], t["season"] - 1 if t["month"] in (7, 8) else t["season"])
+
+del pool_keys, pool_apps, lineups, transfer_rows, by_player, skip_claim, goal_team_seasons
 
 out_players = []
 windows_registry = {}
 league_index = {}
+used_club_ids = set()
 
 for p in selected:
     pid = p["player_id"]
     teams = []
-    for cname, seasons in sorted(team_seasons.get(pid, {}).items()):
-        cid = club_id_for(cname)
-        lg = clubs.get(next((k for k, v in clubs.items() if v["name"] == cname), ""), {}).get("domestic_competition_id")
+    for cid, seasons in sorted(team_seasons.get(pid, {}).items(),
+                               key=lambda kv: (clubs.get(kv[0], {}).get("name", kv[0]), kv[0])):
+        club = clubs.get(cid)
+        if not club: continue
+        lg = club.get("domestic_competition_id")
         if not lg: continue
         league_index.setdefault(lg, league_display(lg))
-        ss = sorted(seasons)
+        used_club_ids.add(cid)
         teams.append({
-            "clubId": cid, "clubName": cname,
+            "clubId": int(cid), "clubName": club["name"],
             "leagueId": lg, "leagueName": league_display(lg),
-            "seasons": ss,
+            "seasons": sorted(seasons),
         })
     if not teams: continue
 
@@ -318,7 +429,8 @@ fixture = {
              "CC0 transfermarkt-datasets dump. Every value measured, none invented.",
     "registry": {
         "leagues": league_index,
-        "clubs": [{"id": cid, "name": n} for n, cid in sorted(club_index.items(), key=lambda x: x[1])],
+        "clubs": [{"id": int(cid), "name": clubs[cid]["name"]}
+                  for cid in sorted(used_club_ids, key=lambda c: (clubs[c]["name"], int(c)))],
         "windows": windows_registry,
         "tournaments": [{"id": "wc-2022", "name": "2022 FIFA World Cup", "year": 2022}],
     },
@@ -331,7 +443,7 @@ with open(path, "w", encoding="utf-8") as f:
     json.dump(fixture, f, ensure_ascii=False, indent=2)
 
 print(f"\nwrote {path}")
-print(f"  players: {len(out_players)}  windows: {len(windows_registry)}  clubs: {len(club_index)}")
+print(f"  players: {len(out_players)}  windows: {len(windows_registry)}  clubs: {len(used_club_ids)}")
 multi = [p for p in out_players if len(p["teams"]) > 1]
 print(f"  players with multi-club paths: {len(multi)}")
 withw = [p for p in out_players if p["windows"]]

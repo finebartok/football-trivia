@@ -160,19 +160,19 @@ test('club contract: the clues describe the club-season and the options are plau
 
 test('regression: Mikel Villanueva gets club-season clues and same-league options', () => {
   const mikel = byName.get('Mikel Villanueva');
-  const atClub = (clubId, season) => players.find((player) => (player.teams ?? [])
-    .some((team) => team.clubId === clubId && (team.seasons ?? []).includes(season)));
+  const clubId = (name) => registry.clubs.find((club) => club.name === name)?.id;
+  const atClub = (club, season) => players.find((player) => (player.teams ?? [])
+    .some((team) => team.clubId === clubId(club) && (team.seasons ?? []).includes(season)));
   const malagaMates = players
     .filter((player) => player.id !== mikel.id && (player.teams ?? [])
-      .some((team) => team.clubId === 310 && (team.seasons ?? []).includes(2018)))
+      .some((team) => team.clubId === clubId('Málaga CF') && (team.seasons ?? []).includes(2018)))
     .slice(0, 3);
   const pool = [
     mikel,
     ...malagaMates,
-    atClub(1034, 2018), // Cádiz CF
-    atClub(21, 2018), // Real Madrid
-    atClub(8, 2018), // FC Barcelona
-    atClub(80, 2018), // Atlético de Madrid
+    atClub('Real Madrid', 2018),
+    atClub('FC Barcelona', 2018),
+    atClub('Atlético de Madrid', 2018),
   ].filter(Boolean)
     .filter((player, index, all) => all.findIndex((other) => other.id === player.id) === index);
   const index = clubIndexFor(pool);
@@ -188,7 +188,9 @@ test('regression: Mikel Villanueva gets club-season clues and same-league option
   assert.deepEqual(round.clues.map((clue) => clue.id), ['club-other', 'club-league']);
 
   const optionNames = round.options.map((option) => option.value);
-  assert.ok(optionNames.includes('Cádiz CF'), 'the career clue names an option');
+  const career = round.clues.find((clue) => clue.id === 'club-other');
+  const careerClub = career.value.match(/^Also played for (.+) in \d{4}\/\d{2}\.$/)?.[1];
+  assert.ok(optionNames.includes(careerClub), 'the career clue names an option');
   const subjectClubs = new Set((mikel.teams ?? []).map((team) => team.clubName));
   for (const name of optionNames) {
     const inLeagueThatSeason = [...index.values()].some((entry) => entry.clubName === name

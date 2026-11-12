@@ -199,7 +199,8 @@ import { clueFamilySchedule, planIqQuiz, iqFormatSchedule } from '../../js/engin
 import { makeRng } from '../../js/engine/rng.js';
 import { IQ_FORMATS } from '../../js/engine/formats.js';
 
-const barcaScope = { v: 2, name: 'Barcelona', clauses: [{ teams: [8] }] };
+const barcaId = loadFixture().registry.clubs.find((club) => club.name === 'FC Barcelona').id;
+const barcaScope = { v: 2, name: 'Barcelona', clauses: [{ teams: [barcaId] }] };
 
 test('a solo quiz is ten identify rounds and zero stat rounds', () => {
   const { players, registry } = loadFixture();

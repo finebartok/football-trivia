@@ -49,7 +49,7 @@ test('an identify round tells a story and carries a true hook', () => {
 
   assert.deepEqual(round.clues.map(c => c.label),
     ['The stage', 'The trail', 'The record', 'The home']);
-  assert.equal(round.hook, '500 club goals since 2012.');
+  assert.equal(round.hook, '300 club goals since 2012.');
   assert.equal(round.prompt, 'Who is this?',
     'the hook lives beside the prompt, not inside it');
 });

@@ -41,7 +41,7 @@ test('an era stage counts seasons without faking the player’s stint', () => {
   assert.equal(stage.value, 'Eight seasons in La Liga (2012/13–2019/20).');
   assert.match(stage.value, /2012\/13/, 'the count is bounded by the data start');
 
-  const clubScope = { clauses: [{ teams: [8], seasonStart: 2010, seasonEnd: 2019 }] };
+  const clubScope = { clauses: [{ teams: [registry.clubs.find((club) => club.name === 'FC Barcelona').id], seasonStart: 2010, seasonEnd: 2019 }] };
   const clubStage = buildHints(messi, null, registry, { pool: players, scope: clubScope })
     .find((h) => h.role === 'stage');
   assert.equal(clubStage.value, 'Eight seasons at FC Barcelona (2012/13–2019/20).');
